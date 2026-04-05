@@ -1,50 +1,77 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+
+
+# posse-bliki Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Content-first & portable
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Readable Markdown (or equivalent plain-text markup) is the canonical source for authored pages. Published
+pages MUST be representable as stable, human-meaningful URLs (slugs) and remain export-friendly (no
+vendor-locked binary-only formats for primary content). Changing a title MUST NOT silently break inbound
+links without an explicit migration or redirect strategy when URLs are user-facing.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: A bliki’s value is durable, shareable writing; portability reduces lock-in and supports
+archival and migration.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Simplicity over cleverness
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+Prefer a small, understandable stack and explicit modules over frameworks that obscure data flow. New
+dependencies MUST solve a concrete problem that cannot be met with existing tools at proportionate cost.
+YAGNI applies: do not build generalized platforms before a second concrete use case exists.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: Small teams ship and maintain simple systems longer than clever ones.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Test-first for domain logic (NON-NEGOTIABLE)
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+For rules that can be isolated—Markdown processing, slug generation, search indexing behavior, permission
+checks—write automated tests before or alongside implementation (red-green-refactor). Critical user
+journeys (e.g., create → view → edit → search) MUST have at least one automated integration or end-to-end
+check where feasible; if not feasible, document the gap and the manual verification steps.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Regressions in text handling and URLs erode trust quickly; tests encode the real contract.
+
+### IV. Trust boundary clarity
+
+Authentication and authorization models MUST be explicit in specs and plans: who can read, create, edit,
+and delete content. Secrets and credentials MUST NOT be committed; configuration MUST use environment or
+secure secret stores. User-visible errors MUST avoid leaking internal implementation details.
+
+**Rationale**: Wikis and blogs often handle semi-private material; ambiguity causes data exposure incidents.
+
+### V. Spec-driven delivery
+
+Non-trivial work follows: constitution compliance → feature specification → technical plan → tasks →
+implementation. Deviations (e.g., hotfixes) MUST be reconciled afterward by updating artifacts or recording
+a time-boxed exception with owner.
+
+**Rationale**: Aligns tooling (Spec Kit) with accountable, reviewable change.
+
+## Content & quality standards
+
+- **Accessibility**: Primary reading and editing flows SHOULD meet a reasonable baseline (semantic structure,
+keyboard operability for core actions) unless a feature explicitly defers accessibility with a documented
+follow-up.
+- **Performance (read path)**: Typical page read and search results SHOULD feel immediate on a broadband
+connection for expected content sizes; specific numeric targets belong in feature specs or plans once
+scale is known.
+- **Writing experience**: Editing SHOULD preserve intent (whitespace and common Markdown constructs) unless
+a normalization rule is documented and tested.
+
+## Development workflow
+
+- **Branches**: Feature work uses numbered feature branches (e.g., `001-feature-name`) consistent with
+repository conventions and Spec Kit scripts.
+- **Review**: Changes that touch permissions, persistence, or URL behavior SHOULD be reviewed before merge
+when more than one contributor exists.
+- **Definition of done**: Merged work includes tests required by Principle III for the change, updated docs
+or specs when behavior is user-visible, and no known open security regressions for the touched surface.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes ad hoc coding preferences when they conflict. Amendments require updating
+this document, bumping **Version** per semantic versioning (MAJOR: incompatible governance; MINOR: new
+principle or materially expanded rule; PATCH: clarifications only), and setting **Last Amended** to the
+change date. Pull requests SHOULD state constitution impact when non-obvious.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-04-05 | **Last Amended**: 2026-04-05
