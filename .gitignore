@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+public/
+.DS_Store
+
+# Obsidian per-machine state
+content/.obsidian/workspace*
+content/.obsidian/cache
+content/.obsidian/graph.json

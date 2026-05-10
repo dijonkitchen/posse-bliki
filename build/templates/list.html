@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ list_title }} — {{ site.title }}{% endblock %}
+{% block content %}
+<section class="h-feed">
+<h1 class="p-name">{{ list_title }}</h1>
+<ul>
+{% for p in posts %}
+<li class="h-entry">
+<a class="u-url p-name" href="{{ p.url }}">{{ p.title }}</a>
+<time class="dt-published" datetime="{{ p.date.isoformat() }}">{{ p.date.strftime('%Y-%m-%d') }}</time>
+{% if p.summary %} — <span class="p-summary">{{ p.summary }}</span>{% endif %}
+</li>
+{% endfor %}
+</ul>
+</section>
+{% endblock %}

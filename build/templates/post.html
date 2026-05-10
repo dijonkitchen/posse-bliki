@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ page.title }} — {{ site.title }}{% endblock %}
+{% block meta %}{% if page.summary %}<meta name="description" content="{{ page.summary }}">{% endif %}{% endblock %}
+{% block content %}
+<article class="h-entry">
+<header>
+<h1 class="p-name">{{ page.title }}</h1>
+<p class="meta">
+<a class="u-url u-uid" href="{{ canonical_url }}"><time class="dt-published" datetime="{{ page.date.isoformat() }}">{{ page.date.strftime('%Y-%m-%d') }}</time></a>
+{% if page.updated %} · <time class="dt-updated" datetime="{{ page.updated.isoformat() }}">updated {{ page.updated.strftime('%Y-%m-%d') }}</time>{% endif %}
+ · <span class="p-author h-card"><a class="u-url p-name" rel="author" href="{{ site.base_url }}/">{{ site.author.name }}</a></span>
+</p>
+{% if page.summary %}<p class="p-summary">{{ page.summary }}</p>{% endif %}
+{% if page.tags %}<p class="tags">{% for tag in page.tags %}<a class="p-category" href="/tags/{{ tag }}/">#{{ tag }}</a>{% if not loop.last %} {% endif %}{% endfor %}</p>{% endif %}
+</header>
+<div class="e-content">
+{{ page.content_html | safe }}
+</div>
+{% if page.syndication %}
+<footer>
+<p>Also on: {% for s in page.syndication %}<a class="u-syndication" href="{{ s }}">{{ s }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>
+</footer>
+{% endif %}
+</article>
+{% if backlinks %}
+<aside class="backlinks">
+<h2>Linked from</h2>
+<ul>
+{% for b in backlinks %}<li><a href="{{ b.url }}">{{ b.title }}</a></li>{% endfor %}
+</ul>
+</aside>
+{% endif %}
+{% endblock %}

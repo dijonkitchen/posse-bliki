@@ -1,0 +1,27 @@
+[project]
+name = "posse-bliki"
+version = "0.1.0"
+description = "Personal POSSE bliki — markdown vault, spec-driven build, IndieWeb-compliant output."
+requires-python = ">=3.13"
+dependencies = [
+  "markdown-it-py[plugins]>=3.0",
+  "jinja2>=3.1",
+  "pyyaml>=6.0",
+  "jsonschema>=4.21",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "mf2py>=2.0",
+  "feedparser>=6.0",
+  "html5lib>=1.1",
+  "watchfiles>=0.22",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.uv]
+package = false
