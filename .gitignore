@@ -1,0 +1,10 @@
+node_modules/
+public/
+.cache/
+.build/
+.DS_Store
+
+# Obsidian local state — keep settings, ignore per-machine workspace
+.obsidian/workspace*
+.obsidian/cache
+.obsidian/graph.json
