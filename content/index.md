@@ -15,4 +15,4 @@ Some pages here are short and unfinished. That's the point of a
 
 - [[about|About this site]]
 - [[colophon|How this site is built]]
-- [[notes/how-this-bliki-works|How to use this bliki]]
+- [[how-this-bliki-works|How to use this bliki]]

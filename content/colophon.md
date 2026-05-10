@@ -1,5 +1,6 @@
 ---
 title: Colophon
+summary: How this site is built and why.
 ---
 
 This site is built on a deliberately small stack chosen for longevity:
@@ -8,12 +9,17 @@ This site is built on a deliberately small stack chosen for longevity:
 |---|---|
 | Editor | [Obsidian](https://obsidian.md) — local-first, plain markdown |
 | Storage | `.md` files in a Git repo |
-| Static site generator | [Quartz 4](https://quartz.jzhao.xyz) |
+| Build | ~300 lines of Python (markdown-it-py + Jinja2) |
+| Toolchain | [uv](https://docs.astral.sh/uv/) |
 | Hosting | GitHub Pages |
 | CI/CD | GitHub Actions |
-| Syndication source | RSS feed at [/index.xml](/index.xml) |
+| Syndication | RSS at `/index.xml`, JSON Feed at `/feed.json` |
 
-Everything is markdown. If Quartz disappeared tomorrow, the notes would
-still open in any text editor and render in any markdown viewer.
+The architecture is **spec + harness + replaceable build**. The build
+code is small and can be rewritten in any language; what's permanent is
+the contract in `spec/` and the test harness in `tests/`. See
+[[how-this-bliki-works]] for the day-to-day side and the repo's
+`docs/adr/` for the reasoning.
 
-The repo is at [github.com/dijonkitchen/posse-bliki](https://github.com/dijonkitchen/posse-bliki).
+If every tool listed above disappeared tomorrow, the notes would still
+open in any text editor. That's the point.

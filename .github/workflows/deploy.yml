@@ -1,4 +1,4 @@
-name: Deploy bliki to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -14,54 +14,31 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
-env:
-  # Pin the Quartz version for reproducible builds.
-  # Bump this deliberately — don't use `main` or `v4` (a moving target).
-  # Latest tags: https://github.com/jackyzha0/quartz/releases
-  QUARTZ_VERSION: v4
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout site
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
         with:
-          path: site
-          fetch-depth: 0   # Quartz uses git history for created/modified dates
+          enable-cache: true
 
-      - name: Clone Quartz
-        run: |
-          git clone --depth 1 --branch "$QUARTZ_VERSION" \
-            https://github.com/jackyzha0/quartz.git quartz
+      - name: Sync deps
+        run: uv sync --frozen
 
-      - name: Overlay content & config
-        run: |
-          rm -rf quartz/content
-          cp -r site/content quartz/content
-          cp site/quartz.config.ts quartz/quartz.config.ts
-          cp site/quartz.layout.ts quartz/quartz.layout.ts
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install dependencies
-        working-directory: quartz
-        run: npm ci
+      - name: Run harness (gate)
+        run: uv run pytest
 
       - name: Build site
-        working-directory: quartz
-        run: npx quartz build
+        run: uv run python -m build --out public
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v5
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
-          path: quartz/public
+          path: public
 
   deploy:
     needs: build
@@ -70,6 +47,5 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4

@@ -1,18 +1,15 @@
 ---
 title: How this bliki works
-tags:
-  - meta
+date: 2026-05-10
+tags: [meta]
+summary: A short tour of the conventions used in this vault.
 ---
-
-A short tour of the conventions used here.
 
 ## Authoring
 
 1. Open the `content/` folder as an Obsidian vault.
-2. Write notes in plain markdown.
-3. Use `[[wiki links]]` to connect ideas. Quartz turns these into real
-   links and generates [[backlinks]] automatically.
-4. Front-matter `tags:` produce tag pages, e.g. `/tags/meta`.
+2. Write notes in plain markdown. Use `[[wiki links]]` to connect ideas.
+3. Tags via front-matter (`tags: [foo]`) or inline (`#foo`) — both work.
 
 ## Drafts
 
@@ -23,8 +20,7 @@ draft: true
 ---
 ```
 
-Notes marked `draft: true` are excluded from the build but still render
-normally inside Obsidian.
+Drafts are excluded from the build but still render in Obsidian.
 
 ## Aliases & redirects
 
@@ -32,36 +28,37 @@ normally inside Obsidian.
 ---
 title: My canonical title
 aliases:
-  - older-slug
-  - another-name
+  - /old-slug/
+  - /another-name/
 ---
 ```
 
-Quartz emits HTML redirects from each alias to the canonical URL.
+Each alias gets a tiny redirect page pointing at the canonical URL.
+Once added, never remove an alias — URLs are forever.
 
 ## Publishing
 
 ```sh
-git add .
-git commit -m "new note: ..."
-git push
+git add . && git commit -m "new note" && git push
 ```
 
-GitHub Actions clones Quartz at the pinned version, overlays this
-content + config, builds, and deploys to Pages. Usually under a minute.
+CI runs the full harness (HTML validity, microformats conformance, link
+integrity, feed validity, idempotency) and only deploys if everything
+is green.
 
-## Syndicating (POSSE)
+## Syndicating
 
-The RSS feed at `/index.xml` is the single syndication source. Tools
-like [Bridgy Fed](https://fed.brid.gy) or [echofeed](https://echofeed.app)
-can repost from RSS to Mastodon, Bluesky, etc., always pointing back
-here as canonical.
+The RSS feed at `/index.xml` (and JSON Feed at `/feed.json`) is the
+syndication source. Point [Bridgy Fed](https://fed.brid.gy) or
+[echofeed](https://echofeed.app) at it to repost to Mastodon, Bluesky,
+etc., always pointing back here as canonical.
 
-## Why so few moving parts
+When a syndicated copy goes live, add its URL to the post's front-matter:
 
-Long-term maintainability beats features. Each layer (markdown, git,
-GitHub Pages) has been stable for over a decade and has obvious escape
-hatches. Quartz is the one component that could change — but because
-it's pinned by version and only consumes plain markdown, swapping it
-out later (for Hugo, Astro, 11ty…) means a new build script, not a
-content rewrite.
+```yaml
+syndication:
+  - https://mastodon.example/@me/12345
+  - https://bsky.app/profile/me/post/abc
+```
+
+Those URLs render as `u-syndication` links, closing the POSSE loop.

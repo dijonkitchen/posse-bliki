@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Redirecting…{% endblock %}
+{% block meta %}
+<meta http-equiv="refresh" content="0; url={{ target }}">
+<meta name="robots" content="noindex">
+{% endblock %}
+{% block content %}
+<p>This page has moved to <a href="{{ target }}">{{ target }}</a>.</p>
+{% endblock %}

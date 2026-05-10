@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="h-card">
+<p>
+<span class="p-name">{{ site.author.name }}</span>
+<a class="u-url u-uid" rel="me" href="{{ site.base_url }}/">{{ site.base_url }}/</a>
+{% for u in site.author.rel_me %}
+<a class="u-url" rel="me" href="{{ u }}">{{ u }}</a>
+{% endfor %}
+</p>
+</section>
+<article>
+{{ page.content_html | safe }}
+</article>
+<section class="h-feed">
+<h2 class="p-name">Recent posts</h2>
+<ul>
+{% for p in posts[:10] %}
+<li class="h-entry">
+<a class="u-url p-name" href="{{ p.url }}">{{ p.title }}</a>
+<time class="dt-published" datetime="{{ p.date.isoformat() }}">{{ p.date.strftime('%Y-%m-%d') }}</time>
+</li>
+{% endfor %}
+</ul>
+</section>
+{% endblock %}

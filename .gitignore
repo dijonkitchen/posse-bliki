@@ -1,10 +1,12 @@
-node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
 public/
-.cache/
-.build/
 .DS_Store
 
-# Obsidian local state — keep settings, ignore per-machine workspace
-.obsidian/workspace*
-.obsidian/cache
-.obsidian/graph.json
+# Obsidian per-machine state
+content/.obsidian/workspace*
+content/.obsidian/cache
+content/.obsidian/graph.json

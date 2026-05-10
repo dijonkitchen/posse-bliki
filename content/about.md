@@ -1,5 +1,6 @@
 ---
 title: About
+summary: A long-lived home for notes, writing, and half-formed ideas.
 ---
 
 This is a long-lived home for my notes, writing, and half-formed ideas.
