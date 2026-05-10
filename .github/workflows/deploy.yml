@@ -25,14 +25,8 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Sync deps
-        run: uv sync --frozen
-
-      - name: Run harness (gate)
-        run: uv run pytest
-
-      - name: Build site
-        run: uv run python -m build --out public
+      - name: Run CI gate + build (mirrors `make ci` locally)
+        run: make ci
 
       - uses: actions/configure-pages@v5
 

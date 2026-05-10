@@ -24,11 +24,5 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Sync deps
-        run: uv sync --frozen
-
-      - name: Run harness
-        run: uv run pytest
-
-      - name: Build (smoke)
-        run: uv run python -m build --out _smoke
+      - name: Run CI (mirrors `make ci` locally)
+        run: make ci

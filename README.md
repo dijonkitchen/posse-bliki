@@ -30,14 +30,15 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 ## Local commands
 
 ```sh
-uv sync                          # install deps
-uv run pytest                    # run harness
-uv run python -m build           # build → public/
-uv run python -m build --serve   # build + watch + serve at :8080
+make ci          # full CI — sync, test, build (mirrors GitHub Actions)
+make test        # run the harness only
+make serve       # build, watch content/, serve at http://localhost:8080
+make help        # list all targets
 ```
 
-Requires [uv](https://docs.astral.sh/uv/) (one-line install:
-`curl -LsSf https://astral.sh/uv/install.sh | sh`).
+Requires [uv](https://docs.astral.sh/uv/) and `make`. Install uv with
+`curl -LsSf https://astral.sh/uv/install.sh | sh`. Make ships with macOS
+and every Linux distro.
 
 ## What gets deployed
 

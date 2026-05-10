@@ -24,7 +24,7 @@ anything.
 3. Add or update a test in `tests/` that fails today and passes when
    the feature is done.
 4. Edit `build/` (and `build/templates/`) to make it pass.
-5. Run `uv run pytest && uv run python -m build` locally. Both green.
+5. Run `make ci` locally. Green before commit.
 6. Commit with a message that names the spec file or ADR number.
 
 ## How to fix a bug
@@ -35,11 +35,18 @@ the bug, then fix it.
 ## Commands
 
 ```sh
-uv sync                              # install / update deps
-uv run pytest                        # run the harness
-uv run pytest tests/test_foo.py -k bar   # focused
-uv run python -m build               # build site → public/
-uv run python -m build --serve       # build + serve at :8080 with watch
+make ci                              # full local CI — same as GitHub Actions
+make test                            # harness only
+make build                           # build site → public/
+make serve                           # build + serve at :8080 with watch
+make help                            # list all targets
+```
+
+The CI workflow runs `make ci` — there is no separate command list. If you
+need to focus a single test:
+
+```sh
+uv run pytest tests/test_foo.py -k bar
 ```
 
 ## Files you will touch often
