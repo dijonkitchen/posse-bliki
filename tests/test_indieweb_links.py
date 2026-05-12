@@ -29,9 +29,15 @@ def test_every_post_has_rel_author(post_html_files: list[Path]) -> None:
 
 
 def test_canonical_matches_url(site: Path, config: dict) -> None:
-    """The canonical link on /notes/<slug>/index.html points to <base>/notes/<slug>/."""
+    """The canonical link on /notes/<slug>/index.html points to <base>/notes/<slug>/.
+
+    Alias redirect pages are excepted: per ``spec/url-policy.md`` they
+    point their canonical at the target URL, not at themselves.
+    """
     base = config["base_url"].rstrip("/")
     for f in site.rglob("index.html"):
+        if 'http-equiv="refresh"' in f.read_text(encoding="utf-8"):
+            continue
         rels = _rels(f)
         canonical = rels.get("canonical")
         if not canonical:
