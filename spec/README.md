@@ -11,6 +11,7 @@ Read order:
 4. [feeds.md](feeds.md) — RSS, JSON Feed, sitemap
 5. [indieweb.md](indieweb.md) — which IndieWeb standards are supported
 6. [build-invariants.md](build-invariants.md) — hermetic, idempotent, deterministic
+7. [portability.md](portability.md) — every dependency is exit-able
 
 ## How to change a spec
 

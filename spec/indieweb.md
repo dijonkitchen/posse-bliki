@@ -19,6 +19,11 @@ Conformance to each item is enforced by a test in `tests/`.
 
 ## Wired up via external services (no server needed)
 
+Every service here must satisfy the exit policy in
+[ADR 0006](../docs/adr/0006-dependency-exit-policy.md) /
+[`portability.md`](portability.md); migration runbooks are in
+[`docs/exit-plan.md`](../docs/exit-plan.md).
+
 | Standard | Service | Configuration |
 |---|---|---|
 | **Webmention** (receive) | <https://webmention.io> | `<link rel=webmention>` on every page |
