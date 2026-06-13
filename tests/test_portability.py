@@ -140,6 +140,20 @@ def test_self_urls_derive_from_base_url(alt_site: Path) -> None:
     assert not failures, "\n".join(failures)
 
 
+# --- P6: feeds liberate full content (RSS half; JSON Feed in test_jsonfeed.py) ---
+
+
+def test_rss_items_carry_full_content(site: Path) -> None:
+    parsed = feedparser.parse(str(site / "index.xml"))
+    assert parsed.entries, "RSS feed has no items"
+    failures: list[str] = []
+    for entry in parsed.entries:
+        content = getattr(entry, "content", None)
+        if not content or not content[0].value.strip():
+            failures.append(f"{entry.link}: no content:encoded body")
+    assert not failures, "\n".join(failures)
+
+
 # --- P7: content is portable plain markdown ---
 
 

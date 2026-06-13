@@ -425,6 +425,7 @@ def build_site(content_dir: Path, out_dir: Path, config: dict) -> None:
                 date_rfc822=_rfc822(p.date or _dt.date(1970, 1, 1)),
                 summary=p.summary or "",
                 content_text_excerpt=excerpt,
+                content_html=p.content_html,
             )
         )
     _write(out_dir / "index.xml", rss_tmpl.render(site=site, posts=rss_items))
