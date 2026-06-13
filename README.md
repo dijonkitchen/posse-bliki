@@ -54,6 +54,16 @@ and every Linux distro.
 2. Repo Settings → Pages → Source: GitHub Actions.
 3. Push to `main`. CI builds, runs the harness, deploys.
 
+## Built to be left
+
+No dependency here is allowed to hold the site hostage: output is plain
+static files deployable on any host, `make ci` is the whole CI contract,
+`git clone` is the full export, and external services (webmention.io,
+Bridgy Fed) sit behind W3C standards with documented exits. The harness
+enforces it — see [`spec/portability.md`](spec/portability.md),
+[ADR 0006](docs/adr/0006-dependency-exit-policy.md), and the
+per-dependency runbook in [`docs/exit-plan.md`](docs/exit-plan.md).
+
 ## POSSE
 
 The RSS/JSON feeds are the syndication source. Point an external bridge
