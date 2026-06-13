@@ -11,6 +11,7 @@ ADR that supersedes the old one. Don't edit history.
 | [0003](0003-uv-for-python-toolchain.md) | uv for Python toolchain | Accepted |
 | [0004](0004-indieweb-standards-supported.md) | IndieWeb standards in scope | Accepted |
 | [0005](0005-obsidian-as-editor-no-required-plugins.md) | Obsidian as editor, no required plugins | Accepted |
+| [0006](0006-dependency-exit-policy.md) | Dependency exit policy | Accepted |
 
 ## Format
 
