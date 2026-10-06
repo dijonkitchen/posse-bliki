@@ -23,7 +23,8 @@ anything.
    service), add an ADR in `docs/adr/` numbered after the latest one.
 3. Add or update a test in `tests/` that fails today and passes when
    the feature is done.
-4. Edit `build/` (and `build/templates/`) to make it pass.
+4. Edit `build/` to make it pass. The build uses only the Python
+   standard library (ADR 0007); keep it that way.
 5. Run `make ci` locally. Green before commit.
 6. Commit with a message that names the spec file or ADR number.
 

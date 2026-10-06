@@ -1,7 +1,8 @@
 """Static site build for posse-bliki.
 
-This module is the only place build logic lives. Keep it small. Behaviour
-is defined by ``spec/`` and verified by ``tests/`` — that's the contract.
+Orchestration lives here; ``markdown``, ``frontmatter`` and ``render`` are
+its standard-library-only helpers. Keep it small. Behaviour is defined by
+``spec/`` and verified by ``tests/`` — that's the contract.
 """
 from __future__ import annotations
 
@@ -15,29 +16,10 @@ import shutil
 import sys
 from pathlib import Path
 
-import jinja2
-import jsonschema
-import yaml
-from markdown_it import MarkdownIt
-
-
-class _StringDatesLoader(yaml.SafeLoader):
-    """SafeLoader that does NOT auto-convert ISO dates to ``datetime.date``.
-
-    Per ``spec/content-schema.md``, front-matter dates are strings. Disabling
-    the timestamp resolver keeps them as strings without requiring quoting.
-    """
-
-
-_StringDatesLoader.yaml_implicit_resolvers = {
-    k: [(t, r) for t, r in v if t != "tag:yaml.org,2002:timestamp"]
-    for k, v in _StringDatesLoader.yaml_implicit_resolvers.items()
-}
+from . import frontmatter, markdown, render
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
-SCHEMA_PATH = REPO_ROOT / "spec" / "content-schema.json"
 
 
 class BuildError(RuntimeError):
@@ -155,9 +137,10 @@ def _split_front_matter(text: str) -> tuple[dict, str]:
     m = _FRONT_MATTER_RE.match(text)
     if not m:
         return {}, text
-    fm = yaml.load(m.group(1), Loader=_StringDatesLoader) or {}
-    if not isinstance(fm, dict):
-        raise BuildError("front-matter is not a YAML mapping")
+    try:
+        fm = frontmatter.parse(m.group(1))
+    except frontmatter.FrontMatterError as e:
+        raise BuildError(f"front-matter: {e}") from None
     return fm, m.group(2)
 
 
@@ -219,10 +202,6 @@ def _extract_inline_tags(text: str) -> tuple[str, list[str]]:
     return _CODE_OR_TAG_RE.sub(repl, text), found
 
 
-def _md() -> MarkdownIt:
-    return MarkdownIt("gfm-like", {"html": False, "linkify": False, "typographer": False})
-
-
 def _strip_html(html: str) -> str:
     return re.sub(r"<[^>]+>", "", html)
 
@@ -230,7 +209,7 @@ def _strip_html(html: str) -> str:
 # --- build phases ---
 
 
-def _load_notes(content_dir: Path, validator: jsonschema.Draft202012Validator) -> list[Note]:
+def _load_notes(content_dir: Path) -> list[Note]:
     notes: list[Note] = []
     for path in sorted(content_dir.rglob("*.md")):
         rel = path.relative_to(content_dir)
@@ -241,10 +220,9 @@ def _load_notes(content_dir: Path, validator: jsonschema.Draft202012Validator) -
             fm, body = _split_front_matter(text)
         except BuildError as e:
             raise BuildError(f"{rel}: {e}") from None
-        errs = sorted(validator.iter_errors(fm), key=lambda e: list(e.path))
+        errs = frontmatter.validate(fm)
         if errs:
-            msg = "; ".join(f"{list(e.path)!r}: {e.message}" for e in errs)
-            raise BuildError(f"{rel}: front-matter invalid: {msg}")
+            raise BuildError(f"{rel}: front-matter invalid: {'; '.join(errs)}")
         kind = _kind_for(rel)
         slug = "index" if kind == "home" else _slugify(rel.stem)
         notes.append(Note(path=path, rel_path=rel, slug=slug, kind=kind, fm=fm, body=body))
@@ -271,12 +249,11 @@ def _validate_tags(notes: list[Note]) -> None:
 
 
 def _render_markdown(notes: list[Note], slug_to_url: dict[str, str]) -> None:
-    md = _md()
     for n in notes:
         body = _resolve_wikilinks(n.body, slug_to_url, str(n.rel_path))
         body, inline_tags = _extract_inline_tags(body)
         n.fm["tags"] = sorted(set(n.fm.get("tags", [])) | set(inline_tags))
-        n.content_html = md.render(body)
+        n.content_html = markdown.render(body)
 
 
 def _compute_backlinks(notes: list[Note]) -> None:
@@ -290,15 +267,6 @@ def _compute_backlinks(notes: list[Note]) -> None:
                 target.backlinks.append(n)
     for n in notes:
         n.backlinks.sort(key=lambda b: b.url)
-
-
-def _env() -> jinja2.Environment:
-    return jinja2.Environment(
-        loader=jinja2.FileSystemLoader(str(TEMPLATES_DIR)),
-        autoescape=jinja2.select_autoescape(["html", "xml"]),
-        keep_trailing_newline=True,
-        undefined=jinja2.StrictUndefined,
-    )
 
 
 def _write(p: Path, content: str) -> None:
@@ -319,16 +287,14 @@ def _iso_datetime(d: _dt.date) -> str:
 
 
 def build_site(content_dir: Path, out_dir: Path, config: dict) -> None:
-    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
-    jsonschema.Draft202012Validator.check_schema(schema)
-    validator = jsonschema.Draft202012Validator(schema)
-
-    notes = [n for n in _load_notes(content_dir, validator) if not n.draft]
+    notes = [n for n in _load_notes(content_dir) if not n.draft]
     _validate_unique_slugs(notes)
 
     for n in notes:
         n.url = _url_for(n.rel_path, n.kind)
         n.out_path = _out_path_for(out_dir, n.url)
+        if n.kind == "post" and n.date is None:
+            raise BuildError(f"{n.rel_path}: posts need a date")
 
     slug_to_url = {n.slug: n.url for n in notes}
     _render_markdown(notes, slug_to_url)
@@ -339,7 +305,6 @@ def build_site(content_dir: Path, out_dir: Path, config: dict) -> None:
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True)
 
-    env = _env()
     site = config
     base = site["base_url"].rstrip("/")
     canonical = lambda url: base + url
@@ -352,32 +317,16 @@ def build_site(content_dir: Path, out_dir: Path, config: dict) -> None:
 
     # --- pages ---
     for n in notes:
-        ctx = dict(
-            site=site,
-            page=n,
-            canonical_url=canonical(n.url),
-            posts=posts,
-            backlinks=n.backlinks,
-        )
         if n.kind == "home":
-            tmpl = env.get_template("home.html")
+            html = render.home(site, n, canonical(n.url), posts)
         elif n.kind == "post":
-            tmpl = env.get_template("post.html")
+            html = render.post(site, n, canonical(n.url), n.backlinks)
         else:
-            tmpl = env.get_template("page.html")
-        _write(n.out_path, tmpl.render(**ctx))
+            html = render.page(site, n, canonical(n.url), n.backlinks)
+        _write(n.out_path, html)
 
     # --- /notes/ list ---
-    list_tmpl = env.get_template("list.html")
-    _write(
-        out_dir / "notes" / "index.html",
-        list_tmpl.render(
-            site=site,
-            list_title="Notes",
-            posts=posts,
-            canonical_url=canonical("/notes/"),
-        ),
-    )
+    _write(out_dir / "notes" / "index.html", render.listing(site, "Notes", posts, canonical("/notes/")))
 
     # --- tag pages ---
     by_tag: dict[str, list[Note]] = {}
@@ -385,36 +334,23 @@ def build_site(content_dir: Path, out_dir: Path, config: dict) -> None:
         for t in n.tags:
             by_tag.setdefault(t, []).append(n)
     for tag, tag_posts in sorted(by_tag.items()):
-        url = f"/tags/{tag}/"
         _write(
             out_dir / "tags" / tag / "index.html",
-            list_tmpl.render(
-                site=site,
-                list_title=f"#{tag}",
-                posts=tag_posts,
-                canonical_url=canonical(url),
-            ),
+            render.listing(site, f"#{tag}", tag_posts, canonical(f"/tags/{tag}/")),
         )
 
     # --- alias redirects ---
-    redirect_tmpl = env.get_template("redirect.html")
     for n in notes:
         for alias in n.aliases:
             _write(
                 out_dir / alias.strip("/") / "index.html",
-                redirect_tmpl.render(
-                    site=site,
-                    target=n.url,
-                    canonical_url=canonical(n.url),
-                ),
+                render.redirect(site, n.url, canonical(n.url)),
             )
 
     # --- 404 ---
-    nf_tmpl = env.get_template("404.html")
-    _write(out_dir / "404.html", nf_tmpl.render(site=site, canonical_url=None))
+    _write(out_dir / "404.html", render.not_found(site))
 
     # --- RSS ---
-    rss_tmpl = env.get_template("feed.xml")
     rss_items = []
     for p in posts:
         excerpt = _strip_html(p.content_html)[:200]
@@ -427,7 +363,7 @@ def build_site(content_dir: Path, out_dir: Path, config: dict) -> None:
                 content_text_excerpt=excerpt,
             )
         )
-    _write(out_dir / "index.xml", rss_tmpl.render(site=site, posts=rss_items))
+    _write(out_dir / "index.xml", render.rss(site, rss_items))
 
     # --- JSON Feed ---
     feed = {
@@ -453,7 +389,6 @@ def build_site(content_dir: Path, out_dir: Path, config: dict) -> None:
     _write(out_dir / "feed.json", json.dumps(feed, indent=2) + "\n")
 
     # --- sitemap ---
-    sitemap_tmpl = env.get_template("sitemap.xml")
     urls = [
         dict(
             url=canonical(n.url),
@@ -464,7 +399,7 @@ def build_site(content_dir: Path, out_dir: Path, config: dict) -> None:
     urls.append(dict(url=canonical("/notes/"), lastmod=_dt.date(1970, 1, 1).isoformat()))
     for tag in sorted(by_tag):
         urls.append(dict(url=canonical(f"/tags/{tag}/"), lastmod=_dt.date(1970, 1, 1).isoformat()))
-    _write(out_dir / "sitemap.xml", sitemap_tmpl.render(site=site, urls=urls))
+    _write(out_dir / "sitemap.xml", render.sitemap(urls))
 
     # --- robots.txt ---
     _write(
@@ -506,19 +441,28 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
+def _snapshot(content: Path) -> dict[str, float]:
+    return {str(p): p.stat().st_mtime for p in content.rglob("*") if p.is_file()}
+
+
 def _serve(out: Path, port: int, content: Path, cfg: dict) -> None:
     import functools
     import http.server
     import threading
+    import time
 
     handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(out))
     server = http.server.ThreadingHTTPServer(("127.0.0.1", port), handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     print(f"serving at http://127.0.0.1:{port}/")
+    seen = _snapshot(content)
     try:
-        from watchfiles import watch
-
-        for _ in watch(content):
+        while True:
+            time.sleep(0.5)
+            now = _snapshot(content)
+            if now == seen:
+                continue
+            seen = now
             try:
                 build_site(content, out, cfg)
                 print("rebuilt")

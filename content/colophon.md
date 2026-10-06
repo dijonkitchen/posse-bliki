@@ -9,7 +9,7 @@ This site is built on a deliberately small stack chosen for longevity:
 |---|---|
 | Editor | [Obsidian](https://obsidian.md) — local-first, plain markdown |
 | Storage | `.md` files in a Git repo |
-| Build | ~300 lines of Python (markdown-it-py + Jinja2) |
+| Build | Python, standard library only — no third-party packages |
 | Toolchain | [uv](https://docs.astral.sh/uv/) |
 | Hosting | GitHub Pages |
 | CI/CD | GitHub Actions |
