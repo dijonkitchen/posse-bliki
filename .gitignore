@@ -10,3 +10,6 @@ public/
 content/.obsidian/workspace*
 content/.obsidian/cache
 content/.obsidian/graph.json
+
+# Rust build output
+target/

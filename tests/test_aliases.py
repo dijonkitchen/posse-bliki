@@ -10,9 +10,7 @@ CONTENT = Path(__file__).resolve().parent.parent / "content"
 
 
 @pytest.fixture(scope="module")
-def aliased_site(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, str, str]:
-    from build.build import build_site, default_config
-
+def aliased_site(tmp_path_factory: pytest.TempPathFactory, build_site) -> tuple[Path, str, str]:
     src = tmp_path_factory.mktemp("vault")
     for p in CONTENT.rglob("*"):
         rel = p.relative_to(CONTENT)
@@ -36,7 +34,7 @@ def aliased_site(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, str, s
         encoding="utf-8",
     )
     out = tmp_path_factory.mktemp("public-with-alias")
-    build_site(content_dir=src, out_dir=out, config=default_config())
+    build_site(src, out)
     return out, "/old-location/", "/notes/moved-note/"
 
 

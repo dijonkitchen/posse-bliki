@@ -3,12 +3,9 @@ name = "posse-bliki"
 version = "0.1.0"
 description = "Personal POSSE bliki — markdown vault, spec-driven build, IndieWeb-compliant output."
 requires-python = ">=3.13"
-dependencies = [
-  "markdown-it-py[plugins]>=3.0",
-  "jinja2>=3.1",
-  "pyyaml>=6.0",
-  "jsonschema>=4.21",
-]
+# The build is a dependency-free Rust binary (docs/adr/0007). Python is only
+# the test harness, so there are no runtime dependencies.
+dependencies = []
 
 [dependency-groups]
 dev = [
@@ -16,7 +13,9 @@ dev = [
   "mf2py>=2.0",
   "feedparser>=6.0",
   "html5lib>=1.1",
-  "watchfiles>=0.22",
+  # independent reference check of front-matter in tests/test_frontmatter_schema.py
+  "pyyaml>=6.0",
+  "jsonschema>=4.21",
 ]
 
 [tool.pytest.ini_options]

@@ -2,7 +2,7 @@
 
 A personal [bliki](https://martinfowler.com/bliki/WhatIsaBliki.html) (blog +
 wiki) edited in [Obsidian](https://obsidian.md), stored as plain markdown,
-built by a small Python script, and deployed to GitHub Pages. Follows
+built by a small dependency-free Rust program, and deployed to GitHub Pages. Follows
 [POSSE](https://indieweb.org/POSSE) and supports
 [IndieWeb](https://indieweb.org/) standards (microformats2, h-entry, h-card,
 Webmention, RSS, JSON Feed).
@@ -16,7 +16,7 @@ The architecture is **spec + harness + replaceable build** — see
 content/         Obsidian vault — your notes
 spec/            Outcome contracts (what "correct" means)
 tests/           Automated harness enforcing the specs
-build/           Build implementation (replaceable)
+build/           Build implementation — Rust, std only (replaceable)
 docs/adr/        Architecture Decision Records (append-only)
 AGENTS.md        Operating contract for any agent/human editing this repo
 ```
@@ -36,9 +36,11 @@ make serve       # build, watch content/, serve at http://localhost:8080
 make help        # list all targets
 ```
 
-Requires [uv](https://docs.astral.sh/uv/) and `make`. Install uv with
+Requires [Rust](https://rustup.rs) (for the build), [uv](https://docs.astral.sh/uv/)
+(for the test harness) and `make`. Install uv with
 `curl -LsSf https://astral.sh/uv/install.sh | sh`. Make ships with macOS
-and every Linux distro.
+and every Linux distro. The build itself has zero crate dependencies — see
+[`docs/adr/0007`](docs/adr/0007-rust-build-zero-dependencies.md).
 
 ## What gets deployed
 
@@ -49,7 +51,7 @@ and every Linux distro.
 
 ## Going live
 
-1. Edit `site` config at the top of [`build/build.py`](build/build.py)
+1. Edit `default_config()` in [`build/site.rs`](build/site.rs)
    (title, base URL, author, rel=me links, webmention.io username).
 2. Repo Settings → Pages → Source: GitHub Actions.
 3. Push to `main`. CI builds, runs the harness, deploys.
