@@ -6,22 +6,24 @@ Properties of the build process itself. Each enforced by `tests/`.
 
 - The build does not read any file outside the repository.
 - The build does not make network calls.
-- All versions are pinned: Python in `.python-version`, deps in `uv.lock`,
-  Quartz/external assets — none.
+- All versions are pinned: Rust edition in `Cargo.toml`, test-harness Python
+  in `.python-version` and `uv.lock`; build dependencies, Quartz/external
+  assets — none.
 
 Tested by running the build with no network and verifying success.
 
 ## Idempotent
 
-Running `build/build.py` twice in a row produces byte-identical output
-in `public/`. Tested by hashing every file from two consecutive builds.
+Running the build (`cargo run --release`) twice in a row produces
+byte-identical output in `public/`. Tested by hashing every file from two
+consecutive builds.
 
 ## Deterministic
 
 - File walks are sorted before processing.
-- Dict iteration is insertion-order (Python 3.7+ guarantee), and we always
-  insert in sorted order.
-- No timestamps from `datetime.now()` end up in output. The only time-like
+- Maps are never iterated for output; keyed collections are kept in sorted
+  order (or as explicit ordered vectors).
+- No wall-clock timestamps end up in output. The only time-like
   values are derived from front-matter `date` / `updated`.
 - No randomness. No PIDs. No hash-of-iteration-order in output.
 

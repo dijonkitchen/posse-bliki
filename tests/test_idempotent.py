@@ -16,13 +16,11 @@ def _hash_tree(root: Path) -> dict[str, str]:
     return out
 
 
-def test_idempotent(tmp_path: Path, config: dict) -> None:
-    from build.build import build_site
-
+def test_idempotent(tmp_path: Path, build_site) -> None:
     a = tmp_path / "a"
     b = tmp_path / "b"
-    build_site(content_dir=CONTENT, out_dir=a, config=config)
-    build_site(content_dir=CONTENT, out_dir=b, config=config)
+    build_site(CONTENT, a)
+    build_site(CONTENT, b)
 
     ha, hb = _hash_tree(a), _hash_tree(b)
     diff = {k: (ha.get(k), hb.get(k)) for k in set(ha) | set(hb) if ha.get(k) != hb.get(k)}

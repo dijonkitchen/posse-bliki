@@ -10,10 +10,8 @@ CONTENT = Path(__file__).resolve().parent.parent / "content"
 
 
 @pytest.fixture(scope="module")
-def draft_note(tmp_path_factory: pytest.TempPathFactory) -> Path:
+def draft_note(tmp_path_factory: pytest.TempPathFactory, build_site) -> Path:
     """Drop a draft into a vault copy and rebuild — verify it's invisible."""
-    from build.build import build_site, default_config
-
     src = tmp_path_factory.mktemp("vault")
     # Copy content/ into src
     for p in CONTENT.rglob("*"):
@@ -36,7 +34,7 @@ def draft_note(tmp_path_factory: pytest.TempPathFactory) -> Path:
         encoding="utf-8",
     )
     out = tmp_path_factory.mktemp("public-with-draft")
-    build_site(content_dir=src, out_dir=out, config=default_config())
+    build_site(src, out)
     return out
 
 
