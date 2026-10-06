@@ -28,7 +28,14 @@ jobs:
       - name: Run CI gate + build (mirrors `make ci` locally)
         run: make ci
 
-      - uses: actions/configure-pages@v5
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      # Point links at the address Pages serves from: the project sub-path
+      # (https://dijonkitchen.github.io/posse-bliki/) now, the bare custom
+      # domain after cutover.
+      - name: Relocate site to the Pages URL
+        run: python3 scripts/relocate.py public --to "${{ steps.pages.outputs.base_url }}"
 
       - uses: actions/upload-pages-artifact@v3
         with:
