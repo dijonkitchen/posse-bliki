@@ -9,8 +9,8 @@ This site is built on a deliberately small stack chosen for longevity:
 |---|---|
 | Editor | [Obsidian](https://obsidian.md) — local-first, plain markdown |
 | Storage | `.md` files in a Git repo |
-| Build | ~300 lines of Python (markdown-it-py + Jinja2) |
-| Toolchain | [uv](https://docs.astral.sh/uv/) |
+| Build | ~5k lines of Rust, standard library only — no crates |
+| Toolchain | [cargo](https://doc.rust-lang.org/cargo/) for the build, [uv](https://docs.astral.sh/uv/) for the test harness |
 | Hosting | GitHub Pages |
 | CI/CD | GitHub Actions |
 | Syndication | RSS at `/index.xml`, JSON Feed at `/feed.json` |

@@ -23,7 +23,7 @@ anything.
    service), add an ADR in `docs/adr/` numbered after the latest one.
 3. Add or update a test in `tests/` that fails today and passes when
    the feature is done.
-4. Edit `build/` (and `build/templates/`) to make it pass.
+4. Edit `build/` (Rust, std only — no crates) to make it pass.
 5. Run `make ci` locally. Green before commit.
 6. Commit with a message that names the spec file or ADR number.
 
@@ -54,17 +54,21 @@ uv run pytest tests/test_foo.py -k bar
 - `content/` — the Obsidian vault. Edit notes here.
 - `spec/` — outcome contracts. Edit when intent changes.
 - `tests/` — harness. Edit when adding/fixing features.
-- `build/` — implementation. Replaceable.
+- `build/` — implementation (Rust, zero dependencies). Replaceable.
 
 ## Files you should rarely touch
 
 - `docs/adr/` — append-only. New ADRs only.
-- `pyproject.toml`, `uv.lock`, `.python-version` — change with an ADR.
+- `pyproject.toml`, `uv.lock`, `.python-version` — test harness only; change
+  with an ADR.
+- `Cargo.toml`, `Cargo.lock` — the build has no dependencies and gains none
+  without an ADR.
 
 ## Hard rules
 
 - No network access during build.
 - No randomness, no `datetime.now()` in output.
+- No dependencies in the build: Rust standard library only (ADR 0007).
 - No new dependencies without an ADR.
 - No unresolved wikilinks, no broken internal links — both are build errors.
 - No `<script>` tags in output (the site is JS-free).

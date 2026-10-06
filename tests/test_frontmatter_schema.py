@@ -10,7 +10,7 @@ from jsonschema import Draft202012Validator
 
 
 class _StringDatesLoader(yaml.SafeLoader):
-    """Match build/build.py: keep ISO dates as strings (per spec/content-schema.md)."""
+    """Match the build: keep ISO dates as strings (per spec/content-schema.md)."""
 
 
 _StringDatesLoader.yaml_implicit_resolvers = {
