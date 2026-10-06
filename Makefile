@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help sync test build serve ci clean
+.PHONY: help sync test build serve ci clean tables
 
 PORT ?= 8080
 OUT  ?= public
@@ -10,7 +10,8 @@ help: ## Show available targets
 sync: ## Install/update Python test-harness deps from uv.lock
 	uv sync --frozen
 
-test: ## Run the test harness
+test: ## Run Rust unit tests, then the spec harness
+	cargo test --release --quiet
 	uv run pytest
 
 build: ## Build the site → ./$(OUT) (Rust binary, std only)
@@ -20,6 +21,9 @@ serve: ## Build, watch content/, and serve at :$(PORT)
 	cargo run --release -- --out $(OUT) --serve --port $(PORT)
 
 ci: sync test build ## Full local CI: same checks .github/workflows/ci.yml runs
+
+tables: ## Regenerate build/entities.rs and build/unicode.rs tables (ADR 0007)
+	python3 scripts/gen_tables.py
 
 clean: ## Remove build + cache artifacts
 	rm -rf public _smoke .pytest_cache .ruff_cache target
