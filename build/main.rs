@@ -18,13 +18,15 @@ mod util;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-const USAGE: &str = "usage: bliki [--content DIR] [--out DIR] [--serve] [--port N] [--print-config]
+const USAGE: &str = "usage: bliki [--content DIR] [--out DIR] [--base-url URL] [--serve] [--port N] [--print-config]
 
 Build the posse-bliki site.
 
 options:
   --content DIR    content vault (default: content)
   --out DIR        output directory (default: public)
+  --base-url URL   URL the site is served from, overriding the config
+                   (a path such as /posse-bliki is prefixed to every link)
   --serve          build, serve the output at 127.0.0.1:PORT and rebuild on changes
   --port N         port for --serve (default: 8080)
   --print-config   print the site config as JSON and exit
@@ -33,6 +35,7 @@ options:
 struct Args {
     content: PathBuf,
     out: PathBuf,
+    base_url: Option<String>,
     serve: bool,
     port: u16,
     print_config: bool,
@@ -42,6 +45,7 @@ fn parse_args() -> Result<Args, String> {
     let mut args = Args {
         content: PathBuf::from("content"),
         out: PathBuf::from("public"),
+        base_url: None,
         serve: false,
         port: 8080,
         print_config: false,
@@ -61,6 +65,7 @@ fn parse_args() -> Result<Args, String> {
         match flag.as_str() {
             "--content" => args.content = PathBuf::from(value("--content")?),
             "--out" => args.out = PathBuf::from(value("--out")?),
+            "--base-url" => args.base_url = Some(value("--base-url")?),
             "--port" => {
                 let v = value("--port")?;
                 args.port = v.parse().map_err(|_| format!("argument --port: invalid int value: '{}'", v))?;
@@ -100,7 +105,10 @@ fn main() -> ExitCode {
             return ExitCode::from(2);
         }
     };
-    let cfg = site::default_config();
+    let mut cfg = site::default_config();
+    if let Some(url) = args.base_url {
+        cfg.base_url = Box::leak(url.into_boxed_str());
+    }
     if args.print_config {
         println!("{}", cfg.to_json());
         return ExitCode::SUCCESS;

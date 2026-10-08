@@ -231,6 +231,62 @@ fn write(p: &Path, content: &str) -> Result<(), String> {
     fs::write(p, content).map_err(|err| format!("cannot write {}: {}", p.display(), err))
 }
 
+/// The path part of `base_url`: `/posse-bliki` for a GitHub Pages project
+/// site, empty when the site is served from a domain root.
+fn base_path(base_url: &str) -> String {
+    let rest = base_url.split_once("://").map_or(base_url, |(_, r)| r);
+    rest.find('/').map_or("", |i| &rest[i..]).trim_end_matches('/').to_string()
+}
+
+/// Root-relative URL openers the pages and feeds emit: attributes in HTML,
+/// the same escaped inside RSS (`&quot;`) and JSON Feed (`\"`) bodies, and
+/// the meta-refresh target of alias redirects.
+const ROOT_RELATIVE: &[&str] = &[
+    "href=\"/", "src=\"/", "href=&quot;/", "src=&quot;/", "href=\\\"/", "src=\\\"/", "url=/",
+];
+
+/// Prefix every root-relative link with `prefix` (`/notes/` becomes
+/// `/posse-bliki/notes/`). Protocol-relative `//host` links are left alone.
+fn prefix_root_relative(text: &str, prefix: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut i = 0;
+    while i < text.len() {
+        let rest = &text[i..];
+        match ROOT_RELATIVE.iter().find(|p| rest.starts_with(**p)) {
+            Some(p) if !rest[p.len()..].starts_with('/') => {
+                out.push_str(&p[..p.len() - 1]);
+                out.push_str(prefix);
+                out.push('/');
+                i += p.len();
+            }
+            _ => {
+                let c = rest.chars().next().unwrap();
+                out.push(c);
+                i += c.len_utf8();
+            }
+        }
+    }
+    out
+}
+
+/// Rewrite the emitted site so it works when served under a sub-path.
+fn apply_base_path(dir: &Path, prefix: &str) -> Result<(), String> {
+    if prefix.is_empty() {
+        return Ok(());
+    }
+    let rd = fs::read_dir(dir).map_err(|err| format!("cannot read {}: {}", dir.display(), err))?;
+    for entry in rd.flatten() {
+        let p = entry.path();
+        if p.is_dir() {
+            apply_base_path(&p, prefix)?;
+        } else if matches!(p.extension().and_then(|x| x.to_str()), Some("html" | "xml" | "json")) {
+            let text = fs::read_to_string(&p).map_err(|err| format!("cannot read {}: {}", p.display(), err))?;
+            write(&p, &prefix_root_relative(&text, prefix))?;
+        }
+    }
+    Ok(())
+}
+
 // --- templates ---
 
 fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str) -> String {
@@ -596,5 +652,6 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // static assets
     write(&out.join("style.css"), STYLE_CSS)?;
+    apply_base_path(out, &base_path(site.base_url))?;
     Ok(())
 }

@@ -46,3 +46,11 @@ In addition to the universal invariants, every post page must:
 ## Error pages
 
 - `/404.html` exists and is valid HTML5.
+
+## Serving under a sub-path
+
+`--base-url` overrides `site.base_url` for one build. When it carries a path
+(a GitHub Pages project site such as `https://dijonkitchen.github.io/posse-bliki`),
+every root-relative link the pages and feeds emit (`/notes/`, `/style.css`,
+alias redirect targets) is prefixed with that path, so the site works there.
+With no path, output is unchanged. Enforced by `tests/test_base_path.py`.
