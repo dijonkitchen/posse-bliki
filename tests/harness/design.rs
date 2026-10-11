@@ -1,13 +1,9 @@
 //! Pages follow spec/design.md: one self-hosted stylesheet built on the a11y
-//! design system. Runs under `cargo test`; std only (ADR 0007).
-//!
-//! Builds the real vault once with the `bliki` binary into a temp dir, then
-//! checks the emitted HTML and `style.css`.
+//! design system.
 
 use std::fs;
-use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::sync::OnceLock;
+
+use crate::support::{html_files as pages, site};
 
 const SEMANTIC_TOKENS: &[&str] = &[
     "--text-1",
@@ -23,52 +19,10 @@ const SEMANTIC_TOKENS: &[&str] = &[
 
 const DARK_QUERY: &str = "@media (prefers-color-scheme: dark) {";
 
-/// The built site, shared by every test in this file.
-fn site() -> &'static Path {
-    static SITE: OnceLock<PathBuf> = OnceLock::new();
-    SITE.get_or_init(|| {
-        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
-        let out = std::env::temp_dir().join(format!("bliki-design-{}", std::process::id()));
-        let _ = fs::remove_dir_all(&out);
-        let status = Command::new(env!("CARGO_BIN_EXE_bliki"))
-            .current_dir(root)
-            .arg("--content")
-            .arg(root.join("content"))
-            .arg("--out")
-            .arg(&out)
-            .output()
-            .expect("run bliki");
-        assert!(
-            status.status.success(),
-            "build failed: {}",
-            String::from_utf8_lossy(&status.stderr)
-        );
-        out
-    })
-}
-
-fn html_files() -> Vec<(PathBuf, String)> {
-    fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
-        for entry in fs::read_dir(dir).expect("read dir") {
-            let p = entry.expect("dir entry").path();
-            if p.is_dir() {
-                walk(&p, out);
-            } else if p.extension().is_some_and(|e| e == "html") {
-                out.push(p);
-            }
-        }
-    }
-    let mut paths = Vec::new();
-    walk(site(), &mut paths);
-    paths.sort();
-    assert!(paths.len() >= 4, "expected several HTML files, got {}", paths.len());
-    paths
-        .into_iter()
-        .map(|p| {
-            let text = fs::read_to_string(&p).expect("read html");
-            (p, text)
-        })
-        .collect()
+fn html_files() -> &'static [(std::path::PathBuf, String)] {
+    let files = pages();
+    assert!(files.len() >= 4, "expected several HTML files, got {}", files.len());
+    files
 }
 
 fn css() -> String {
@@ -115,7 +69,7 @@ fn light_and_dark(css: &str) -> (&str, &str) {
 
 #[test]
 fn every_page_links_the_stylesheet() {
-    for (p, html) in html_files() {
+    for (p, html) in html_files().iter() {
         assert!(
             html.contains("<link rel=\"stylesheet\" href=\"/style.css\">"),
             "{}",
@@ -126,7 +80,7 @@ fn every_page_links_the_stylesheet() {
 
 #[test]
 fn no_inline_styles() {
-    for (p, html) in html_files() {
+    for (p, html) in html_files().iter() {
         let lower = html.to_lowercase();
         assert!(!lower.contains("<style"), "{}: <style> block", p.display());
         assert!(!lower.contains(" style="), "{}: inline style attribute", p.display());
@@ -137,8 +91,8 @@ fn no_inline_styles() {
 fn no_third_party_requests_from_pages() {
     // rel=me, alternate and webmention links point elsewhere by design; only
     // links that make the browser fetch something must stay on this origin.
-    for (p, html) in html_files() {
-        for tag in link_tags(&html) {
+    for (p, html) in html_files().iter() {
+        for tag in link_tags(html) {
             let rel = attr(tag, "rel").unwrap_or("");
             if !matches!(rel, "stylesheet" | "preload" | "icon" | "modulepreload") {
                 continue;
@@ -280,7 +234,7 @@ fn no_text_below_16px() {
 
 #[test]
 fn skip_link_first_in_body() {
-    for (p, html) in html_files() {
+    for (p, html) in html_files().iter() {
         let Some(i) = html.find("<body>") else {
             continue; // alias redirect stubs carry no body content
         };

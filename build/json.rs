@@ -2,7 +2,7 @@
 //! (default `ensure_ascii=True`), and a small parser for the JSON the build
 //! reads back (a previous `feed.json`, webmention.io's jf2 export).
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Json {
     Str(String),
     Arr(Vec<Json>),

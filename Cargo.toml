@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 description = "Static site build for posse-bliki (Rust std only; see docs/adr/0007)."
 publish = false
+# `cargo run` builds the site; gen-tables is a developer tool.
+default-run = "bliki"
 
 # Deliberately empty: the build uses the Rust standard library only.
 [dependencies]
@@ -15,6 +17,11 @@ path = "build/lib.rs"
 [[bin]]
 name = "bliki"
 path = "build/main.rs"
+
+# Developer tool: regenerates build/entities.rs and build/unicode.rs (`make tables`).
+[[bin]]
+name = "gen-tables"
+path = "build/gen_tables.rs"
 
 [profile.release]
 opt-level = 3

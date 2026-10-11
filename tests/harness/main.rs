@@ -1,0 +1,23 @@
+//! The spec harness: every outcome in `spec/` has a test here (ADR 0001).
+//!
+//! One cargo integration test target, run by `make test` (`cargo test`).
+//! Each module mirrors one spec area; `support/` holds the fixtures and the
+//! small std-only checkers (HTML, XML, microformats, JSON Schema) that stand
+//! in for the Python libraries the harness used before ADR 0010.
+
+mod support;
+
+mod aliases;
+mod base_path;
+mod design;
+mod drafts;
+mod frontmatter_schema;
+mod html_valid;
+mod idempotent;
+mod indieweb_links;
+mod jsonfeed;
+mod links;
+mod microformats;
+mod rss;
+mod url_policy;
+mod webmentions;
