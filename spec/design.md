@@ -9,7 +9,8 @@ See [ADR 0008](../docs/adr/0008-a11y-design-system-self-hosted-fonts.md).
 
 ## Contract
 
-Each item is enforced by `tests/test_design.py`.
+Each item is enforced by `tests/design.rs`, a Rust integration test that
+runs under `cargo test`.
 
 - **One stylesheet.** Every page links `/style.css`. No inline `style`
   attributes, no `<style>` blocks.
