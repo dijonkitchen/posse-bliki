@@ -32,6 +32,8 @@ In addition to the universal invariants, every post page must:
   - `.p-summary` if `summary` was set
   - `.p-category` per tag
   - `.u-syndication` per syndication URL
+  - a hidden, empty link to each configured syndication target
+  - received webmentions, when given (see [indieweb.md](indieweb.md))
 - Show backlinks (incoming wikilinks) when any exist.
 
 ## Home (`/`)

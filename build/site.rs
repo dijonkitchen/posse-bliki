@@ -12,6 +12,7 @@ use crate::json::{self, Json};
 use crate::markdown;
 use crate::text;
 use crate::util::{escape as e, py_repr_str};
+use crate::webmention::{self, Mention};
 
 const STYLE_CSS: &str = include_str!("static/style.css");
 /// Self-hosted fonts and their licences (spec/design.md), copied to `fonts/`.
@@ -37,19 +38,31 @@ pub struct Config {
     pub rel_me: &'static [&'static str],
     pub webmention_endpoint: &'static str,
     pub pingback: &'static str,
+    /// POSSE targets each post links to and is sent to as a webmention
+    /// once deployed: `(target, webmention endpoint)`.
+    pub syndicate_to: &'static [(&'static str, &'static str)],
+    /// Received webmentions keyed by `webmention::url_key` of their target;
+    /// empty unless `--webmentions` is given.
+    pub mentions: HashMap<String, Vec<Mention>>,
 }
 
 pub fn default_config() -> Config {
     Config {
-        title: "posse-bliki",
-        tagline: "A personal POSSE bliki.",
-        base_url: "https://example.com",
+        title: "Philosophy as a service",
+        tagline: "Bliki of Jonathan Chen's thoughts.",
+        base_url: "https://dijonkitchen.org",
         language: "en",
-        author_name: "Author Name",
-        author_url: "https://example.com",
+        author_name: "Jonathan Chen",
+        author_url: "https://dijonkitchen.org",
         rel_me: &["https://github.com/dijonkitchen"],
-        webmention_endpoint: "https://webmention.io/example.com/webmention",
-        pingback: "https://webmention.io/example.com/xmlrpc",
+        webmention_endpoint: "https://webmention.io/dijonkitchen.org/webmention",
+        pingback: "https://webmention.io/dijonkitchen.org/xmlrpc",
+        syndicate_to: &[
+            ("https://brid.gy/publish/mastodon", "https://brid.gy/publish/webmention"),
+            ("https://brid.gy/publish/bluesky", "https://brid.gy/publish/webmention"),
+            ("https://fed.brid.gy/", "https://fed.brid.gy/webmention"),
+        ],
+        mentions: HashMap::new(),
     }
 }
 
@@ -74,6 +87,15 @@ impl Config {
                     ("endpoint".into(), json::s(self.webmention_endpoint)),
                     ("pingback".into(), json::s(self.pingback)),
                 ]),
+            ),
+            (
+                "syndicate_to".into(),
+                Json::Arr(
+                    self.syndicate_to
+                        .iter()
+                        .map(|(t, ep)| Json::Obj(vec![("target".into(), json::s(t)), ("endpoint".into(), json::s(ep))]))
+                        .collect(),
+                ),
             ),
         ]))
     }
@@ -367,11 +389,18 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
             synd.iter().map(|s| format!("<a class=\"u-syndication\" href=\"{}\">{}</a>", e(s), e(s))).collect();
         format!("\n<footer>\n<p>Also on: {}</p>\n</footer>\n", links.join(", "))
     };
+    // Bridgy only publishes a page that links to it; the links carry no text.
+    let posse: String = site
+        .syndicate_to
+        .iter()
+        .map(|(t, _)| format!("\n<a href=\"{}\" hidden></a>", e(t)))
+        .collect();
+    let mentions = site.mentions.get(&webmention::url_key(canonical)).map_or(String::new(), |m| webmention::render(m));
     let content = format!(
         "\n<article class=\"h-entry\">\n<header>\n<h1 class=\"p-name\">{title}</h1>\n<p class=\"meta\">\n\
 <a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{ymd}</time></a>\n\
 {updated}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url p-name\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
-</p>\n{summary}\n{tags}\n</header>\n<div class=\"e-content\">\n{html}\n</div>\n{synd}\n</article>\n{back}\n",
+</p>\n{summary}\n{tags}\n</header>\n<div class=\"e-content\">\n{html}\n</div>\n{synd}{posse}{mentions}\n</article>\n{back}\n",
         title = e(n.title()),
         canon = e(canonical),
         iso = d.iso(),

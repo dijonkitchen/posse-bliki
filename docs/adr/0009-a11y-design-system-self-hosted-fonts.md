@@ -1,4 +1,4 @@
-# 0008 — a11y design system, self-hosted fonts
+# 0009 — a11y design system, self-hosted fonts
 
 - Date: 2026-10-11
 - Status: Accepted

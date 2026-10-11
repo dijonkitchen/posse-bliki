@@ -382,3 +382,28 @@ main { padding-block-end: var(--space-7); }
   font-size: var(--size-lg);
 }
 .backlinks li:last-child { border-bottom: 0; }
+
+/* --- received webmentions (spec/indieweb.md) --- */
+.webmentions {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+}
+.webmentions h2 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--size-lg);
+}
+.webmentions ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.webmentions li {
+  max-width: none;
+  margin: 0;
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.webmentions li p { margin-bottom: var(--space-1); }
+.webmentions time { color: var(--text-2); font-size: var(--size-sm); }
+.webmentions .p-content { color: var(--text-2); }
