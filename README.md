@@ -33,6 +33,7 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 make ci          # full CI — sync, test, build (mirrors GitHub Actions)
 make test        # run the harness only
 make serve       # build, watch content/, serve at http://localhost:8080
+make validate    # check built pages with the W3C Nu HTML Checker (needs Java)
 make help        # list all targets
 ```
 

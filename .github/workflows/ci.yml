@@ -26,3 +26,19 @@ jobs:
 
       - name: Run CI (mirrors `make ci` locally)
         run: make ci
+
+  html:
+    # Independent check of the built pages with the W3C Nu HTML Checker
+    # (ADR 0011). CI-only: it needs Java and a download, so it stays out of
+    # `make ci` and the build.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Validate the built site (mirrors `make validate` locally)
+        run: make validate

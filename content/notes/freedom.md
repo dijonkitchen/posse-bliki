@@ -64,7 +64,7 @@ fun things in the present,
 be generous to build interconnectedness
 and create your ideal future.
 
-### References
+## References
 
 * [https://nav.al/rich](https://nav.al/rich)
 * [Company of One](https://www.goodreads.com/book/show/37570605-company-of-one)

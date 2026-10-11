@@ -439,7 +439,7 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         ));
     }
     let content = format!(
-        "\n<section class=\"h-card\">\n<p>\n<span class=\"p-name\">{author}</span>\n\
+        "\n<section class=\"h-card\">\n<h1 class=\"p-name\">{author}</h1>\n<p>\n\
 <a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{base}/</a>\n{rel_me}\n</p>\n</section>\n<article>\n{html}\n</article>\n\
 <section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n</section>\n",
         author = e(site.author_name),

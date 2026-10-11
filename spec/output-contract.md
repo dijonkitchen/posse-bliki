@@ -6,6 +6,9 @@ in `tests/`.
 ## Universal (every page)
 
 - Valid HTML5 (parses with `html5lib` strict mode, no errors).
+- Passes the W3C Nu HTML Checker with no errors or warnings, including
+  heading order (no skipped levels) and one `<h1>` per page. Checked by
+  `make validate` in CI's `html` job, not by `tests/` (ADR 0011).
 - `<!DOCTYPE html>` first, `<html lang="en">`.
 - `<meta charset="utf-8">`.
 - `<meta name="viewport" content="width=device-width, initial-scale=1">`.
@@ -39,7 +42,7 @@ In addition to the universal invariants, every post page must:
 ## Home (`/`)
 
 - Contains exactly one `h-card` with `p-name` (author), `u-url` (site),
-  and any `rel=me` links.
+  and any `rel=me` links. The author's `p-name` is the page's `<h1>`.
 - Contains an `h-feed` listing recent posts as `h-entry` items.
 
 ## List pages (`/notes/`, `/tags/<tag>/`)

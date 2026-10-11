@@ -66,6 +66,6 @@ true human connection and story telling
 
 random chance and creation
 
-### See also
+## See also
 
 * [30x500 idea](https://30x500.com/academy/)

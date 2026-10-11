@@ -39,10 +39,12 @@ make ci                              # full local CI — same as GitHub Actions
 make test                            # harness only
 make build                           # build site → public/
 make serve                           # build + serve at :8080 with watch
+make validate                        # Nu HTML Checker on built pages (Java, CI job `html`)
 make help                            # list all targets
 ```
 
-The CI workflow runs `make ci` — there is no separate command list. If you
+The CI workflow runs `make ci`, plus `make validate` in its `html` job —
+there is no separate command list. If you
 need to focus a single test:
 
 ```sh

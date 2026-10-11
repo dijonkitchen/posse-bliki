@@ -35,7 +35,7 @@ to reach for the stars (Star Trek).
 Minimize long-term catatrospic loss,
 but be a reasonable optimist. 
 
-### See also
+## See also
 
 * [Algorithms to Live By](https://openlibrary.org/works/OL17357767W/Algorithms_to_Live_By)
 * [Prisoner's dilemma](https://en.wikipedia.org/wiki/Prisoner%27s_dilemma)
