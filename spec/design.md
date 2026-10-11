@@ -5,7 +5,7 @@ Design System artifact on claude.ai): maximally readable for people of all
 ages, including people with low vision, colour-vision deficiency, dyslexia
 or tremor. Values in `build/static/style.css` are copied from the system's
 `tokens/*.css`; when the system changes, copy the new values across.
-See [ADR 0008](../docs/adr/0008-a11y-design-system-self-hosted-fonts.md).
+See [ADR 0009](../docs/adr/0009-a11y-design-system-self-hosted-fonts.md).
 
 ## Contract
 

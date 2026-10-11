@@ -40,11 +40,11 @@ def bliki() -> Path:
 
 @pytest.fixture(scope="session")
 def build_site(bliki: Path) -> Callable[[Path, Path], subprocess.CompletedProcess[str]]:
-    """``build_site(content_dir, out_dir)`` runs the binary; raises BuildFailed on error."""
+    """``build_site(content_dir, out_dir, *extra_args)`` runs the binary; raises BuildFailed on error."""
 
-    def run(content_dir: Path, out_dir: Path) -> subprocess.CompletedProcess[str]:
+    def run(content_dir: Path, out_dir: Path, *extra: str) -> subprocess.CompletedProcess[str]:
         proc = subprocess.run(
-            [str(bliki), "--content", str(content_dir), "--out", str(out_dir)],
+            [str(bliki), "--content", str(content_dir), "--out", str(out_dir), *extra],
             cwd=REPO_ROOT,
             capture_output=True,
             text=True,

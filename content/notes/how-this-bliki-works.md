@@ -48,10 +48,11 @@ is green.
 
 ## Syndicating
 
-The RSS feed at `/index.xml` (and JSON Feed at `/feed.json`) is the
-syndication source. Point [Bridgy Fed](https://fed.brid.gy) or
-[echofeed](https://echofeed.app) at it to repost to Mastodon, Bluesky,
-etc., always pointing back here as canonical.
+Each deploy sends new posts to [Bridgy](https://brid.gy), which reposts
+them to Mastodon and Bluesky, and to [Bridgy Fed](https://fed.brid.gy),
+which federates them to the fediverse. The copies always point back here
+as canonical. Replies, likes and reposts come back as webmentions and show
+under the post on the next deploy.
 
 When a syndicated copy goes live, add its URL to the post's front-matter:
 
