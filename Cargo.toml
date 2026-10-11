@@ -8,6 +8,10 @@ publish = false
 # Deliberately empty: the build uses the Rust standard library only.
 [dependencies]
 
+[lib]
+name = "posse_bliki_build"
+path = "build/lib.rs"
+
 [[bin]]
 name = "bliki"
 path = "build/main.rs"

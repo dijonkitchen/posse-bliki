@@ -3,19 +3,7 @@
 //! Behaviour is defined by `spec/` and verified by `tests/`; see
 //! docs/adr/0007-rust-build-zero-dependencies.md.
 
-mod date;
-mod entities;
-mod frontmatter;
-mod json;
-mod markdown;
-mod mdurl;
-mod serve;
-mod site;
-mod text;
-mod unicode;
-mod util;
-mod webmention;
-
+use posse_bliki_build::{serve, site, webmention};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
