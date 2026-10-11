@@ -82,7 +82,9 @@ fn parse_args() -> Result<Args, String> {
             "--pending-webmentions" => args.pending = Some(PathBuf::from(value("--pending-webmentions")?)),
             "--port" => {
                 let v = value("--port")?;
-                args.port = v.parse().map_err(|_| format!("argument --port: invalid int value: '{}'", v))?;
+                args.port = v
+                    .parse()
+                    .map_err(|_| format!("argument --port: invalid int value: '{}'", v))?;
             }
             "--serve" => args.serve = true,
             "--print-config" => args.print_config = true,
@@ -103,7 +105,7 @@ fn count_html(dir: &Path) -> usize {
             let p = entry.path();
             if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
                 n += count_html(&p);
-            } else if p.extension().map_or(false, |e| e == "html") {
+            } else if p.extension().is_some_and(|e| e == "html") {
                 n += 1;
             }
         }

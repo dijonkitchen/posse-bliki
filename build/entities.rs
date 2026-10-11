@@ -2130,5 +2130,8 @@ pub static ENTITIES: &[(&str, &str)] = &[
 ];
 
 pub fn lookup(name: &str) -> Option<&'static str> {
-    ENTITIES.binary_search_by(|(k, _)| (*k).cmp(name)).ok().map(|i| ENTITIES[i].1)
+    ENTITIES
+        .binary_search_by(|(k, _)| (*k).cmp(name))
+        .ok()
+        .map(|i| ENTITIES[i].1)
 }

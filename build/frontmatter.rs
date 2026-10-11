@@ -32,7 +32,10 @@ impl Value {
             Value::List(l) => format!("[{}]", l.iter().map(|v| v.repr()).collect::<Vec<_>>().join(", ")),
             Value::Map(m) => format!(
                 "{{{}}}",
-                m.iter().map(|(k, v)| format!("{}: {}", py_repr_str(k), v.repr())).collect::<Vec<_>>().join(", ")
+                m.iter()
+                    .map(|(k, v)| format!("{}: {}", py_repr_str(k), v.repr()))
+                    .collect::<Vec<_>>()
+                    .join(", ")
             ),
         }
     }
@@ -70,7 +73,11 @@ fn py_float_repr(f: f64) -> String {
     if let Some(idx) = s.find('e') {
         let (m, e) = s.split_at(idx);
         let e = &e[1..];
-        let (sign, digits) = if let Some(d) = e.strip_prefix('-') { ("-", d) } else { ("+", e) };
+        let (sign, digits) = if let Some(d) = e.strip_prefix('-') {
+            ("-", d)
+        } else {
+            ("+", e)
+        };
         return format!("{}e{}{:0>2}", m.trim_end_matches(".0"), sign, digits);
     }
     s
@@ -121,7 +128,11 @@ pub fn parse_yaml(src: &str) -> Result<Option<Value>, String> {
             return yerr(no, "tabs are not allowed for indentation");
         }
         let indent = raw.len() - raw.trim_start_matches(' ').len();
-        lines.push(Line { no, indent, text: &raw[indent..] });
+        lines.push(Line {
+            no,
+            indent,
+            text: &raw[indent..],
+        });
     }
     let is_blank = |l: &Line| {
         let t = l.text.trim_end();
@@ -409,7 +420,11 @@ fn parse_value_text(
                 s.push_str(p);
                 prev_nl = false;
             }
-            let v = if parts.len() == 1 { resolve_plain(&s) } else { Value::Str(s) };
+            let v = if parts.len() == 1 {
+                resolve_plain(&s)
+            } else {
+                Value::Str(s)
+            };
             Ok((v, j))
         }
     }
@@ -488,7 +503,7 @@ fn parse_block_scalar(
     }
     // trailing blank lines
     let mut trailing = 0;
-    while body.last().map_or(false, |l| l.is_empty()) {
+    while body.last().is_some_and(|l| l.is_empty()) {
         body.pop();
         trailing += 1;
     }
@@ -846,7 +861,8 @@ fn resolve_float(s: &str) -> Option<f64> {
     };
     if let Some(e) = exp {
         // exponent requires an explicit sign in YAML 1.1
-        let ok = (e.starts_with('+') || e.starts_with('-')) && e.len() > 1 && e[1..].chars().all(|c| c.is_ascii_digit());
+        let ok =
+            (e.starts_with('+') || e.starts_with('-')) && e.len() > 1 && e[1..].chars().all(|c| c.is_ascii_digit());
         if !ok {
             return None;
         }
@@ -866,8 +882,16 @@ fn resolve_float(s: &str) -> Option<f64> {
     let text = format!(
         "{}{}.{}{}",
         if sign < 0.0 { "-" } else { "" },
-        if ip.is_empty() { "0".to_string() } else { ip.replace('_', "") },
-        if fp.is_empty() { "0".to_string() } else { fp.replace('_', "") },
+        if ip.is_empty() {
+            "0".to_string()
+        } else {
+            ip.replace('_', "")
+        },
+        if fp.is_empty() {
+            "0".to_string()
+        } else {
+            fp.replace('_', "")
+        },
         exp.map(|e| format!("e{}", e)).unwrap_or_default()
     );
     text.parse().ok()
@@ -877,7 +901,16 @@ fn resolve_float(s: &str) -> Option<f64> {
 // Schema validation (hand-written equivalent of spec/content-schema.json)
 // ---------------------------------------------------------------------------
 
-const PROPERTIES: &[&str] = &["title", "date", "updated", "summary", "tags", "draft", "aliases", "syndication"];
+const PROPERTIES: &[&str] = &[
+    "title",
+    "date",
+    "updated",
+    "summary",
+    "tags",
+    "draft",
+    "aliases",
+    "syndication",
+];
 const DATE_PATTERN: &str = r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:?\d{2})?)?$";
 const TAG_PATTERN: &str = "^[a-z0-9][a-z0-9-]*$";
 const ALIAS_PATTERN: &str = "^/.+";
@@ -910,7 +943,8 @@ fn digits(s: &[u8], n: usize) -> bool {
 
 pub fn is_date_like(s: &str) -> bool {
     let b = strip_dollar_nl(s).as_bytes();
-    if !(digits(b, 4) && b.get(4) == Some(&b'-') && digits(&b[5..], 2) && b.get(7) == Some(&b'-') && digits(&b[8..], 2)) {
+    if !(digits(b, 4) && b.get(4) == Some(&b'-') && digits(&b[5..], 2) && b.get(7) == Some(&b'-') && digits(&b[8..], 2))
+    {
         return false;
     }
     let mut r = &b[10..];
@@ -948,7 +982,7 @@ pub fn is_tag(s: &str) -> bool {
 fn is_alias(s: &str) -> bool {
     // ^/.+  (`.` excludes newline)
     let mut cs = s.chars();
-    cs.next() == Some('/') && cs.next().map_or(false, |c| c != '\n')
+    cs.next() == Some('/') && cs.next().is_some_and(|c| c != '\n')
 }
 
 /// RFC 3986 URI (absolute: scheme required), as `format: uri` intends.
@@ -960,7 +994,9 @@ pub fn is_uri(s: &str) -> bool {
     let scheme = &s[..colon];
     if scheme.is_empty()
         || !scheme.starts_with(|c: char| c.is_ascii_alphabetic())
-        || !scheme.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '-' | '.'))
+        || !scheme
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '+' | '-' | '.'))
     {
         return false;
     }
@@ -993,11 +1029,14 @@ fn type_name(v: &Value) -> &'static str {
     }
 }
 
+/// A schema `pattern` and the function that implements it.
+type Pattern<'a> = (&'a str, fn(&str) -> bool);
+
 fn check_string(
     v: &Value,
     path: Vec<PathElem>,
     min_len: bool,
-    pattern: Option<(&str, fn(&str) -> bool)>,
+    pattern: Option<Pattern>,
     uri: bool,
     errs: &mut Vec<(Vec<PathElem>, String)>,
 ) {
@@ -1010,7 +1049,10 @@ fn check_string(
         }
         if let Some((pat, f)) = pattern {
             if !f(s) {
-                errs.push((path.clone(), format!("{} does not match {}", v.repr(), py_repr_str(pat))));
+                errs.push((
+                    path.clone(),
+                    format!("{} does not match {}", v.repr(), py_repr_str(pat)),
+                ));
             }
         }
         if uri && !is_uri(s) {
@@ -1019,13 +1061,7 @@ fn check_string(
     }
 }
 
-fn check_array(
-    v: &Value,
-    key: &str,
-    pattern: Option<(&str, fn(&str) -> bool)>,
-    uri: bool,
-    errs: &mut Vec<(Vec<PathElem>, String)>,
-) {
+fn check_array(v: &Value, key: &str, pattern: Option<Pattern>, uri: bool, errs: &mut Vec<(Vec<PathElem>, String)>) {
     let path = vec![PathElem::Key(key.to_string())];
     if type_name(v) != "array" {
         errs.push((path.clone(), format!("{} is not of type 'array'", v.repr())));
@@ -1062,13 +1098,20 @@ fn values_equal(a: &Value, b: &Value) -> bool {
 pub fn validate(fm: &FrontMatter) -> Result<(), String> {
     let mut errs: Vec<(Vec<PathElem>, String)> = Vec::new();
     // additionalProperties
-    let mut extras: Vec<&String> = fm.iter().map(|(k, _)| k).filter(|k| !PROPERTIES.contains(&k.as_str())).collect();
+    let mut extras: Vec<&String> = fm
+        .iter()
+        .map(|(k, _)| k)
+        .filter(|k| !PROPERTIES.contains(&k.as_str()))
+        .collect();
     extras.sort();
     extras.dedup();
     if !extras.is_empty() {
         let verb = if extras.len() == 1 { "was" } else { "were" };
         let list = extras.iter().map(|e| py_repr_str(e)).collect::<Vec<_>>().join(", ");
-        errs.push((vec![], format!("Additional properties are not allowed ({} {} unexpected)", list, verb)));
+        errs.push((
+            vec![],
+            format!("Additional properties are not allowed ({} {} unexpected)", list, verb),
+        ));
     }
     // required
     if get(fm, "title").is_none() {
@@ -1100,7 +1143,11 @@ pub fn validate(fm: &FrontMatter) -> Result<(), String> {
         return Ok(());
     }
     errs.sort_by(|a, b| a.0.cmp(&b.0));
-    Err(errs.iter().map(|(p, m)| format!("{}: {}", path_repr(p), m)).collect::<Vec<_>>().join("; "))
+    Err(errs
+        .iter()
+        .map(|(p, m)| format!("{}: {}", path_repr(p), m))
+        .collect::<Vec<_>>()
+        .join("; "))
 }
 
 /// Parse and validate the front-matter of `text`. Returns `(front-matter, body)`.
@@ -1144,7 +1191,11 @@ mod tests {
         assert_eq!(get(&m, "date"), Some(&Value::Str("2020-01-02".into())));
         assert_eq!(
             get(&m, "tags"),
-            Some(&Value::List(vec![Value::Str("a".into()), Value::Str("b".into()), Value::Str("c-d".into())]))
+            Some(&Value::List(vec![
+                Value::Str("a".into()),
+                Value::Str("b".into()),
+                Value::Str("c-d".into())
+            ]))
         );
         assert_eq!(get(&m, "aliases").unwrap().repr(), "['/x/', '/y/']");
         assert_eq!(get(&m, "draft"), Some(&Value::Bool(true)));

@@ -38,7 +38,11 @@ fn site() -> &'static Path {
             .arg(&out)
             .output()
             .expect("run bliki");
-        assert!(status.status.success(), "build failed: {}", String::from_utf8_lossy(&status.stderr));
+        assert!(
+            status.status.success(),
+            "build failed: {}",
+            String::from_utf8_lossy(&status.stderr)
+        );
         out
     })
 }
@@ -112,7 +116,11 @@ fn light_and_dark(css: &str) -> (&str, &str) {
 #[test]
 fn every_page_links_the_stylesheet() {
     for (p, html) in html_files() {
-        assert!(html.contains("<link rel=\"stylesheet\" href=\"/style.css\">"), "{}", p.display());
+        assert!(
+            html.contains("<link rel=\"stylesheet\" href=\"/style.css\">"),
+            "{}",
+            p.display()
+        );
     }
 }
 
@@ -136,7 +144,12 @@ fn no_third_party_requests_from_pages() {
                 continue;
             }
             let href = attr(tag, "href").unwrap_or("");
-            assert!(href.starts_with('/') && !href.starts_with("//"), "{}: {}", p.display(), tag);
+            assert!(
+                href.starts_with('/') && !href.starts_with("//"),
+                "{}: {}",
+                p.display(),
+                tag
+            );
         }
     }
 }
@@ -158,7 +171,10 @@ fn stylesheet_urls_resolve() {
     let urls = css_urls(&css());
     assert!(!urls.is_empty(), "expected self-hosted font urls");
     for url in urls {
-        assert!(site().join(&url).is_file(), "url({url}) does not resolve next to style.css");
+        assert!(
+            site().join(&url).is_file(),
+            "url({url}) does not resolve next to style.css"
+        );
     }
 }
 
@@ -214,10 +230,18 @@ fn user_preferences_honoured() {
 fn focus_is_always_visible() {
     let css = css();
     let focus = rule_after(&css, 0, ":focus-visible").expect("no :focus-visible rule");
-    assert!(focus.contains("box-shadow: var(--focus-outline)"), "focus rule: {focus}");
-    let forced = css.find("@media (forced-colors: active)").expect("no forced-colors block");
+    assert!(
+        focus.contains("box-shadow: var(--focus-outline)"),
+        "focus rule: {focus}"
+    );
+    let forced = css
+        .find("@media (forced-colors: active)")
+        .expect("no forced-colors block");
     let forced_focus = rule_after(&css, forced, ":focus-visible").expect("no forced-colors focus rule");
-    assert!(forced_focus.contains("outline: 3px"), "forced-colors focus rule: {forced_focus}");
+    assert!(
+        forced_focus.contains("outline: 3px"),
+        "forced-colors focus rule: {forced_focus}"
+    );
 }
 
 #[test]
@@ -238,7 +262,11 @@ fn no_text_below_16px() {
         } else {
             continue;
         };
-        assert!(px >= 16.0, "font-size {digits}{} is below 16px", &unit[..unit.find(';').unwrap_or(unit.len())]);
+        assert!(
+            px >= 16.0,
+            "font-size {digits}{} is below 16px",
+            &unit[..unit.find(';').unwrap_or(unit.len())]
+        );
     }
     // The size tokens themselves.
     for (i, _) in css.match_indices("--size-") {
@@ -263,6 +291,10 @@ fn skip_link_first_in_body() {
             p.display(),
             &first[..first.len().min(60)]
         );
-        assert!(html.contains("<main id=\"main\">"), "{}: no <main id=\"main\">", p.display());
+        assert!(
+            html.contains("<main id=\"main\">"),
+            "{}: no <main id=\"main\">",
+            p.display()
+        );
     }
 }
