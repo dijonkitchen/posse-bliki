@@ -31,13 +31,13 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 
 ```sh
 make ci          # full CI — sync, test, build (mirrors GitHub Actions)
-make test        # run the harness only
+make test        # run the harness: cargo test, then pytest
 make serve       # build, watch content/, serve at http://localhost:8080
 make help        # list all targets
 ```
 
 Requires [Rust](https://rustup.rs) (for the build), [uv](https://docs.astral.sh/uv/)
-(for the test harness) and `make`. Install uv with
+(for the pytest half of the harness) and `make`. Install uv with
 `curl -LsSf https://astral.sh/uv/install.sh | sh`. Make ships with macOS
 and every Linux distro. The build itself has zero crate dependencies — see
 [`docs/adr/0007`](docs/adr/0007-rust-build-zero-dependencies.md).
