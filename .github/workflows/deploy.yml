@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  # Daily rebuild so newly received webmentions show up without a push.
+  schedule:
+    - cron: "17 6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -31,8 +34,47 @@ jobs:
       - id: pages
         uses: actions/configure-pages@v5
 
+      # Received webmentions, rendered into the posts at build time (no JS).
+      # Needs the WEBMENTION_IO_TOKEN secret (webmention.io > Settings > API
+      # key); without it, or if webmention.io is down, posts show none.
+      - name: Fetch received webmentions
+        env:
+          WEBMENTION_IO_TOKEN: ${{ secrets.WEBMENTION_IO_TOKEN }}
+        run: |
+          if [ -z "$WEBMENTION_IO_TOKEN" ]; then
+            echo "WEBMENTION_IO_TOKEN not set; building without webmentions"
+          elif curl -sS --fail --max-time 60 -o "$RUNNER_TEMP/webmentions.json" \
+              "https://webmention.io/api/mentions.jf2?per-page=10000&token=$WEBMENTION_IO_TOKEN"; then
+            echo "WEBMENTIONS=$RUNNER_TEMP/webmentions.json" >> "$GITHUB_ENV"
+          else
+            echo "::warning::could not fetch webmentions; building without them"
+          fi
+
+      # The feed currently live, so the send step below can tell which posts
+      # this deploy adds.
+      - name: Fetch the deployed feed
+        run: |
+          curl -sS --fail --max-time 60 -o "$RUNNER_TEMP/previous-feed.json" \
+            "${{ steps.pages.outputs.base_url }}/feed.json" \
+            || echo "::warning::no deployed feed; nothing will be syndicated this run"
+
       - name: Run CI gate + build (mirrors `make ci` locally)
-        run: make ci BASE_URL="${{ steps.pages.outputs.base_url }}"
+        run: make ci BASE_URL="${{ steps.pages.outputs.base_url }}" WEBMENTIONS="${WEBMENTIONS:-}"
+
+      - name: List webmentions to send for new posts
+        run: |
+          : > pending-webmentions.tsv
+          if [ -s "$RUNNER_TEMP/previous-feed.json" ]; then
+            target/release/bliki --out public --pending-webmentions "$RUNNER_TEMP/previous-feed.json" \
+              > pending-webmentions.tsv \
+              || { echo "::warning::not syndicating this run"; : > pending-webmentions.tsv; }
+          fi
+          cat pending-webmentions.tsv
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pending-webmentions
+          path: pending-webmentions.tsv
 
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -47,3 +89,30 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # POSSE: once the new posts are live, ask Bridgy Publish (Mastodon,
+  # Bluesky) and Bridgy Fed (fediverse) to syndicate them. Off until the
+  # SEND_WEBMENTIONS repository variable is "true", which only makes sense
+  # once the site is on its own domain and the Bridgy accounts are set up.
+  syndicate:
+    needs: deploy
+    if: vars.SEND_WEBMENTIONS == 'true'
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pending-webmentions
+
+      - name: Send webmentions
+        run: |
+          failed=0
+          while IFS="$(printf '\t')" read -r endpoint source target; do
+            [ -n "$endpoint" ] || continue
+            echo "-> $target for $source"
+            curl -sS --fail-with-body --max-time 120 \
+              --data-urlencode "source=$source" --data-urlencode "target=$target" "$endpoint" \
+              || { echo "::warning::$target refused $source"; failed=1; }
+            echo
+          done < pending-webmentions.tsv
+          exit $failed
