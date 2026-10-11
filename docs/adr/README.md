@@ -14,6 +14,7 @@ ADR that supersedes the old one. Don't edit history.
 | [0007](0007-rust-build-zero-dependencies.md) | Rust build with zero dependencies | Accepted |
 | [0008](0008-webmentions-at-deploy-time.md) | Webmentions at deploy time | Accepted |
 | [0009](0009-a11y-design-system-self-hosted-fonts.md) | a11y design system, self-hosted fonts | Accepted |
+| [0011](0011-holocene-years-on-the-page.md) | Holocene years on the page | Accepted |
 
 ## Format
 

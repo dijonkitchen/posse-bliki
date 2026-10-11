@@ -6,6 +6,7 @@
 
 use std::collections::HashMap;
 
+use crate::date::Date;
 use crate::json::{self, Json};
 use crate::util::escape as e;
 
@@ -127,7 +128,7 @@ pub fn render(mentions: &[Mention]) -> String {
     if !replies.is_empty() {
         out.push_str("<ol class=\"replies\">\n");
         for m in replies {
-            let date = m.published.get(..10).unwrap_or(&m.published);
+            let date = Date::parse(&m.published).map_or_else(|| m.published.clone(), |d| d.human());
             let verb = if m.kind == Kind::Reply { "replied" } else { "mentioned this" };
             let text = if m.text.is_empty() {
                 String::new()
@@ -141,7 +142,7 @@ pub fn render(mentions: &[Mention]) -> String {
                 verb,
                 e(&m.url),
                 e(&m.published),
-                e(date),
+                e(&date),
                 text
             ));
         }
@@ -225,5 +226,6 @@ mod tests {
         assert!(html.contains("&lt;b&gt;Eve"));
         assert!(!html.contains("javascript:"));
         assert!(!html.contains("Liked by"));
+        assert!(html.contains("datetime=\"2026-10-01T00:00:00Z\">12026-10-01</time>"));
     }
 }

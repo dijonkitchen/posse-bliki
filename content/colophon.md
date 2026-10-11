@@ -23,5 +23,12 @@ the contract in `spec/` and the test harness in `tests/`. See
 [[how-this-bliki-works]] for the day-to-day side and the repo's
 `docs/adr/` for the reasoning.
 
+Dates here use the [Holocene calendar](https://en.wikipedia.org/wiki/Holocene_calendar):
+the year plus 10,000, so 2026 is 12026. It's a small nod to the
+[Long Now Foundation](https://longnow.org) and to Kurzgesagt's
+Human Era, counting from
+roughly when people started building civilisation, about 12,000 years ago.
+Feeds and machine-readable dates stay in the usual calendar.
+
 If every tool listed above disappeared tomorrow, the notes would still
 open in any text editor. That's the point.

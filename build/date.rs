@@ -71,9 +71,11 @@ impl Date {
         format!("{:04}-{:02}-{:02}", self.year, self.month, self.day)
     }
 
-    /// `date.strftime('%Y-%m-%d')` (glibc does not pad `%Y`).
-    pub fn ymd(&self) -> String {
-        format!("{}-{:02}-{:02}", self.year, self.month, self.day)
+    /// The date people read on the page, in the Holocene calendar: the year
+    /// plus 10,000 (2026 is 12026). Machine-readable values keep `iso()`.
+    /// See docs/adr/0011-holocene-years-on-the-page.md.
+    pub fn human(&self) -> String {
+        format!("{}-{:02}-{:02}", self.year + 10_000, self.month, self.day)
     }
 
     /// `email.utils.format_datetime` of midnight UTC.
@@ -106,7 +108,8 @@ mod tests {
         assert_eq!(Date::parse("2023-04-11").unwrap().rfc822(), "Tue, 11 Apr 2023 00:00:00 +0000");
         assert_eq!(EPOCH.rfc822(), "Thu, 01 Jan 1970 00:00:00 +0000");
         assert_eq!(Date::parse("0005-01-01").unwrap().rfc822(), "Sat, 01 Jan 0005 00:00:00 +0000");
-        assert_eq!(Date::parse("0005-01-01").unwrap().ymd(), "5-01-01");
+        assert_eq!(Date::parse("0005-01-01").unwrap().human(), "10005-01-01");
+        assert_eq!(Date::parse("2026-10-11").unwrap().human(), "12026-10-11");
         assert_eq!(Date::parse("2000-02-29T10:00Z").unwrap().iso_datetime(), "2000-02-29T00:00:00+00:00");
         assert!(Date::parse("2021-02-29").is_none());
         assert!(Date::parse("0000-01-01").is_none());
