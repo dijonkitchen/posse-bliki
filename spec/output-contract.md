@@ -46,6 +46,15 @@ In addition to the universal invariants, every post page must:
 
 - Contain an `h-feed` of `h-entry` items.
 
+## Dates
+
+- Every date the build shows a reader uses the Holocene year, the Gregorian
+  year plus 10,000 (`2026-10-11` shows as `12026-10-11`). See
+  [ADR 0011](../docs/adr/0011-holocene-years-on-the-page.md).
+- Every machine-readable date stays Gregorian: `<time datetime>`, RSS,
+  JSON Feed, the sitemap and URLs.
+- Enforced by `tests/test_holocene_dates.py`.
+
 ## Error pages
 
 - `/404.html` exists and is valid HTML5.

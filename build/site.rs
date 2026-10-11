@@ -368,7 +368,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     let d = n.post_date()?;
     let updated = n
         .updated
-        .map(|u| format!(" \u{b7} <time class=\"dt-updated\" datetime=\"{}\">updated {}</time>", u.iso(), u.ymd()))
+        .map(|u| format!(" \u{b7} <time class=\"dt-updated\" datetime=\"{}\">updated {}</time>", u.iso(), u.human()))
         .unwrap_or_default();
     let summary = n.summary().map(|s| format!("<p class=\"p-summary\">{}</p>", e(s))).unwrap_or_default();
     let tags = if n.tags.is_empty() {
@@ -398,13 +398,13 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     let mentions = site.mentions.get(&webmention::url_key(canonical)).map_or(String::new(), |m| webmention::render(m));
     let content = format!(
         "\n<article class=\"h-entry\">\n<header>\n<h1 class=\"p-name\">{title}</h1>\n<p class=\"meta\">\n\
-<a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{ymd}</time></a>\n\
+<a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{human}</time></a>\n\
 {updated}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url p-name\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
 </p>\n{summary}\n{tags}\n</header>\n<div class=\"e-content\">\n{html}\n</div>\n{synd}{posse}{mentions}\n</article>\n{back}\n",
         title = e(n.title()),
         canon = e(canonical),
         iso = d.iso(),
-        ymd = d.ymd(),
+        human = d.human(),
         base = e(site.base_url),
         author = e(site.author_name),
         html = n.content_html,
@@ -435,7 +435,7 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
             e(&pn.url),
             e(pn.title()),
             d.iso(),
-            d.ymd()
+            d.human()
         ));
     }
     let content = format!(
@@ -461,7 +461,7 @@ fn render_list(site: &Config, notes: &[Note], list_title: &str, posts: &[usize],
             e(&pn.url),
             e(pn.title()),
             d.iso(),
-            d.ymd(),
+            d.human(),
             summary
         ));
     }
