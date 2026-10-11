@@ -1,4 +1,4 @@
-# 0011 — Nu HTML Checker in CI
+# 0012 — Nu HTML Checker in CI
 
 - Date: 2026-10-11
 - Status: Accepted

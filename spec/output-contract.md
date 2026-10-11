@@ -8,7 +8,7 @@ in `tests/`.
 - Valid HTML5 (parses with `html5lib` strict mode, no errors).
 - Passes the W3C Nu HTML Checker with no errors or warnings, including
   heading order (no skipped levels) and one `<h1>` per page. Checked by
-  `make validate` in CI's `html` job, not by `tests/` (ADR 0011).
+  `make validate` in CI's `html` job, not by `tests/` (ADR 0012).
 - `<!DOCTYPE html>` first, `<html lang="en">`.
 - `<meta charset="utf-8">`.
 - `<meta name="viewport" content="width=device-width, initial-scale=1">`.
@@ -48,6 +48,15 @@ In addition to the universal invariants, every post page must:
 ## List pages (`/notes/`, `/tags/<tag>/`)
 
 - Contain an `h-feed` of `h-entry` items.
+
+## Dates
+
+- Every date the build shows a reader uses the Holocene year, the Gregorian
+  year plus 10,000 (`2026-10-11` shows as `12026-10-11`). See
+  [ADR 0011](../docs/adr/0011-holocene-years-on-the-page.md).
+- Every machine-readable date stays Gregorian: `<time datetime>`, RSS,
+  JSON Feed, the sitemap and URLs.
+- Enforced by `tests/test_holocene_dates.py`.
 
 ## Error pages
 

@@ -7,7 +7,7 @@ OUT  ?= public
 BASE_URL ?=
 # jf2 file of received webmentions to show on posts; empty shows none
 WEBMENTIONS ?=
-# Nu HTML Checker for `make validate` (ADR 0011): pinned release from npm, checked by hash
+# Nu HTML Checker for `make validate` (ADR 0012): pinned release from npm, checked by hash
 VNU_VERSION := 26.9.16
 VNU_SHA512  := 843772e456ea003f9e3998d481837389d4b38b9e2ffd595e07f6ac3b2cd81823dc9ac03d2b86afebea0a4be64ff43235376b3fcfa6d7ee4f24739c16af796c62
 VNU_JAR     := target/vnu/vnu-$(VNU_VERSION).jar
@@ -30,7 +30,7 @@ serve: ## Build, watch content/, and serve at :$(PORT)
 
 ci: sync test build ## Full local CI: same checks .github/workflows/ci.yml runs
 
-validate: build $(VNU_JAR) ## Check every built page with the Nu HTML Checker (needs Java, ADR 0011)
+validate: build $(VNU_JAR) ## Check every built page with the Nu HTML Checker (needs Java, ADR 0012)
 	java -jar $(VNU_JAR) --skip-non-html --Werror \
 		--filterpattern '.*Trailing slash on void elements.*' $(OUT)
 
