@@ -3,6 +3,7 @@ title: rebase
 date: 2018-08-31
 aliases:
   - /rebase/
+  - /p/rebase/
 ---
 ## Code Symbiosis
 

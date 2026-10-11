@@ -3,6 +3,7 @@ title: freedom
 date: 2020-05-24
 aliases:
   - /freedom/
+  - /p/freedom/
 ---
 long-term creative freedom vs status; game theory
 

@@ -3,6 +3,7 @@ title: time
 date: 2019-12-26
 aliases:
   - /time/
+  - /p/time/
 ---
 ## Value-time (kind of like space-time)
 

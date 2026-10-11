@@ -3,6 +3,7 @@ title: experience
 date: 2019-09-14
 aliases:
   - /experience/
+  - /p/experience/
 ---
 Great, sustainable experiences
 

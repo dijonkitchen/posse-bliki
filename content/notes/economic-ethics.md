@@ -3,6 +3,7 @@ title: economic ethics
 date: 2018-09-15
 aliases:
   - /economic-ethics/
+  - /p/economic-ethics/
 ---
 Capitalism: lie/cheat/steal vs value add
 

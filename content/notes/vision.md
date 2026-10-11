@@ -3,6 +3,7 @@ title: vision
 date: 2020-03-15
 aliases:
   - /vision/
+  - /p/vision/
 ---
 Don't optimize for things that don't matter. 
 Intermediate milestones/goals may be too limiting

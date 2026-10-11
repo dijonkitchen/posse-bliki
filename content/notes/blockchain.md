@@ -3,6 +3,7 @@ title: blockchain
 date: 2021-04-28
 aliases:
   - /blockchain/
+  - /p/blockchain/
 ---
 Watching and learning since 2011.
 Each wave opened up the possibilities

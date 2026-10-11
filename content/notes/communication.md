@@ -3,6 +3,7 @@ title: communication
 date: 2019-11-08
 aliases:
   - /communication/
+  - /p/communication/
 ---
 Goals:
 * Team succeed at goals

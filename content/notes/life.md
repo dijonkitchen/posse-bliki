@@ -3,6 +3,7 @@ title: life
 date: 2020-05-29
 aliases:
   - /life/
+  - /p/life/
 ---
 Life aspirations 
 thinking about a child,
