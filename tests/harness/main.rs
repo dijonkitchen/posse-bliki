@@ -9,6 +9,7 @@ mod support;
 
 mod aliases;
 mod base_path;
+mod dates;
 mod design;
 mod drafts;
 mod frontmatter_schema;

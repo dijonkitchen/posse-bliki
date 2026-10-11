@@ -412,7 +412,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
             format!(
                 " \u{b7} <time class=\"dt-updated\" datetime=\"{}\">updated {}</time>",
                 u.iso(),
-                u.ymd()
+                u.human()
             )
         })
         .unwrap_or_default();
@@ -452,13 +452,13 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         .map_or(String::new(), |m| webmention::render(m));
     let content = format!(
         "\n<article class=\"h-entry\">\n<header>\n<h1 class=\"p-name\">{title}</h1>\n<p class=\"meta\">\n\
-<a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{ymd}</time></a>\n\
+<a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{human}</time></a>\n\
 {updated}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url p-name\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
 </p>\n{summary}\n{tags}\n</header>\n<div class=\"e-content\">\n{html}\n</div>\n{synd}{posse}{mentions}\n</article>\n{back}\n",
         title = e(n.title()),
         canon = e(canonical),
         iso = d.iso(),
-        ymd = d.ymd(),
+        human = d.human(),
         base = e(site.base_url),
         author = e(site.author_name),
         html = n.content_html,
@@ -504,7 +504,7 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
             e(&pn.url),
             e(pn.title()),
             d.iso(),
-            d.ymd()
+            d.human()
         ));
     }
     let content = format!(
@@ -538,7 +538,7 @@ fn render_list(
             e(&pn.url),
             e(pn.title()),
             d.iso(),
-            d.ymd(),
+            d.human(),
             summary
         ));
     }
