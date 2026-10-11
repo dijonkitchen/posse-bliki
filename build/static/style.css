@@ -44,3 +44,8 @@ table { border-collapse: collapse; }
 table th, table td { border: 1px solid var(--rule); padding: 0.4rem 0.6rem; text-align: left; }
 .backlinks { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule); color: var(--muted); }
 .backlinks h2 { font-size: 1rem; }
+.webmentions { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
+.webmentions h2 { font-size: 1rem; }
+.webmentions ol { list-style: none; padding-left: 0; }
+.webmentions li { padding: 0.4rem 0; border-bottom: 1px solid var(--rule); }
+.webmentions time { color: var(--muted); font-size: 0.85rem; }

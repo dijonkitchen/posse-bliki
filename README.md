@@ -51,15 +51,25 @@ and every Linux distro. The build itself has zero crate dependencies — see
 
 ## Going live
 
-1. Edit `default_config()` in [`build/site.rs`](build/site.rs)
-   (title, base URL, author, rel=me links, webmention.io username).
+1. Check `default_config()` in [`build/site.rs`](build/site.rs)
+   (title, base URL, author, rel=me links, webmention.io domain,
+   syndication targets).
 2. Repo Settings → Pages → Source: GitHub Actions.
 3. Push to `main`. CI builds, runs the harness, deploys.
 
-## POSSE
+## POSSE and webmentions
 
-The RSS/JSON feeds are the syndication source. Point an external bridge
-([Bridgy Fed](https://fed.brid.gy), [echofeed](https://echofeed.app),
-or similar) at `/index.xml` to repost to Mastodon/Bluesky/etc. Each
-post can declare its `u-syndication` outlinks via front-matter once
-syndicated, closing the POSSE loop.
+The deploy workflow handles both directions
+([ADR 0008](docs/adr/0008-webmentions-at-deploy-time.md)):
+
+- **Received** webmentions are fetched from webmention.io and shown on
+  each post. Sign in at <https://webmention.io> with the site's domain,
+  then save its API key as the `WEBMENTION_IO_TOKEN` repository secret.
+  A daily deploy picks up new ones.
+- **New posts** are sent to Bridgy Publish (Mastodon, Bluesky) and Bridgy
+  Fed (fediverse). Connect your accounts at <https://brid.gy> and
+  <https://fed.brid.gy>, then set the `SEND_WEBMENTIONS` repository
+  variable to `true`. Until then nothing is sent.
+
+Once a syndicated copy exists, add its URL to the post's `syndication:`
+front matter to link to it.

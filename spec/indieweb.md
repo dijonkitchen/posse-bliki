@@ -22,10 +22,43 @@ Conformance to each item is enforced by a test in `tests/`.
 | Standard | Service | Configuration |
 |---|---|---|
 | **Webmention** (receive) | <https://webmention.io> | `<link rel=webmention>` on every page |
+| **Webmention** (display) | webmention.io jf2 export | fetched at deploy, rendered by `--webmentions` |
 | **Pingback** (receive) | <https://webmention.io> | `<link rel=pingback>` on every page |
-| **Webmention** (send) | <https://telegraph.p3k.io> or <https://brid.gy> | manual or via build hook |
-| **ActivityPub** | <https://fed.brid.gy> | follow `@<domain>@<domain>` after Bridgy Fed setup |
+| **Webmention** (send) | <https://brid.gy> (Mastodon, Bluesky) | deploy workflow, for new posts |
+| **ActivityPub** | <https://fed.brid.gy> | deploy workflow; follow `@<domain>@web.brid.gy` |
 | **WebSub** | <https://websub.rocks/hub> | optional `<link rel=hub>` if enabled |
+
+## Webmentions at deploy time
+
+See [ADR 0008](../docs/adr/0008-webmentions-at-deploy-time.md). The build
+does no network I/O; the deploy workflow fetches and sends.
+
+**Receiving.** `bliki --webmentions FILE` reads webmention.io's jf2 export
+and, on each post a mention targets, renders a `<section
+class="webmentions">` inside the `h-entry`:
+
+- Targets match a post's canonical URL ignoring scheme, a leading `www.`,
+  query, fragment and trailing slash.
+- `like-of`, `repost-of` and `bookmark-of` become `p-like`, `p-repost` and
+  `p-bookmark` `h-cite`s; `in-reply-to` and anything else become `p-comment`
+  `h-cite`s with author, date and text.
+- Mentions marked `wm-private` are skipped. Content is text only and
+  escaped. Only http(s) URLs become links.
+- No section is emitted for a post with no mentions, or without the flag.
+- An unreadable or invalid file fails the build.
+
+**Sending.** Every post contains `<a href="TARGET" hidden></a>` for each
+target in the config's `syndicate_to`, because Bridgy publishes only pages
+that link to it. `bliki --out DIR --pending-webmentions FEED` builds
+nothing; it compares `DIR/feed.json` with FEED (the feed live before this
+deploy) and prints `endpoint<TAB>source<TAB>target` for each new post and
+target. It fails, printing nothing, when FEED isn't a JSON Feed or when
+more than 5 posts are new. The workflow's `syndicate` job posts those
+lines after the deploy, only while the `SEND_WEBMENTIONS` repository
+variable is `true`.
+
+Enforced by `tests/test_webmentions.py` and the Rust unit tests in
+`build/webmention.rs`.
 
 ## Out of scope (deliberately)
 
@@ -39,7 +72,7 @@ Conformance to each item is enforced by a test in `tests/`.
 ## Verifying conformance
 
 ```sh
-uv run pytest tests/test_microformats.py tests/test_indieweb_links.py
+uv run pytest tests/test_microformats.py tests/test_indieweb_links.py tests/test_webmentions.py
 ```
 
 External validators (run manually before major releases):

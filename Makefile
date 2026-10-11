@@ -5,6 +5,8 @@ PORT ?= 8080
 OUT  ?= public
 # URL the site is served from; empty keeps the config base_url
 BASE_URL ?=
+# jf2 file of received webmentions to show on posts; empty shows none
+WEBMENTIONS ?=
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-8s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -17,7 +19,7 @@ test: ## Run Rust unit tests, then the spec harness
 	uv run pytest
 
 build: ## Build the site → ./$(OUT) (Rust binary, std only)
-	cargo run --release -- --out $(OUT) $(if $(BASE_URL),--base-url $(BASE_URL))
+	cargo run --release -- --out $(OUT) $(if $(BASE_URL),--base-url $(BASE_URL)) $(if $(WEBMENTIONS),--webmentions $(WEBMENTIONS))
 
 serve: ## Build, watch content/, and serve at :$(PORT)
 	cargo run --release -- --out $(OUT) --serve --port $(PORT)
