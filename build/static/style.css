@@ -1,51 +1,409 @@
-:root {
-  --fg: #1a1a1a;
-  --bg: #fafafa;
-  --muted: #6a6a6a;
-  --accent: #2a5d8f;
-  --rule: #e0e0e0;
-  --max: 38rem;
+/*
+ * posse-bliki styles, built on JC's a11y Design System (spec/design.md).
+ *
+ * Token values are copied from the system's tokens/*.css. Use the semantic
+ * tokens (--text-*, --surface-*, --border-*) in rules below, not the
+ * primitives (--blue-700 and friends), so a palette change touches one place.
+ * Fonts are self-hosted from /fonts/ (no third-party requests).
+ */
+
+/* --- fonts (SIL OFL 1.1; licences sit beside the files) --- */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("fonts/atkinson-hyperlegible-next-latin.woff2") format("woff2");
 }
-@media (prefers-color-scheme: dark) {
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  font-style: italic;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("fonts/atkinson-hyperlegible-next-italic-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("fonts/jetbrains-mono-latin.woff2") format("woff2");
+}
+
+/* --- colour: primitives (OKLCH, one lightness ladder for every hue) --- */
+:root {
+  --paper: oklch(0.985 0.004 91.4);
+  --white: oklch(1 0 0);
+  --sand-50: oklch(0.965 0.007 89);
+  --sand-100: oklch(0.93 0.011 89);
+  --sand-200: oklch(0.87 0.014 89);
+  --ink-900: oklch(0.255 0.018 260.7);
+  --ink-700: oklch(0.425 0.018 260.7);
+  --ink-500: oklch(0.525 0.018 260.7);
+  --blue-900: oklch(0.255 0.083 254.5);
+  --blue-700: oklch(0.425 0.13 254.5);
+  --blue-50: oklch(0.965 0.011 254.5);
+  --yellow-focus: oklch(0.879 0.162 90.9);
+}
+/* Browsers without OKLCH get the same palette in hex. */
+@supports not (color: oklch(0 0 0)) {
   :root {
-    --fg: #e6e6e6;
-    --bg: #15161a;
-    --muted: #9a9a9a;
-    --accent: #88b4e0;
-    --rule: #2a2c33;
+    --paper: #fbfaf7;
+    --white: #ffffff;
+    --sand-50: #f5f3ee;
+    --sand-100: #ebe8e0;
+    --sand-200: #d8d4ca;
+    --ink-900: #1e232c;
+    --ink-700: #494f59;
+    --ink-500: #646b75;
+    --blue-900: #002249;
+    --blue-700: #0b4e93;
+    --blue-50: #eff4fb;
+    --yellow-focus: #ffd23f;
   }
 }
-* { box-sizing: border-box; }
-html { font-size: 17px; }
+
+/* --- colour: semantic (light). Text pairs meet WCAG AAA 7:1. --- */
+:root {
+  --text-1: var(--ink-900);
+  --text-2: var(--ink-700);
+  --text-link: var(--blue-700);
+  --text-link-hover: var(--blue-900);
+  --surface-page: var(--paper);
+  --surface-card: var(--white);
+  --surface-sunken: var(--sand-50);
+  --surface-selected: var(--blue-50);
+  --border-strong: var(--ink-500);
+  --border-subtle: var(--sand-200);
+  --focus-halo: var(--yellow-focus);
+  --focus-ring: var(--ink-900);
+  --badge-neutral-bg: var(--sand-100);
+  --badge-neutral-border: var(--sand-200);
+  color-scheme: light dark;
+}
+/* Dark follows the operating system. Accents at L 0.795, tints at L 0.28. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-1: oklch(0.943 0.007 88.6);
+    --text-2: oklch(0.808 0.009 91.5);
+    --text-link: oklch(0.795 0.104 253.8);
+    --text-link-hover: oklch(0.889 0.055 255.2);
+    --surface-page: oklch(0.204 0.009 264.4);
+    --surface-card: oklch(0.251 0.012 264.3);
+    --surface-sunken: oklch(0.181 0.007 258.4);
+    --surface-selected: oklch(0.286 0.044 255.6);
+    --border-strong: oklch(0.704 0.016 260.7);
+    --border-subtle: oklch(0.336 0.015 264.3);
+    --focus-halo: oklch(0.879 0.162 90.9);
+    --focus-ring: oklch(1 0 0);
+    --badge-neutral-bg: oklch(0.3 0.014 261.7);
+    --badge-neutral-border: oklch(0.367 0.017 262.3);
+  }
+}
+
+/* --- type: 18px base, ~1.25 ratio, nothing below 16px --- */
+:root {
+  --font-sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", Verdana, "Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans", Ubuntu, Cantarell, "DejaVu Sans", sans-serif;
+  --font-code: "JetBrains Mono", "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+  --size-sm: 1rem;
+  --size-base: 1.125rem;
+  --size-lg: 1.375rem;
+  --size-xl: 1.75rem;
+  --size-2xl: 2.125rem;
+  --size-3xl: 2.625rem;
+  --weight-regular: 400;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-body: 1.6;
+  --tracking-body: 0.01em;
+  --tracking-display: -0.01em;
+  --para-space: 1em;
+  --measure: 66ch;
+}
+
+/* --- space, shape, motion --- */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --target-min: 44px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-pill: 999px;
+  --focus-outline: 0 0 0 3px var(--focus-halo), 0 0 0 6px var(--focus-ring);
+  --duration-fast: 120ms;
+  --ease-out: cubic-bezier(.2, .7, .3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --duration-fast: 0ms; }
+}
+/* More contrast asked for: secondary text and hairlines go to full strength. */
+@media (prefers-contrast: more) {
+  :root {
+    --text-2: var(--text-1);
+    --border-subtle: var(--border-strong);
+  }
+}
+
+/* --- element defaults --- */
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-block: var(--space-8);
+}
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: ui-serif, Georgia, "Iowan Old Style", "Apple Garamond", Baskerville, "Times New Roman", serif;
-  line-height: 1.55;
+  background: var(--surface-page);
+  color: var(--text-1);
+  font: var(--weight-regular) var(--size-base)/var(--leading-body) var(--font-sans);
+  letter-spacing: var(--tracking-body);
+  -webkit-font-smoothing: antialiased;
 }
-main, header.site-header, footer.site-footer { max-width: var(--max); margin: 0 auto; padding: 1rem; }
-header.site-header { padding-top: 2rem; padding-bottom: 0; }
-footer.site-footer { color: var(--muted); border-top: 1px solid var(--rule); margin-top: 3rem; }
-nav a { margin-right: 1rem; text-decoration: none; }
-a { color: var(--accent); }
-h1, h2, h3 { line-height: 1.2; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; }
-h1 { font-size: 1.6rem; }
-h2 { font-size: 1.25rem; margin-top: 2rem; }
-.meta { color: var(--muted); font-size: 0.9rem; }
+h1, h2, h3, h4 {
+  margin: var(--space-6) 0 var(--space-3);
+  font-family: var(--font-sans);
+  font-weight: var(--weight-bold);
+  text-wrap: balance;
+  color: var(--text-1);
+}
+h1 { font-size: var(--size-3xl); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); margin-top: 0; }
+h2 { font-size: var(--size-2xl); line-height: var(--leading-tight); }
+h3 { font-size: var(--size-xl); line-height: var(--leading-snug); }
+h4 { font-size: var(--size-lg); line-height: var(--leading-snug); }
+p, li { max-width: var(--measure); text-wrap: pretty; }
+p { margin: 0 0 var(--para-space); }
+ul, ol { padding-inline-start: var(--space-5); }
+li + li { margin-top: var(--space-1); }
+strong, b { font-weight: var(--weight-bold); }
+a {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: .2em;
+}
+a:hover { color: var(--text-link-hover); text-decoration-thickness: 3px; }
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-outline);
+  border-radius: var(--radius-sm);
+}
+::selection { background: var(--yellow-focus); color: var(--ink-900); }
+img { max-width: 100%; height: auto; border-radius: var(--radius-md); }
+hr { border: 0; border-top: 1px solid var(--border-subtle); margin: var(--space-7) 0; }
+
+/* Code: slashed zero, fixed-width digits, no ligatures (!= stays !=). */
+code, kbd, pre, samp {
+  font-family: var(--font-code);
+  font-size: var(--size-sm);
+  font-variant-numeric: slashed-zero tabular-nums;
+  font-variant-ligatures: none;
+  letter-spacing: 0;
+}
+:not(pre) > code {
+  padding: .1em .35em;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 0 0 var(--para-space);
+  padding: var(--space-4);
+  background: var(--surface-sunken);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  line-height: var(--leading-body);
+}
+
+blockquote {
+  margin: 0 0 var(--para-space);
+  padding-inline-start: var(--space-4);
+  border-inline-start: 4px solid var(--border-subtle);
+  color: var(--text-2);
+}
+
+table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 0 0 var(--para-space);
+}
+th, td {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  text-align: start;
+  vertical-align: top;
+}
+th { background: var(--surface-sunken); font-weight: var(--weight-bold); }
+
+/* Windows contrast themes strip box-shadow, so focus needs a real outline. */
+@media (forced-colors: active) {
+  :focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
+}
+
+/* --- page layout: one left-aligned column, text measure 66ch --- */
+.site-header, main, .site-footer {
+  max-width: calc(var(--measure) + 2 * var(--space-5));
+  margin-inline: auto;
+  padding-inline: var(--space-5);
+}
+
+/* Hidden until focused, then the first thing a keyboard user lands on. */
+.skip-link {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: 1;
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-card);
+  font-weight: var(--weight-bold);
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; }
+
+.site-header {
+  padding-block: var(--space-5) var(--space-6);
+}
+.site-header nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+}
+.site-header nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+}
+.site-header .site-title {
+  margin-inline-end: auto;
+  color: var(--text-1);
+  font-weight: var(--weight-heavy);
+  font-size: var(--size-lg);
+  text-decoration: none;
+}
+.site-header .site-title:hover { text-decoration: underline; }
+/* Narrow screens: the title gets its own row, the links share the next. */
+@media (max-width: 40rem) {
+  .site-header .site-title { flex-basis: 100%; }
+}
+
+main { padding-block-end: var(--space-7); }
+
+.site-footer {
+  padding-block: var(--space-5) var(--space-7);
+  color: var(--text-2);
+}
+.site-footer p {
+  max-width: none;
+  padding-block-start: var(--space-5);
+  border-block-start: 1px solid var(--border-subtle);
+}
+
+/* --- notes (h-entry) --- */
+.h-entry > header { margin-bottom: var(--space-6); }
+.meta, .p-summary { color: var(--text-2); }
+.meta { font-size: var(--size-sm); }
 .meta a { color: inherit; }
-.tags a { margin-right: 0.5rem; color: var(--muted); text-decoration: none; }
-.h-feed ul, .backlinks ul { list-style: none; padding-left: 0; }
-.h-feed li, .backlinks li { padding: 0.4rem 0; border-bottom: 1px solid var(--rule); }
-.h-feed time { color: var(--muted); font-size: 0.85rem; margin-left: 0.5rem; }
-code, pre { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 0.9rem; }
-pre { background: var(--rule); padding: 1rem; overflow-x: auto; border-radius: 4px; }
-table { border-collapse: collapse; }
-table th, table td { border: 1px solid var(--rule); padding: 0.4rem 0.6rem; text-align: left; }
-.backlinks { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule); color: var(--muted); }
-.backlinks h2 { font-size: 1rem; }
-.webmentions { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--rule); }
-.webmentions h2 { font-size: 1rem; }
-.webmentions ol { list-style: none; padding-left: 0; }
-.webmentions li { padding: 0.4rem 0; border-bottom: 1px solid var(--rule); }
-.webmentions time { color: var(--muted); font-size: 0.85rem; }
+.h-entry > header .p-summary { font-size: var(--size-lg); }
+.e-content > :first-child { margin-top: 0; }
+.e-content h1 { font-size: var(--size-2xl); margin-top: var(--space-6); }
+
+/* Tags: static pill tags, at least 44px tall so they are easy to hit. */
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  max-width: none;
+}
+.tags a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding-inline: 14px;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-card);
+  color: var(--text-1);
+  font-size: var(--size-sm);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+.tags a:hover { background: var(--surface-selected); border-color: var(--text-1); }
+
+.h-entry > footer {
+  margin-top: var(--space-7);
+  color: var(--text-2);
+}
+
+/* --- lists of notes (h-feed) and backlinks --- */
+.h-feed ul, .backlinks ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.h-feed li, .backlinks li {
+  max-width: none;
+  margin: 0;
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.h-feed li > a { font-weight: var(--weight-bold); }
+.h-feed time, .h-feed .p-summary { color: var(--text-2); }
+.h-feed time {
+  margin-inline-start: var(--space-2);
+  font-size: var(--size-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.h-card { margin-bottom: var(--space-6); }
+.h-card p { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
+.h-card .p-name { font-weight: var(--weight-bold); }
+
+.backlinks {
+  margin-top: var(--space-7);
+  padding: var(--space-5);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-md);
+}
+.backlinks h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--size-lg);
+}
+.backlinks li:last-child { border-bottom: 0; }
+
+/* --- received webmentions (spec/indieweb.md) --- */
+.webmentions {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
+}
+.webmentions h2 {
+  margin: 0 0 var(--space-3);
+  font-size: var(--size-lg);
+}
+.webmentions ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.webmentions li {
+  max-width: none;
+  margin: 0;
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.webmentions li p { margin-bottom: var(--space-1); }
+.webmentions time { color: var(--text-2); font-size: var(--size-sm); }
+.webmentions .p-content { color: var(--text-2); }

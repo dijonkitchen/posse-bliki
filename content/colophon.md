@@ -11,6 +11,7 @@ This site is built on a deliberately small stack chosen for longevity:
 | Storage | `.md` files in a Git repo |
 | Build | ~5k lines of Rust, standard library only — no crates |
 | Toolchain | [cargo](https://doc.rust-lang.org/cargo/) for the build, [uv](https://docs.astral.sh/uv/) for the test harness |
+| Design | Atkinson Hyperlegible Next and JetBrains Mono, self-hosted; colours checked for AAA contrast in light and dark |
 | Hosting | GitHub Pages |
 | CI/CD | GitHub Actions |
 | Syndication | RSS at `/index.xml`, JSON Feed at `/feed.json` |
