@@ -8,10 +8,10 @@ anything.
 
 1. **Spec is the source of truth.** [`spec/`](spec/) defines what
    "correct" means. The build is regenerable; the spec is not.
-2. **Tests enforce the spec.** [`tests/`](tests/) is an automated
-   harness: Rust tests under `cargo test` (`tests/*.rs` and unit tests in
-   `build/`) plus the pytest suite (`tests/*.py`). A change is correct iff
-   `make test`, which runs both, is green.
+2. **Tests enforce the spec.** [`tests/harness/`](tests/harness/) is an
+   automated harness, one Rust module per spec area, run with the unit
+   tests in `build/` by `cargo test`. A change is correct iff `make ci`
+   (lint, test, build) is green.
 3. **Edit `build/` only.** Don't add new dependencies, frameworks, or
    abstractions outside this directory unless an ADR justifies it.
 4. **Don't bypass the harness.** If a test fails, fix the implementation
@@ -37,8 +37,10 @@ the bug, then fix it.
 ## Commands
 
 ```sh
+make setup                           # install the pinned Rust toolchain (once)
 make ci                              # full local CI — same as GitHub Actions
-make test                            # harness only
+make lint                            # rustfmt check + clippy, warnings are errors
+make test                            # harness + unit tests (cargo test)
 make build                           # build site → public/
 make serve                           # build + serve at :8080 with watch
 make help                            # list all targets
@@ -48,23 +50,23 @@ The CI workflow runs `make ci` — there is no separate command list. If you
 need to focus a single test:
 
 ```sh
-cargo test --release --test design focus   # one Rust test file, filtered by name
-uv run pytest tests/test_foo.py -k bar      # one pytest file, filtered by name
+cargo test --release --test harness design::focus   # tests whose name matches
 ```
 
 ## Files you will touch often
 
 - `content/` — the Obsidian vault. Edit notes here.
 - `spec/` — outcome contracts. Edit when intent changes.
-- `tests/` — harness. Edit when adding/fixing features. New tests go in Rust
-  (`tests/*.rs`, std only) where they can.
+- `tests/harness/` — harness. Edit when adding/fixing features. Shared
+  fixtures and the std-only HTML, XML, microformats and JSON Schema
+  checkers live in `tests/harness/support/`.
 - `build/` — implementation (Rust, zero dependencies). Replaceable.
 
 ## Files you should rarely touch
 
 - `docs/adr/` — append-only. New ADRs only.
-- `pyproject.toml`, `uv.lock`, `.python-version` — test harness only; change
-  with an ADR.
+- `rust-toolchain.toml` — the pinned Rust version; bump it in its own
+  change and review the output diff.
 - `Cargo.toml`, `Cargo.lock` — the build has no dependencies and gains none
   without an ADR.
 
@@ -72,7 +74,8 @@ uv run pytest tests/test_foo.py -k bar      # one pytest file, filtered by name
 
 - No network access during build.
 - No randomness, no `datetime.now()` in output.
-- No dependencies in the build: Rust standard library only (ADR 0007).
+- No dependencies anywhere: build, tests and tools use the Rust standard
+  library only (ADR 0007, ADR 0010).
 - No new dependencies without an ADR.
 - No unresolved wikilinks, no broken internal links — both are build errors.
 - No `<script>` tags in output (the site is JS-free).
