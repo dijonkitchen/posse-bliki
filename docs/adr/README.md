@@ -12,6 +12,7 @@ ADR that supersedes the old one. Don't edit history.
 | [0004](0004-indieweb-standards-supported.md) | IndieWeb standards in scope | Accepted |
 | [0005](0005-obsidian-as-editor-no-required-plugins.md) | Obsidian as editor, no required plugins | Accepted |
 | [0007](0007-rust-build-zero-dependencies.md) | Rust build with zero dependencies | Accepted |
+| [0008](0008-a11y-design-system-self-hosted-fonts.md) | a11y design system, self-hosted fonts | Accepted |
 
 ## Format
 

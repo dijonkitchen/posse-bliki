@@ -16,6 +16,7 @@ in `tests/`.
 - `<link rel="webmention">` and `<link rel="pingback">` (configured target).
 - All internal links resolve to a real emitted file.
 - No `<script>` tags. (Site is fully functional with JS off.)
+- Styling follows [design.md](design.md).
 
 ## Posts (`content/notes/**`)
 

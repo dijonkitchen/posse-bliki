@@ -14,6 +14,17 @@ use crate::text;
 use crate::util::{escape as e, py_repr_str};
 
 const STYLE_CSS: &str = include_str!("static/style.css");
+/// Self-hosted fonts and their licences (spec/design.md), copied to `fonts/`.
+const FONTS: &[(&str, &[u8])] = &[
+    ("atkinson-hyperlegible-next-latin.woff2", include_bytes!("static/fonts/atkinson-hyperlegible-next-latin.woff2")),
+    (
+        "atkinson-hyperlegible-next-italic-latin.woff2",
+        include_bytes!("static/fonts/atkinson-hyperlegible-next-italic-latin.woff2"),
+    ),
+    ("jetbrains-mono-latin.woff2", include_bytes!("static/fonts/jetbrains-mono-latin.woff2")),
+    ("OFL-atkinson-hyperlegible-next.txt", include_bytes!("static/fonts/OFL-atkinson-hyperlegible-next.txt")),
+    ("OFL-jetbrains-mono.txt", include_bytes!("static/fonts/OFL-jetbrains-mono.txt")),
+];
 
 /// Site configuration (edit before going live).
 pub struct Config {
@@ -225,6 +236,10 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
 }
 
 fn write(p: &Path, content: &str) -> Result<(), String> {
+    write_bytes(p, content.as_bytes())
+}
+
+fn write_bytes(p: &Path, content: &[u8]) -> Result<(), String> {
     if let Some(parent) = p.parent() {
         fs::create_dir_all(parent).map_err(|err| format!("cannot create {}: {}", parent.display(), err))?;
     }
@@ -298,9 +313,11 @@ fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
 <link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n\
-<link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<header class=\"site-header\">\n<nav>\n\
-<a href=\"/\">{t}</a>\n<a href=\"/notes/\">notes</a>\n<a href=\"/about/\">about</a>\n<a href=\"/colophon/\">colophon</a>\n\
-</nav>\n</header>\n<main>\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n\
+<link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
+<link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
+<header class=\"site-header\">\n<nav aria-label=\"Site\">\n\
+<a class=\"site-title\" href=\"/\">{t}</a>\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
+</nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
@@ -652,6 +669,9 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // static assets
     write(&out.join("style.css"), STYLE_CSS)?;
+    for (name, bytes) in FONTS {
+        write_bytes(&out.join("fonts").join(name), bytes)?;
+    }
     apply_base_path(out, &base_path(site.base_url))?;
     Ok(())
 }
