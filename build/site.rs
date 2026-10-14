@@ -50,8 +50,8 @@ pub struct Config {
 
 pub fn default_config() -> Config {
     Config {
-        title: "Philosophy as a service",
-        tagline: "Bliki of Jonathan Chen's thoughts.",
+        title: "Dijon Kitchen",
+        tagline: "JC's napkin logic bliki. Philosophy as a service.",
         base_url: "https://dijonkitchen.org",
         language: "en",
         author_name: "Jonathan Chen",
