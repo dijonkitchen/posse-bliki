@@ -30,7 +30,7 @@ PAGES="/ /notes/data/ /notes/governance/ /notes/security/ /notes/ /about/"
 mkdir -p "$REPORTS"
 npm ci --prefix "$TOOLS" --ignore-scripts --no-audit --no-fund
 LIGHTHOUSE="$TOOLS/node_modules/.bin/lighthouse"
-cargo build --release --quiet
+cargo build --release --locked --quiet
 target/release/bliki --out "$OUT" --serve --port "$PORT" &
 server=$!
 trap 'kill $server 2>/dev/null || true' EXIT INT TERM
