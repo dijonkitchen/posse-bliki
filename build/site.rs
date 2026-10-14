@@ -50,7 +50,6 @@ pub fn default_config() -> Config {
     Config {
         title: "Philosophy as a service",
         tagline: "Bliki of Jonathan Chen's thoughts.",
-        // Canonical host is www (ADR 0013).
         base_url: "https://www.dijonkitchen.org",
         language: "en",
         author_name: "Jonathan Chen",

@@ -20,12 +20,16 @@ anything.
 1. Read relevant specs in `spec/`. Update them if the feature changes
    what "correct" means.
 2. If the change is architectural (new dep, new layer, new external
-   service), add an ADR in `docs/adr/` numbered after the latest one.
+   service) or a lasting choice that lives partly outside the repo
+   (hosting, domain, DNS, third-party accounts), add an ADR in `docs/adr/`
+   numbered after the latest one, counting ADRs in open PRs too.
 3. Add or update a test in `tests/` that fails today and passes when
    the feature is done.
 4. Edit `build/` (Rust, std only — no crates) to make it pass.
 5. Run `make ci` locally. Green before commit.
 6. Commit with a message that names the spec file or ADR number.
+   The commit message carries the *why* of a change; code comments only
+   for a *why* the code and its history can't show, never a restatement.
 
 ## How to fix a bug
 
