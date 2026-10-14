@@ -40,9 +40,10 @@ def test_no_responses_section_without_webmentions(post_html_files: list[Path]) -
 
 @pytest.fixture(scope="module")
 def mentioned_site(tmp_path_factory: pytest.TempPathFactory, build_site, config: dict) -> Path:
-    # Targets use www. and http:// on purpose: they must still match.
+    # Targets flip the www. prefix and use http:// on purpose: they must still match.
     host = config["base_url"].split("://", 1)[1].rstrip("/")
-    target = f"http://www.{host}{POST}"
+    other = host.removeprefix("www.") if host.startswith("www.") else f"www.{host}"
+    target = f"http://{other}{POST}"
     children = [
         {"wm-property": "like-of", "wm-target": target, "url": "https://m.example/likes/1",
          "author": {"name": "Ada", "url": "https://ada.example/"}},

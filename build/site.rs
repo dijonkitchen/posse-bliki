@@ -50,13 +50,13 @@ pub fn default_config() -> Config {
     Config {
         title: "Philosophy as a service",
         tagline: "Bliki of Jonathan Chen's thoughts.",
-        base_url: "https://dijonkitchen.org",
+        base_url: "https://www.dijonkitchen.org",
         language: "en",
         author_name: "Jonathan Chen",
-        author_url: "https://dijonkitchen.org",
+        author_url: "https://www.dijonkitchen.org",
         rel_me: &["https://github.com/dijonkitchen"],
-        webmention_endpoint: "https://webmention.io/dijonkitchen.org/webmention",
-        pingback: "https://webmention.io/dijonkitchen.org/xmlrpc",
+        webmention_endpoint: "https://webmention.io/www.dijonkitchen.org/webmention",
+        pingback: "https://webmention.io/www.dijonkitchen.org/xmlrpc",
         syndicate_to: &[
             ("https://brid.gy/publish/mastodon", "https://brid.gy/publish/webmention"),
             ("https://brid.gy/publish/bluesky", "https://brid.gy/publish/webmention"),
