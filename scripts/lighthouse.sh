@@ -12,7 +12,9 @@ set -eu
 PORT="${1:-8090}"
 OUT="${OUT:-_lighthouse/site}"
 REPORTS="${REPORTS:-_lighthouse}"
-LIGHTHOUSE="lighthouse@12.8.2"
+# Lighthouse and everything it pulls in are locked in
+# scripts/lighthouse/package-lock.json; `npm ci` installs exactly that.
+TOOLS="scripts/lighthouse"
 
 # Minimum score per category, 0-100. Performance gets headroom because
 # shared CI runners are noisy; the rest are pass/fail checks with no noise.
@@ -26,6 +28,8 @@ BUDGET_SEO=100
 PAGES="/ /notes/data/ /notes/governance/ /notes/security/ /notes/ /about/"
 
 mkdir -p "$REPORTS"
+npm ci --prefix "$TOOLS" --ignore-scripts --no-audit --no-fund
+LIGHTHOUSE="$TOOLS/node_modules/.bin/lighthouse"
 cargo build --release --quiet
 target/release/bliki --out "$OUT" --serve --port "$PORT" &
 server=$!
@@ -43,7 +47,7 @@ failed=0
 for page in $PAGES; do
   name=$(printf '%s' "$page" | tr '/' '_')
   report="$REPORTS/report$name.json"
-  npx --yes "$LIGHTHOUSE" "http://127.0.0.1:$PORT$page" \
+  "$LIGHTHOUSE" "http://127.0.0.1:$PORT$page" \
     --quiet \
     --chrome-flags="--headless=new --no-sandbox" \
     --output=json --output-path="$report"

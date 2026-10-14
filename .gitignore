@@ -9,3 +9,4 @@ content/.obsidian/graph.json
 
 # Rust build output
 target/
+node_modules/

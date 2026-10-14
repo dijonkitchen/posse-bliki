@@ -54,6 +54,10 @@ code, a post with a large photo, a post with a video embed, `/notes/` and
 Performance has headroom because shared CI runners are noisy; the others
 are pass/fail checks. Locally every page scores 100 in all four.
 
+Lighthouse is locked, with every transitive package, in
+`scripts/lighthouse/package-lock.json` and installed with `npm ci`, so CI
+runs exactly the reviewed versions.
+
 ## PRPL
 
 How the [PRPL pattern](https://web.dev/articles/apply-instant-loading-with-prpl)

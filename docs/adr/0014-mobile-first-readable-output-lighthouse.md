@@ -51,8 +51,11 @@ The full contract is in [spec/performance.md](../../spec/performance.md).
   performance fails below 90.
 - Adding an image means putting the file in `content/images/`; a
   hot-linked image fails `tests/harness/performance.rs`.
-- The build gains no dependency. CI gains a pinned `lighthouse` from npm,
-  run only in its own job.
+- The build gains no dependency. CI gains `lighthouse` from npm, run only
+  in its own job. It and its 200 transitive packages are locked in
+  `scripts/lighthouse/package-lock.json` (registry URLs and integrity
+  hashes) and installed with `npm ci --ignore-scripts`, and the job's
+  actions are pinned to commit SHAs, per the supply-chain rule in #17.
 
 ## Alternatives considered
 
