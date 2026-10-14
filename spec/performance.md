@@ -2,7 +2,7 @@
 
 How pages load. The site should be quick on a phone on a slow connection,
 score at the top of Chrome Lighthouse, and still be pleasant to read with
-"view source". See [ADR 0014](../docs/adr/0014-mobile-first-readable-output-lighthouse.md).
+"view source". See [the mobile-first ADR](../docs/adr/2026-10-14-mobile-first-readable-output-lighthouse.md).
 
 ## Contract
 

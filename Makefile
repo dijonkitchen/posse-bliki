@@ -32,7 +32,7 @@ serve: ## Build, watch content/, and serve at :$(PORT)
 
 ci: lint test build ## Full local CI: same checks .github/workflows/ci.yml runs
 
-lighthouse: ## Lighthouse budget on the built site (CI-only; needs Node + Chrome, ADR 0014)
+lighthouse: ## Lighthouse budget on the built site (CI-only; needs Node + Chrome, ADR 2026-10-14-mobile-first)
 	scripts/lighthouse.sh
 
 tables: ## Regenerate build/entities.rs and build/unicode.rs (downloads the source data)
