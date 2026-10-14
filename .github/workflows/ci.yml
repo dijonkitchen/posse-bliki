@@ -27,3 +27,24 @@ jobs:
 
       - name: Run CI (mirrors `make ci` locally)
         run: make ci
+
+  lighthouse:
+    # Lighthouse budget on the built pages (ADR 0013, spec/performance.md).
+    # CI-only: it needs Node and Chrome, so it stays out of `make ci` and
+    # the build. The runner image ships Chrome.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Lighthouse budget (mirrors `make lighthouse` locally)
+        run: make lighthouse
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: _lighthouse/*.json

@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup lint test build serve ci clean tables
+.PHONY: help setup lint test build serve ci clean tables lighthouse
 
 PORT ?= 8080
 OUT  ?= public
@@ -32,6 +32,9 @@ serve: ## Build, watch content/, and serve at :$(PORT)
 
 ci: lint test build ## Full local CI: same checks .github/workflows/ci.yml runs
 
+lighthouse: ## Lighthouse budget on the built site (CI-only; needs Node + Chrome, ADR 0013)
+	scripts/lighthouse.sh
+
 tables: ## Regenerate build/entities.rs and build/unicode.rs (downloads the source data)
 	mkdir -p $(TABLES_DATA)
 	curl -sSfL -o $(TABLES_DATA)/entities.json https://html.spec.whatwg.org/entities.json
@@ -41,4 +44,4 @@ tables: ## Regenerate build/entities.rs and build/unicode.rs (downloads the sour
 	cargo fmt
 
 clean: ## Remove build artifacts
-	rm -rf public target
+	rm -rf public target _lighthouse
