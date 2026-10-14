@@ -34,7 +34,7 @@ pub struct Config {
     pub base_url: &'static str,
     pub language: &'static str,
     pub author_name: &'static str,
-    /// Short name shown before the full name, as "JC (Jonathan Chen)" (ADR 0015).
+    /// Short name shown before the full name, as "JC (Jonathan Chen)" (ADR 2026-10-14-site-and-author-naming).
     pub author_nickname: &'static str,
     pub author_url: &'static str,
     pub rel_me: &'static [&'static str],
@@ -417,7 +417,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
 }
 
 /// The author as readers see it, "JC (Jonathan Chen)", marked up so mf2
-/// parsers still read the full name as `p-name` (ADR 0015).
+/// parsers still read the full name as `p-name` (ADR 2026-10-14-site-and-author-naming).
 fn author_label(site: &Config) -> String {
     format!(
         "<span class=\"p-nickname\">{}</span> (<span class=\"p-name\">{}</span>)",

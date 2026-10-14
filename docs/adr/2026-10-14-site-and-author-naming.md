@@ -1,4 +1,4 @@
-# 0015 — Site and author naming
+# 2026-10-14 — Site and author naming
 
 - Date: 2026-10-14
 - Status: Accepted
