@@ -1,8 +1,8 @@
 # 0016 — Supply chain: SHA-pinned actions, least-privilege tokens
 
 - Date: 2026-10-14
-- Status: Proposed (accepted when JC merges this PR)
-- Raised by: JC, asking how supply chain safety could be improved.
+- Status: Accepted
+- Decided by: JC, asking how supply chain safety could be improved, then approving PR #17.
 
 ## Context
 
