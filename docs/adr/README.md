@@ -16,14 +16,15 @@ ADR that supersedes the old one. Don't edit history.
 | [0009](0009-a11y-design-system-self-hosted-fonts.md) | a11y design system, self-hosted fonts | Accepted |
 | [0010](0010-rust-only-toolchain.md) | Rust-only toolchain: harness, tables and a pinned compiler | Accepted |
 | [0011](0011-holocene-years-on-the-page.md) | Holocene years on the page | Accepted |
+| [0016](0016-supply-chain-pinned-actions.md) | Supply chain: SHA-pinned actions, least-privilege tokens | Accepted |
 | [2026-10-14](2026-10-14-www-as-canonical-host.md) | www as the canonical host | Accepted |
 
 ## Naming
 
 New ADRs are named by date, `YYYY-MM-DD-short-slug.md`, so parallel branches
 don't race for the next number. If two land on the same day, the slug keeps
-them apart. ADRs 0001–0011 keep their numbers: they're append-only and linked
-from specs, code and commit history. Refer to an ADR by its file name stem,
+them apart. Numbered ADRs already merged (0001–0016) keep their numbers:
+they're append-only and linked from specs, code and commit history. Refer to an ADR by its file name stem,
 e.g. `ADR 2026-10-14-www-as-canonical-host`.
 
 ## Format

@@ -14,6 +14,19 @@ Properties of the build process itself. Each enforced by `tests/`.
 
 Tested by running the build with no network and verifying success.
 
+## Supply chain
+
+- `Cargo.lock` lists exactly one package, this one (ADR 0007). Cargo runs
+  with `--locked`, so a change that would add or update a crate fails.
+- Every third-party GitHub Action is pinned to a full commit SHA, not a
+  tag, because a tag can be moved to new code after review (ADR 0016).
+- Every job names an OS release for its runner (`ubuntu-24.04`), never a
+  moving `-latest` label.
+- Workflows grant the `GITHUB_TOKEN` the least it needs per job; the job
+  that runs repository code cannot publish the site.
+
+Tested by `tests/harness/supply_chain.rs` (all but the last).
+
 ## Idempotent
 
 Running the build (`cargo run --release`) twice in a row produces
