@@ -14,7 +14,11 @@ pub fn py_split_ws(s: &str) -> Vec<&str> {
 
 /// Python `repr()` of a `str`.
 pub fn py_repr_str(s: &str) -> String {
-    let quote = if s.contains('\'') && !s.contains('"') { '"' } else { '\'' };
+    let quote = if s.contains('\'') && !s.contains('"') {
+        '"'
+    } else {
+        '\''
+    };
     let mut out = String::with_capacity(s.len() + 2);
     out.push(quote);
     for c in s.chars() {

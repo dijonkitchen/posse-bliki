@@ -37,7 +37,11 @@ fn is_host_part_char(c: char) -> bool {
 
 /// `^[+a-z0-9A-Z_-]{0,63}$` (Python `$` also matches before a final newline).
 fn host_part_ok(part: &[char]) -> bool {
-    let p = if part.last() == Some(&'\n') { &part[..part.len() - 1] } else { part };
+    let p = if part.last() == Some(&'\n') {
+        &part[..part.len() - 1]
+    } else {
+        part
+    };
     p.len() <= 63 && p.iter().all(|&c| is_host_part_char(c))
 }
 
@@ -74,7 +78,7 @@ fn parse(url: &str) -> Url {
         let mut host_end: Option<usize> = None;
         for &c in HOST_ENDING_CHARS {
             if let Some(h) = find(&rest, c) {
-                if host_end.map_or(true, |e| h < e) {
+                if host_end.is_none_or(|e| h < e) {
                     host_end = Some(h);
                 }
             }
@@ -91,7 +95,7 @@ fn parse(url: &str) -> Url {
         let mut host_end: Option<usize> = None;
         for &c in NON_HOST_CHARS {
             if let Some(h) = find(&rest, c) {
-                if host_end.map_or(true, |e| h < e) {
+                if host_end.is_none_or(|e| h < e) {
                     host_end = Some(h);
                 }
             }
@@ -117,8 +121,7 @@ fn parse(url: &str) -> Url {
                     continue;
                 }
                 if !host_part_ok(part) {
-                    let newpart: Vec<char> =
-                        part.iter().map(|&c| if (c as u32) > 127 { 'x' } else { c }).collect();
+                    let newpart: Vec<char> = part.iter().map(|&c| if (c as u32) > 127 { 'x' } else { c }).collect();
                     if !host_part_ok(&newpart) {
                         let mut valid_parts: Vec<Vec<char>> = parts[..i].to_vec();
                         let mut not_host: Vec<Vec<char>> = parts[i + 1..].to_vec();
@@ -128,7 +131,11 @@ fn parse(url: &str) -> Url {
                             while k < part.len() && k < 63 && is_host_part_char(part[k]) {
                                 k += 1;
                             }
-                            let tail_end = if part.last() == Some(&'\n') { part.len() - 1 } else { part.len() };
+                            let tail_end = if part.last() == Some(&'\n') {
+                                part.len() - 1
+                            } else {
+                                part.len()
+                            };
                             if k <= tail_end {
                                 valid_parts.push(part[..k].to_vec());
                                 not_host.insert(0, part[k..tail_end].to_vec());
@@ -178,7 +185,7 @@ fn parse(url: &str) -> Url {
     if !rest.is_empty() {
         u.pathname = Some(rest.iter().collect());
     }
-    if slashed(&lower_proto) && u.hostname.as_deref().map_or(false, |h| !h.is_empty()) && u.pathname.is_none() {
+    if slashed(&lower_proto) && u.hostname.as_deref().is_some_and(|h| !h.is_empty()) && u.pathname.is_none() {
         u.pathname = Some(String::new());
     }
     u
@@ -190,7 +197,11 @@ fn parse_host(u: &mut Url, mut host: Vec<char>) {
     for i in 0..host.len() {
         if host[i] == ':' {
             let tail = &host[i + 1..];
-            let tail = if tail.last() == Some(&'\n') { &tail[..tail.len() - 1] } else { tail };
+            let tail = if tail.last() == Some(&'\n') {
+                &tail[..tail.len() - 1]
+            } else {
+                tail
+            };
             if tail.iter().all(|c| c.is_ascii_digit()) {
                 found = Some(i);
                 break;
@@ -199,7 +210,11 @@ fn parse_host(u: &mut Url, mut host: Vec<char>) {
     }
     if let Some(i) = found {
         // the match itself excludes a trailing newline matched by `$`
-        let end = if host.last() == Some(&'\n') && i + 1 < host.len() { host.len() - 1 } else { host.len() };
+        let end = if host.last() == Some(&'\n') && i + 1 < host.len() {
+            host.len() - 1
+        } else {
+            host.len()
+        };
         let port: String = host[i..end].iter().collect();
         if port != ":" {
             u.port = Some(port[1..].to_string());
@@ -248,7 +263,7 @@ fn format(u: &Url) -> String {
 }
 
 fn recode_host(u: &Url) -> bool {
-    u.hostname.as_deref().map_or(false, |h| !h.is_empty())
+    u.hostname.as_deref().is_some_and(|h| !h.is_empty())
         && match &u.protocol {
             None => true,
             Some(p) => p.is_empty() || matches!(p.as_str(), "http:" | "https:" | "mailto:"),
@@ -280,13 +295,20 @@ pub fn normalize_link_text(url: &str) -> String {
 /// markdown-it `validateLink`.
 pub fn validate_link(url: &str) -> bool {
     let u = py_strip(url).to_lowercase();
-    let bad = ["vbscript:", "javascript:", "file:", "data:"].iter().any(|p| u.starts_with(p));
+    let bad = ["vbscript:", "javascript:", "file:", "data:"]
+        .iter()
+        .any(|p| u.starts_with(p));
     if !bad {
         return true;
     }
-    ["data:image/gif;", "data:image/png;", "data:image/jpeg;", "data:image/webp;"]
-        .iter()
-        .any(|p| u.starts_with(p))
+    [
+        "data:image/gif;",
+        "data:image/png;",
+        "data:image/jpeg;",
+        "data:image/webp;",
+    ]
+    .iter()
+    .any(|p| u.starts_with(p))
 }
 
 const ENCODE_KEEP: &str = ";/?:@&=+$,-_.!~*'()#";
@@ -591,6 +613,9 @@ mod tests {
     fn punycode_roundtrip() {
         assert_eq!(puny_encode("bücher").unwrap(), "bcher-kva");
         assert_eq!(puny_decode("bcher-kva").unwrap(), "bücher");
-        assert_eq!(normalize_link("https://bücher.example/ä?x=1#y"), "https://xn--bcher-kva.example/%C3%A4?x=1#y");
+        assert_eq!(
+            normalize_link("https://bücher.example/ä?x=1#y"),
+            "https://xn--bcher-kva.example/%C3%A4?x=1#y"
+        );
     }
 }

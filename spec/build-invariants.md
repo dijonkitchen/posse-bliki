@@ -6,16 +6,18 @@ Properties of the build process itself. Each enforced by `tests/`.
 
 - The build does not read any file outside the repository.
 - The build does not make network calls.
-- All versions are pinned: Rust edition in `Cargo.toml`, test-harness Python
-  in `.python-version` and `uv.lock`; build dependencies, Quartz/external
-  assets — none.
+- All versions are pinned: the Rust compiler in `rust-toolchain.toml`, the
+  edition in `Cargo.toml`. Dependencies (build, tests or tools) and
+  external assets: none. Why: the same input must give the same output on
+  every machine, so nothing that varies between machines may feed the
+  build (ADR 0007, ADR 0010).
 
 Tested by running the build with no network and verifying success.
 
 ## Idempotent
 
 Running the build (`cargo run --release`) twice in a row produces
-byte-identical output in `public/`. Tested by hashing every file from two
+byte-identical output in `public/`. Tested by comparing every file from two
 consecutive builds.
 
 ## Deterministic

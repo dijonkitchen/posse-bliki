@@ -2,7 +2,7 @@
 //! (default `ensure_ascii=True`), and a small parser for the JSON the build
 //! reads back (a previous `feed.json`, webmention.io's jf2 export).
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Json {
     Str(String),
     Arr(Vec<Json>),
@@ -258,7 +258,8 @@ impl Parser<'_> {
                         Some(b't') => out.push('\t'),
                         Some(b'u') => {
                             let hi = self.hex4()?;
-                            let cp = if (0xd800..0xdc00).contains(&hi) && self.b.get(self.i..self.i + 2) == Some(b"\\u") {
+                            let cp = if (0xd800..0xdc00).contains(&hi) && self.b.get(self.i..self.i + 2) == Some(b"\\u")
+                            {
                                 self.i += 2;
                                 let lo = self.hex4()?;
                                 if !(0xdc00..0xe000).contains(&lo) {
@@ -281,7 +282,10 @@ impl Parser<'_> {
 
 /// Parse a complete JSON document.
 pub fn parse(text: &str) -> Result<Json, String> {
-    let mut p = Parser { b: text.as_bytes(), i: 0 };
+    let mut p = Parser {
+        b: text.as_bytes(),
+        i: 0,
+    };
     let v = p.value(0)?;
     p.ws();
     if p.i != p.b.len() {
