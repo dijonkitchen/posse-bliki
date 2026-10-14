@@ -84,7 +84,14 @@ fn handle(mut stream: TcpStream, root: &Path) {
     let target = parts.next().unwrap_or("/");
     let head_only = method == "HEAD";
     if method != "GET" && !head_only {
-        respond(&mut stream, "405 Method Not Allowed", "text/plain; charset=utf-8", "", b"method not allowed\n", false);
+        respond(
+            &mut stream,
+            "405 Method Not Allowed",
+            "text/plain; charset=utf-8",
+            "",
+            b"method not allowed\n",
+            false,
+        );
         return;
     }
     let path_part = target.split(['?', '#']).next().unwrap_or("/");
@@ -95,7 +102,14 @@ fn handle(mut stream: TcpStream, root: &Path) {
             Component::Normal(c) => fs_path.push(c),
             Component::CurDir => {}
             _ => {
-                respond(&mut stream, "400 Bad Request", "text/plain; charset=utf-8", "", b"bad request\n", head_only);
+                respond(
+                    &mut stream,
+                    "400 Bad Request",
+                    "text/plain; charset=utf-8",
+                    "",
+                    b"bad request\n",
+                    head_only,
+                );
                 return;
             }
         }
@@ -103,7 +117,14 @@ fn handle(mut stream: TcpStream, root: &Path) {
     if fs_path.is_dir() {
         if !decoded.ends_with('/') {
             let loc = format!("Location: {}/\r\n", path_part);
-            respond(&mut stream, "301 Moved Permanently", "text/plain; charset=utf-8", &loc, b"", head_only);
+            respond(
+                &mut stream,
+                "301 Moved Permanently",
+                "text/plain; charset=utf-8",
+                &loc,
+                b"",
+                head_only,
+            );
             return;
         }
         fs_path.push("index.html");
@@ -112,7 +133,14 @@ fn handle(mut stream: TcpStream, root: &Path) {
         Ok(body) => respond(&mut stream, "200 OK", content_type(&fs_path), "", &body, head_only),
         Err(_) => {
             let body = fs::read(root.join("404.html")).unwrap_or_else(|_| b"not found\n".to_vec());
-            respond(&mut stream, "404 Not Found", "text/html; charset=utf-8", "", &body, head_only);
+            respond(
+                &mut stream,
+                "404 Not Found",
+                "text/html; charset=utf-8",
+                "",
+                &body,
+                head_only,
+            );
         }
     }
 }

@@ -9,7 +9,7 @@ See [ADR 0009](../docs/adr/0009-a11y-design-system-self-hosted-fonts.md).
 
 ## Contract
 
-Each item is enforced by `tests/test_design.py`.
+Each item is enforced by `tests/harness/design.rs`.
 
 - **One stylesheet.** Every page links `/style.css`. No inline `style`
   attributes, no `<style>` blocks.
