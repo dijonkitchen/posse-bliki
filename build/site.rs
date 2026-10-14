@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 
 use crate::date::{self, Date};
 use crate::frontmatter::{self, FrontMatter, LoadError, Value};
+use crate::image;
 use crate::json::{self, Json};
 use crate::markdown;
 use crate::text;
@@ -15,6 +16,11 @@ use crate::util::{escape as e, py_repr_str};
 use crate::webmention::{self, Mention};
 
 const STYLE_CSS: &str = include_str!("static/style.css");
+const FAVICON_SVG: &str = include_str!("static/favicon.svg");
+
+/// Longest `<meta name="description">` written from a page's own text;
+/// search results show about this much (spec/performance.md).
+const DESCRIPTION_MAX: usize = 160;
 /// Self-hosted fonts and their licences (spec/design.md), copied to `fonts/`.
 const FONTS: &[(&str, &[u8])] = &[
     (
@@ -370,6 +376,7 @@ fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
 <link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n\
+<link rel=\"icon\" href=\"/favicon.svg\" type=\"image/svg+xml\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
 <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n<nav aria-label=\"Site\">\n\
@@ -383,10 +390,94 @@ fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
     )
 }
 
-fn summary_meta(n: &Note) -> String {
-    n.summary()
-        .map(|s| format!("<meta name=\"description\" content=\"{}\">", e(s)))
-        .unwrap_or_default()
+fn description_meta(text: &str) -> String {
+    format!("<meta name=\"description\" content=\"{}\">", e(text))
+}
+
+/// A note's description: its `summary`, else the start of its text, else
+/// the site tagline (spec/performance.md: every indexable page has one).
+fn summary_meta(site: &Config, n: &Note) -> String {
+    let text = match n.summary() {
+        Some(s) => s.to_string(),
+        None => text::excerpt(&n.content_html, DESCRIPTION_MAX),
+    };
+    description_meta(if text.is_empty() { site.tagline } else { &text })
+}
+
+/// Prepare a note's images and embeds (spec/performance.md): the first may be the
+/// largest thing on the first screen so it loads eagerly, the rest load
+/// lazily, all decode off the main thread, and each self-hosted image
+/// (`/images/...`, from `content/images/`) gets its `width` and `height` so
+/// the page doesn't jump when it arrives. A missing self-hosted image is a
+/// build error, like a broken link.
+fn prepare_images(html: &str, content: &Path, rel: &str) -> Result<String, String> {
+    let mut out = String::with_capacity(html.len());
+    for (i, part) in html.split("<img ").enumerate() {
+        if i > 0 {
+            out.push_str("<img ");
+            if i > 1 {
+                out.push_str("loading=\"lazy\" ");
+            }
+            out.push_str("decoding=\"async\" ");
+            let tag = &part[..part.find('>').unwrap_or(part.len())];
+            let src = tag
+                .split_once("src=\"")
+                .and_then(|(_, r)| r.split_once('"'))
+                .map(|(s, _)| s);
+            if let Some(src) = src.filter(|s| s.starts_with("/images/")) {
+                let file = content.join(percent_decode(src.trim_start_matches('/')));
+                let bytes =
+                    fs::read(&file).map_err(|_| format!("{}: image {} not found in content/images/", rel, src))?;
+                let (w, h) =
+                    image::size(&bytes).ok_or_else(|| format!("{}: cannot read the size of image {}", rel, src))?;
+                out.push_str(&format!("width=\"{}\" height=\"{}\" ", w, h));
+            }
+        }
+        out.push_str(part);
+    }
+    // Embeds (video players) are heavy and never the main content: always lazy.
+    Ok(out.replace("<iframe ", "<iframe loading=\"lazy\" "))
+}
+
+/// `%XX` escapes in a URL path back to bytes (markdown-it encodes spaces
+/// and non-ASCII in `src`).
+fn percent_decode(s: &str) -> String {
+    let b = s.as_bytes();
+    let mut out = Vec::with_capacity(b.len());
+    let mut i = 0;
+    while i < b.len() {
+        let hex = |c: u8| (c as char).to_digit(16);
+        if b[i] == b'%' && i + 2 < b.len() {
+            if let (Some(h), Some(l)) = (hex(b[i + 1]), hex(b[i + 2])) {
+                out.push((h * 16 + l) as u8);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(b[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+/// Copy `content/images/` to `images/` in the output, as is.
+fn copy_images(from: &Path, to: &Path) -> Result<(), String> {
+    if !from.is_dir() {
+        return Ok(());
+    }
+    let rd = fs::read_dir(from).map_err(|err| format!("cannot read {}: {}", from.display(), err))?;
+    let mut entries: Vec<_> = rd.flatten().map(|e| e.path()).collect();
+    entries.sort();
+    for p in entries {
+        let dest = to.join(p.file_name().unwrap());
+        if p.is_dir() {
+            copy_images(&p, &dest)?;
+        } else {
+            let bytes = fs::read(&p).map_err(|err| format!("cannot read {}: {}", p.display(), err))?;
+            write_bytes(&dest, &bytes)?;
+        }
+    }
+    Ok(())
 }
 
 fn backlinks_block(notes: &[Note], n: &Note) -> String {
@@ -467,7 +558,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     Ok(base(
         site,
         &format!("{} \u{2014} {}", e(n.title()), e(site.title)),
-        &summary_meta(n),
+        &summary_meta(site, n),
         Some(canonical),
         &content,
     ))
@@ -483,7 +574,7 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Stri
     base(
         site,
         &format!("{} \u{2014} {}", e(n.title()), e(site.title)),
-        &summary_meta(n),
+        &summary_meta(site, n),
         Some(canonical),
         &content,
     )
@@ -515,13 +606,18 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         base = e(site.base_url),
         html = n.content_html,
     );
-    Ok(base(site, &e(site.title), "", Some(canonical), &content))
+    let meta = match n.summary() {
+        Some(s) => description_meta(s),
+        None => description_meta(site.tagline),
+    };
+    Ok(base(site, &e(site.title), &meta, Some(canonical), &content))
 }
 
 fn render_list(
     site: &Config,
     notes: &[Note],
     list_title: &str,
+    description: &str,
     posts: &[usize],
     canonical: &str,
 ) -> Result<String, String> {
@@ -550,7 +646,7 @@ fn render_list(
     Ok(base(
         site,
         &format!("{} \u{2014} {}", e(list_title), e(site.title)),
-        "",
+        &description_meta(description),
         Some(canonical),
         &content,
     ))
@@ -571,7 +667,7 @@ fn render_404(site: &Config) -> String {
     base(
         site,
         &format!("Not found \u{2014} {}", e(site.title)),
-        "",
+        &description_meta(site.tagline),
         None,
         content,
     )
@@ -613,7 +709,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         tags.sort();
         tags.dedup();
         n.tags = tags;
-        n.content_html = markdown::render(&body);
+        n.content_html = prepare_images(&markdown::render(&body), content, &n.rel)?;
     }
     for n in &notes {
         for t in &n.tags {
@@ -669,7 +765,14 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     // /notes/ list
     write(
         &out.join("notes").join("index.html"),
-        &render_list(site, &notes, "Notes", &posts, &canonical("/notes/"))?,
+        &render_list(
+            site,
+            &notes,
+            "Notes",
+            &format!("Every post on {}, newest first.", site.title),
+            &posts,
+            &canonical("/notes/"),
+        )?,
     )?;
 
     // tag pages
@@ -685,7 +788,14 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     by_tag.sort_by(|a, b| a.0.cmp(&b.0));
     for (tag, tag_posts) in &by_tag {
         let url = format!("/tags/{}/", tag);
-        let html = render_list(site, &notes, &format!("#{}", tag), tag_posts, &canonical(&url))?;
+        let html = render_list(
+            site,
+            &notes,
+            &format!("#{}", tag),
+            &format!("Posts tagged #{} on {}, newest first.", tag, site.title),
+            tag_posts,
+            &canonical(&url),
+        )?;
         write(&out.join("tags").join(tag).join("index.html"), &html)?;
     }
 
@@ -815,6 +925,8 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // static assets
     write(&out.join("style.css"), STYLE_CSS)?;
+    write(&out.join("favicon.svg"), FAVICON_SVG)?;
+    copy_images(&content.join("images"), &out.join("images"))?;
     for (name, bytes) in FONTS {
         write_bytes(&out.join("fonts").join(name), bytes)?;
     }

@@ -1,6 +1,11 @@
 /*
  * posse-bliki styles, built on JC's a11y Design System (spec/design.md).
  *
+ * Mobile first (spec/performance.md): the rules outside any width query are
+ * the phone layout; `@media (min-width: 40rem)` blocks add to it for wider
+ * screens. There is no `max-width` query. This file ships as written, never
+ * minified, so "view source" stays readable.
+ *
  * Token values are copied from the system's tokens/*.css. Use the semantic
  * tokens (--text-*, --surface-*, --border-*) in rules below, not the
  * primitives (--blue-700 and friends), so a palette change touches one place.
@@ -174,10 +179,18 @@ h1, h2, h3, h4 {
   text-wrap: balance;
   color: var(--text-1);
 }
-h1 { font-size: var(--size-3xl); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); margin-top: 0; }
-h2 { font-size: var(--size-2xl); line-height: var(--leading-tight); }
-h3 { font-size: var(--size-xl); line-height: var(--leading-snug); }
-h4 { font-size: var(--size-lg); line-height: var(--leading-snug); }
+/* Phones: one step down the scale, so a long title doesn't fill the screen. */
+h1 { font-size: var(--size-2xl); line-height: var(--leading-tight); letter-spacing: var(--tracking-display); margin-top: 0; }
+h2 { font-size: var(--size-xl); line-height: var(--leading-tight); }
+h3 { font-size: var(--size-lg); line-height: var(--leading-snug); }
+h4 { font-size: var(--size-base); line-height: var(--leading-snug); }
+/* Wider screens: the design system's full heading scale. */
+@media (min-width: 40rem) {
+  h1 { font-size: var(--size-3xl); }
+  h2 { font-size: var(--size-2xl); }
+  h3 { font-size: var(--size-xl); }
+  h4 { font-size: var(--size-lg); }
+}
 p, li { max-width: var(--measure); text-wrap: pretty; }
 p { margin: 0 0 var(--para-space); }
 ul, ol { padding-inline-start: var(--space-5); }
@@ -197,6 +210,14 @@ a:hover { color: var(--text-link-hover); text-decoration-thickness: 3px; }
 }
 ::selection { background: var(--yellow-focus); color: var(--ink-900); }
 img { max-width: 100%; height: auto; border-radius: var(--radius-md); }
+/* Embeds are videos: shrink to the screen and keep 16:9 rather than overflow. */
+iframe {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: var(--radius-md);
+}
 hr { border: 0; border-top: 1px solid var(--border-subtle); margin: var(--space-7) 0; }
 
 /* Code: slashed zero, fixed-width digits, no ligatures (!= stays !=). */
@@ -252,10 +273,14 @@ th { background: var(--surface-sunken); font-weight: var(--weight-bold); }
 }
 
 /* --- page layout: one left-aligned column, text measure 66ch --- */
+/* Phones: a 16px gutter leaves the most room for text. */
 .site-header, main, .site-footer {
   max-width: calc(var(--measure) + 2 * var(--space-5));
   margin-inline: auto;
-  padding-inline: var(--space-5);
+  padding-inline: var(--space-4);
+}
+@media (min-width: 40rem) {
+  .site-header, main, .site-footer { padding-inline: var(--space-5); }
 }
 
 /* Hidden until focused, then the first thing a keyboard user lands on. */
@@ -293,9 +318,11 @@ th { background: var(--surface-sunken); font-weight: var(--weight-bold); }
   text-decoration: none;
 }
 .site-header .site-title:hover { text-decoration: underline; }
-/* Narrow screens: the title gets its own row, the links share the next. */
-@media (max-width: 40rem) {
-  .site-header .site-title { flex-basis: 100%; }
+/* Phones: the title gets its own row and the links share the next. Wider
+   screens fit the title and links on one row. */
+.site-header .site-title { flex-basis: 100%; }
+@media (min-width: 40rem) {
+  .site-header .site-title { flex-basis: auto; }
 }
 
 main { padding-block-end: var(--space-7); }

@@ -25,4 +25,4 @@ Which companies do you think benefit from this the most?
 
 Those that best know the most people?
 
-![](https://substack-post-media.s3.amazonaws.com/public/images/5881f1fc-cf49-4dea-ad1f-cbf6440bd5bd_1108x752.png)
+![](/images/the-price-of-productivity.png)

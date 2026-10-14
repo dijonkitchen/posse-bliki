@@ -19,6 +19,7 @@ mod indieweb_links;
 mod jsonfeed;
 mod links;
 mod microformats;
+mod performance;
 mod rss;
 mod supply_chain;
 mod url_policy;

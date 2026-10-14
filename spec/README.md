@@ -12,6 +12,7 @@ Read order:
 5. [indieweb.md](indieweb.md) — which IndieWeb standards are supported
 6. [build-invariants.md](build-invariants.md) — hermetic, idempotent, deterministic
 7. [design.md](design.md) — how pages look (a11y design system)
+8. [performance.md](performance.md) — how pages load (mobile first, readable, Lighthouse)
 
 ## How to change a spec
 

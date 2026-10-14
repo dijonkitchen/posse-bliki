@@ -20,7 +20,7 @@ The idea is to make the passphrase more complicated, with more combinations so o
 
 For example:
 
-[![Passphrases](https://imgs.xkcd.com/comics/password_strength.png)](https://xkcd.com/936/)
+[![Passphrases](/images/xkcd-936-password-strength.png)](https://xkcd.com/936/)
 
 Basically, longer is better because it's harder for computers to figure out what it is. Adding different cases, numbers, and symbols is even better, but it can make things hard to remember unless you use Snowden's example of 'MargaretThatcheris110%SEXY!'
 
@@ -36,6 +36,6 @@ Think about it. Even if someone has your passphrase, they most likely won't get 
 
 The good news, is you're not the only one responsible for your data security. Many websites and phones don't let computers try a billion combinations a second; they know those are the bad guys since no human can do that. Bad guys can threaten your life or love ones though...
 
-[![Mugging](https://imgs.xkcd.com/comics/security.png)](https://xkcd.com/538/)
+[![Mugging](/images/xkcd-538-security.png)](https://xkcd.com/538/)
 
 You can make it so you always need more than one person's authentication to login, but their lives may be endangered as well. The moral of the story is, do the best you can, but maybe not dealing with bad guys and having nothing to hide is even better. Thankfully, the most valuable things in life are relationships which are hard to steal!

@@ -9,7 +9,7 @@ aliases:
 ---
 [Listen to the episode](https://api.substack.com/api/v1/audio/upload/4af47756-2ab5-48af-b5e6-43916717b629/src)
 
-![](https://substack-post-media.s3.amazonaws.com/public/images/6149b500-7c7e-4551-b16e-34e0d2043450_800x512)
+![](/images/death.jpg)
 
 You’re going to die in 1, 2, 5, 10, 20 years.
 

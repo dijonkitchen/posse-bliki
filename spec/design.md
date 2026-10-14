@@ -37,6 +37,8 @@ Each item is enforced by `tests/harness/design.rs`.
   measure 66ch. Sizes are in `rem` so the reader's own text-size setting
   scales the page.
 - **Targets.** Navigation links and tags are at least 44px tall.
+- **Mobile first.** The phone layout is the default; see
+  [performance.md](performance.md).
 
 ## Not yet
 

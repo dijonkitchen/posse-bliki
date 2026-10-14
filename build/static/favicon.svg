@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!--
+    Site icon: a phi (φ) for "Philosophy as a service", drawn as a ring and
+    a stem so it needs no font. Colours are the design system's blue-700 on
+    paper, swapped for the dark-theme pair when the OS is dark.
+  -->
+  <style>
+    .tile { fill: #fbfaf7; }
+    .mark { fill: none; stroke: #0b4e93; stroke-width: 3; stroke-linecap: round; }
+    @media (prefers-color-scheme: dark) {
+      .tile { fill: #1e232c; }
+      .mark { stroke: #9cc3f5; }
+    }
+  </style>
+  <rect class="tile" width="32" height="32" rx="7"/>
+  <circle class="mark" cx="16" cy="16" r="7.5"/>
+  <line class="mark" x1="16" y1="4" x2="16" y2="28"/>
+</svg>
