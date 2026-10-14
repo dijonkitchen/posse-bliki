@@ -19,16 +19,16 @@ setup: ## Install the pinned Rust toolchain from rust-toolchain.toml (needs rust
 
 lint: ## Check formatting (rustfmt) and lints (clippy, warnings are errors)
 	cargo fmt --check
-	cargo clippy --release --all-targets --quiet -- -D warnings
+	cargo clippy --locked --release --all-targets --quiet -- -D warnings
 
 test: ## Run the Rust unit tests and the spec harness (tests/harness)
-	cargo test --release --quiet
+	cargo test --locked --release --quiet
 
 build: ## Build the site → ./$(OUT) (Rust binary, std only)
-	cargo run --release -- --out $(OUT) $(if $(BASE_URL),--base-url $(BASE_URL)) $(if $(WEBMENTIONS),--webmentions $(WEBMENTIONS))
+	cargo run --locked --release -- --out $(OUT) $(if $(BASE_URL),--base-url $(BASE_URL)) $(if $(WEBMENTIONS),--webmentions $(WEBMENTIONS))
 
 serve: ## Build, watch content/, and serve at :$(PORT)
-	cargo run --release -- --out $(OUT) --serve --port $(PORT)
+	cargo run --locked --release -- --out $(OUT) --serve --port $(PORT)
 
 ci: lint test build ## Full local CI: same checks .github/workflows/ci.yml runs
 
