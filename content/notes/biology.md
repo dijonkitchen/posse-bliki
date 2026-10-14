@@ -3,6 +3,7 @@ title: biology
 date: 2019-09-30
 aliases:
   - /biology/
+  - /p/biology/
 ---
 People think we're so different than other animals, 
 but we all have the same motivations to survive, 

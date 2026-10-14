@@ -3,6 +3,7 @@ title: process
 date: 2019-08-23
 aliases:
   - /process/
+  - /p/process/
 ---
 Businesses want to be able to have budgets 
 and plans with a process. 

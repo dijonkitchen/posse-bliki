@@ -3,6 +3,7 @@ title: architecture
 date: 2020-07-26
 aliases:
   - /architecture/
+  - /p/architecture/
 ---
 # Architecture scaling and lifecycle
 
