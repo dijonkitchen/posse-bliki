@@ -38,7 +38,8 @@ In addition to the universal invariants, every post page must:
 
 ## Home (`/`)
 
-- Contains exactly one `h-card` with `p-name` (author), `u-url` (site),
+- Contains exactly one `h-card` with `p-name` (author's full name),
+  `p-nickname` (the short name shown first, see ADR 0015), `u-url` (site),
   and any `rel=me` links.
 - Contains an `h-feed` listing recent posts as `h-entry` items.
 

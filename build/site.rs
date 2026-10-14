@@ -34,6 +34,8 @@ pub struct Config {
     pub base_url: &'static str,
     pub language: &'static str,
     pub author_name: &'static str,
+    /// Short name shown before the full name, as "JC (Jonathan Chen)" (ADR 0015).
+    pub author_nickname: &'static str,
     pub author_url: &'static str,
     pub rel_me: &'static [&'static str],
     pub webmention_endpoint: &'static str,
@@ -53,6 +55,7 @@ pub fn default_config() -> Config {
         base_url: "https://dijonkitchen.org",
         language: "en",
         author_name: "Jonathan Chen",
+        author_nickname: "JC",
         author_url: "https://dijonkitchen.org",
         rel_me: &["https://github.com/dijonkitchen"],
         webmention_endpoint: "https://webmention.io/dijonkitchen.org/webmention",
@@ -399,18 +402,28 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     let content = format!(
         "\n<article class=\"h-entry\">\n<header>\n<h1 class=\"p-name\">{title}</h1>\n<p class=\"meta\">\n\
 <a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{human}</time></a>\n\
-{updated}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url p-name\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
+{updated}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
 </p>\n{summary}\n{tags}\n</header>\n<div class=\"e-content\">\n{html}\n</div>\n{synd}{posse}{mentions}\n</article>\n{back}\n",
         title = e(n.title()),
         canon = e(canonical),
         iso = d.iso(),
         human = d.human(),
         base = e(site.base_url),
-        author = e(site.author_name),
+        author = author_label(site),
         html = n.content_html,
         back = backlinks_block(notes, n),
     );
     Ok(base(site, &format!("{} \u{2014} {}", e(n.title()), e(site.title)), &summary_meta(n), Some(canonical), &content))
+}
+
+/// The author as readers see it, "JC (Jonathan Chen)", marked up so mf2
+/// parsers still read the full name as `p-name` (ADR 0015).
+fn author_label(site: &Config) -> String {
+    format!(
+        "<span class=\"p-nickname\">{}</span> (<span class=\"p-name\">{}</span>)",
+        e(site.author_nickname),
+        e(site.author_name)
+    )
 }
 
 fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> String {
@@ -439,10 +452,10 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         ));
     }
     let content = format!(
-        "\n<section class=\"h-card\">\n<p>\n<span class=\"p-name\">{author}</span>\n\
+        "\n<section class=\"h-card\">\n<p>\n{author}\n\
 <a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{base}/</a>\n{rel_me}\n</p>\n</section>\n<article>\n{html}\n</article>\n\
 <section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n</section>\n",
-        author = e(site.author_name),
+        author = author_label(site),
         base = e(site.base_url),
         html = n.content_html,
     );
