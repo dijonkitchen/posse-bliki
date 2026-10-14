@@ -77,6 +77,9 @@ cargo test --release --test harness design::focus   # tests whose name matches
 - No dependencies anywhere: build, tests and tools use the Rust standard
   library only (ADR 0007, ADR 0010).
 - No new dependencies without an ADR.
+- GitHub Actions are pinned to a full commit SHA with the version in a
+  comment (`uses: actions/x@<sha> # v1.2.3`); Dependabot proposes bumps
+  (ADR 0016).
 - No unresolved wikilinks, no broken internal links — both are build errors.
 - No `<script>` tags in output (the site is JS-free).
 - No editing snapshot files in `tests/snapshots/` without a corresponding

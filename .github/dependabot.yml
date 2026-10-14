@@ -1,0 +1,17 @@
+# Keeps the commit-pinned GitHub Actions current (ADR 0016). Cargo is not
+# listed: the build has no crates to update (ADR 0007).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    # Let a release age a week before proposing it, so a hijacked tag is
+    # likely caught and pulled upstream first.
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"
