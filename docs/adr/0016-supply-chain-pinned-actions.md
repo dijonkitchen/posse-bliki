@@ -27,6 +27,10 @@ the `make ci` gate. `actions/checkout` also leaves the token in
 - Pin every third-party action to a full 40-character commit SHA, with the
   release in a trailing comment: `uses: actions/checkout@<sha> # v4.4.0`.
   A commit SHA cannot be changed after the fact.
+- Runners name an OS release (`ubuntu-24.04`), not `ubuntu-latest`, so
+  the OS does not change under the build when GitHub moves the label.
+  GitHub still patches the image weekly; a runner image cannot be pinned
+  to a digest. Moving to a new release is a deliberate one-line change.
 - Dependabot (GitHub's own bot, no third-party app) proposes SHA bumps
   monthly, grouped into one PR, after a release has aged seven days.
 - Permissions are set per job, least first. The workflow default is
@@ -36,7 +40,7 @@ the `make ci` gate. `actions/checkout` also leaves the token in
   after checkout pushes.
 - Cargo runs with `--locked`, so a stray crate or lockfile change fails
   CI instead of being resolved silently.
-- `tests/harness/supply_chain.rs` fails if an action is not SHA-pinned or
+- `tests/harness/supply_chain.rs` fails if an action is not SHA-pinned, a job runs on a `-latest` runner, or
   `Cargo.lock` lists any package but this one.
 
 ## Consequences
