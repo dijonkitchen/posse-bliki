@@ -5,7 +5,10 @@ in `tests/`.
 
 ## Universal (every page)
 
-- Valid HTML5 (parses with `html5lib` strict mode, no errors).
+- Valid HTML5: parses with no errors under the harness's strict checker
+  (`tests/harness/support/html.rs`). Why: browsers repair broken markup
+  differently, and microformats parsers and feed readers see the raw tree,
+  so the only safe markup is markup that needs no repair.
 - Passes the W3C Nu HTML Checker with no errors or warnings, including
   heading order (no skipped levels) and one `<h1>` per page. Checked by
   `make validate` in CI's `html` job, not by `tests/` (ADR 0012).
@@ -56,7 +59,7 @@ In addition to the universal invariants, every post page must:
   [ADR 0011](../docs/adr/0011-holocene-years-on-the-page.md).
 - Every machine-readable date stays Gregorian: `<time datetime>`, RSS,
   JSON Feed, the sitemap and URLs.
-- Enforced by `tests/test_holocene_dates.py`.
+- Enforced by `tests/harness/dates.rs`.
 
 ## Error pages
 
@@ -68,4 +71,4 @@ In addition to the universal invariants, every post page must:
 (a GitHub Pages project site such as `https://dijonkitchen.github.io/posse-bliki`),
 every root-relative link the pages and feeds emit (`/notes/`, `/style.css`,
 alias redirect targets) is prefixed with that path, so the site works there.
-With no path, output is unchanged. Enforced by `tests/test_base_path.py`.
+With no path, output is unchanged. Enforced by `tests/harness/base_path.rs`.

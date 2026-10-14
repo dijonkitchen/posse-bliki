@@ -6,9 +6,8 @@
 
 ## Context
 
-The harness checks the HTML the build emits with a parser written for this
-repo (html5lib today; a strict std-only Rust checker once the Rust harness
-lands). Both the build and that checker come from the same reading of the
+The harness checks the HTML the build emits with a strict std-only parser
+written for this repo (`tests/harness/support/html.rs`, ADR 0010). Both the build and that checker come from the same reading of the
 spec, so a rule misread in one can be misread the same way in the other.
 
 The W3C Nu HTML Checker (vnu) is the reference conformance checker behind

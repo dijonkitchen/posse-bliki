@@ -3,6 +3,7 @@ title: risk
 date: 2020-09-30
 aliases:
   - /risk/
+  - /p/risk/
 ---
 Risks are large, long-term losses.
 Avoid catastrophes

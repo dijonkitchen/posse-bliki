@@ -3,6 +3,7 @@ title: regimen
 date: 2023-04-11
 aliases:
   - /regimen/
+  - /p/regimen/
 ---
 Ideal regimen:
 

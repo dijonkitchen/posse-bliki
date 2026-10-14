@@ -3,6 +3,7 @@ title: information
 date: 2020-01-23
 aliases:
   - /information/
+  - /p/information/
 ---
 Information 
 and disinformation (aka fake news, pseudoscience, etc.) 

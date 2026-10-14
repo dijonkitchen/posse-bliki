@@ -30,18 +30,21 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 ## Local commands
 
 ```sh
-make ci          # full CI — sync, test, build (mirrors GitHub Actions)
-make test        # run the harness only
+make setup       # install the pinned Rust toolchain (once)
+make ci          # full CI — lint, test, build (mirrors GitHub Actions)
+make test        # run the spec harness and unit tests (cargo test)
 make serve       # build, watch content/, serve at http://localhost:8080
 make validate    # check built pages with the W3C Nu HTML Checker (needs Java)
 make help        # list all targets
 ```
 
-Requires [Rust](https://rustup.rs) (for the build), [uv](https://docs.astral.sh/uv/)
-(for the test harness) and `make`. Install uv with
-`curl -LsSf https://astral.sh/uv/install.sh | sh`. Make ships with macOS
-and every Linux distro. The build itself has zero crate dependencies — see
-[`docs/adr/0007`](docs/adr/0007-rust-build-zero-dependencies.md).
+Requires [rustup](https://rustup.rs) and `make`, nothing else. rustup reads
+`rust-toolchain.toml` and installs the exact Rust version the repo pins, so
+every machine and CI run uses the same compiler. Make ships with macOS and
+every Linux distro. The build, the test harness and the tools are all Rust
+with zero crate dependencies — see
+[`docs/adr/0007`](docs/adr/0007-rust-build-zero-dependencies.md) and
+[`docs/adr/0010`](docs/adr/0010-rust-only-toolchain.md) for why.
 
 ## What gets deployed
 

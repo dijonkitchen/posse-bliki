@@ -3,6 +3,7 @@ title: diversity
 date: 2020-05-24
 aliases:
   - /diversity/
+  - /p/diversity/
 ---
 From supermarkets to artists and musicians, 
 there are so many things good and bad;

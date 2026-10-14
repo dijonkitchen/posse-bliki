@@ -143,7 +143,7 @@ fn tag_at(c: &[char], i: usize) -> Option<(usize, String)> {
     // backtrack until a word boundary follows
     while end > start {
         let before = unicode::is_word(c[end - 1]);
-        let after = c.get(end).map_or(false, |&ch| unicode::is_word(ch));
+        let after = c.get(end).is_some_and(|&ch| unicode::is_word(ch));
         if before != after {
             return Some((end - i, c[start..end].iter().collect()));
         }
@@ -236,7 +236,9 @@ mod tests {
         m.insert("foo".to_string(), "/notes/foo/".to_string());
         let r = resolve_wikilinks("a [[Foo#Sec One|x]] `[[nope]]` [[notes/foo]]", &m, "c").unwrap();
         assert_eq!(r, "a [x](/notes/foo/#sec-one) `[[nope]]` [foo](/notes/foo/)");
-        assert!(resolve_wikilinks("[[bar]]", &m, "c.md").unwrap_err().contains("unresolved wikilink [[bar]] (slug 'bar')"));
+        assert!(resolve_wikilinks("[[bar]]", &m, "c.md")
+            .unwrap_err()
+            .contains("unresolved wikilink [[bar]] (slug 'bar')"));
     }
 
     #[test]
@@ -250,6 +252,9 @@ mod tests {
     fn strip_and_hrefs() {
         assert_eq!(strip_html("<p>a <b>x</b> < c <> d</p>"), "a x  d");
         assert_eq!(strip_html("a < b <"), "a < b <");
-        assert_eq!(hrefs(r##"<a href="/x/#y">a</a><a href="#z"></a><a href="/q/">"##), vec!["/x/", "/q/"]);
+        assert_eq!(
+            hrefs(r##"<a href="/x/#y">a</a><a href="#z"></a><a href="/q/">"##),
+            vec!["/x/", "/q/"]
+        );
     }
 }

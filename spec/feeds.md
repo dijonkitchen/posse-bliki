@@ -12,8 +12,10 @@ external bridges (Bridgy Fed, echofeed, IFTTT) at one of them.
 - Each `<item>`: `<title>`, `<link>` (canonical post URL),
   `<guid isPermaLink="true">` = link, `<pubDate>` (RFC 822 from
   front-matter `date`), `<description>` (HTML-escaped rendered body).
-- Validates against the W3C feed validator semantics
-  (tested via `feedparser`: `bozo == 0`).
+- Well-formed XML with the fields above (tested in `tests/harness/rss.rs`
+  with the strict XML checker in `tests/harness/support/xml.rs`). Why: feed
+  readers reject a feed that isn't well-formed outright, so one bad
+  character would silently cut off every subscriber.
 
 ## JSON Feed v1.1 — `/feed.json`
 

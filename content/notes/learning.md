@@ -3,6 +3,7 @@ title: learning
 date: 2021-08-27
 aliases:
   - /learning/
+  - /p/learning/
 ---
 ## Learning how to learn
 

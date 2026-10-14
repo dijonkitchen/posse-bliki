@@ -31,7 +31,12 @@ pub struct Token {
 
 impl Token {
     fn new(ty: &'static str, tag: &'static str, nesting: i8) -> Token {
-        Token { ty, tag, nesting, ..Default::default() }
+        Token {
+            ty,
+            tag,
+            nesting,
+            ..Default::default()
+        }
     }
 
     fn attr_set(&mut self, name: &'static str, value: String) {
@@ -136,7 +141,14 @@ const RULES_ALL: &[Rule] = &[
     Rule::Paragraph,
 ];
 // html_block is disabled (html=False) and so omitted from the chains.
-const TERM_PARAGRAPH: &[Rule] = &[Rule::Table, Rule::Fence, Rule::Blockquote, Rule::Hr, Rule::List, Rule::Heading];
+const TERM_PARAGRAPH: &[Rule] = &[
+    Rule::Table,
+    Rule::Fence,
+    Rule::Blockquote,
+    Rule::Hr,
+    Rule::List,
+    Rule::Heading,
+];
 const TERM_REFERENCE: &[Rule] = TERM_PARAGRAPH;
 const TERM_BLOCKQUOTE: &[Rule] = &[Rule::Fence, Rule::Blockquote, Rule::Hr, Rule::List, Rule::Heading];
 const TERM_LIST: &[Rule] = &[Rule::Fence, Rule::Blockquote, Rule::Hr];
@@ -338,7 +350,11 @@ impl<'e> BlockState<'e> {
             let mut line_indent = 0;
             let line_start = self.bm(line);
             let mut first = line_start;
-            let last = if line + 1 < end || keep_last_lf { self.em(line) + 1 } else { self.em(line) };
+            let last = if line + 1 < end || keep_last_lf {
+                self.em(line) + 1
+            } else {
+                self.em(line)
+            };
             while first < last && line_indent < indent {
                 let ch = self.c(first);
                 if is_sp(ch) {
@@ -502,10 +518,10 @@ impl<'e> BlockState<'e> {
             return false;
         }
         let mut columns = escaped_split(line_text);
-        if columns.first().map_or(false, |c| c.is_empty()) {
+        if columns.first().is_some_and(|c| c.is_empty()) {
             columns.remove(0);
         }
-        if columns.last().map_or(false, |c| c.is_empty()) {
+        if columns.last().is_some_and(|c| c.is_empty()) {
             columns.pop();
         }
         let column_count = columns.len();
@@ -551,10 +567,10 @@ impl<'e> BlockState<'e> {
                 break;
             }
             let mut cols = escaped_split(&lt);
-            if cols.first().map_or(false, |c| c.is_empty()) {
+            if cols.first().is_some_and(|c| c.is_empty()) {
                 cols.remove(0);
             }
-            if cols.last().map_or(false, |c| c.is_empty()) {
+            if cols.last().is_some_and(|c| c.is_empty()) {
                 cols.pop();
             }
             autocompleted += column_count as i64 - cols.len() as i64;
@@ -800,8 +816,7 @@ impl<'e> BlockState<'e> {
                 }
                 last_line_empty = pos >= max;
                 old_bs_count.push(self.bsc(next_line));
-                self.bs_count[next_line as usize] =
-                    self.sc(next_line) + 1 + if space_after_marker { 1 } else { 0 };
+                self.bs_count[next_line as usize] = self.sc(next_line) + 1 + if space_after_marker { 1 } else { 0 };
                 old_s_count.push(self.sc(next_line));
                 self.s_count[next_line as usize] = offset - initial;
                 old_t_shift.push(self.ts(next_line));
@@ -884,7 +899,7 @@ impl<'e> BlockState<'e> {
         }
         self.line = start_line + 1;
         let t = self.push("hr", "hr", 0);
-        self.tokens[t].markup = std::iter::repeat(marker).take(cnt + 1).collect();
+        self.tokens[t].markup = std::iter::repeat_n(marker, cnt + 1).collect();
         true
     }
 
@@ -915,7 +930,7 @@ impl<'e> BlockState<'e> {
         }
         let ch = self.c(pos);
         pos += 1;
-        if !ch.map_or(false, |c| c.is_ascii_digit()) {
+        if !ch.is_some_and(|c| c.is_ascii_digit()) {
             return -1;
         }
         loop {
@@ -924,7 +939,7 @@ impl<'e> BlockState<'e> {
             }
             let ch = self.c(pos);
             pos += 1;
-            if ch.map_or(false, |c| c.is_ascii_digit()) {
+            if ch.is_some_and(|c| c.is_ascii_digit()) {
                 if pos - start >= 10 {
                     return -1;
                 }
@@ -961,9 +976,7 @@ impl<'e> BlockState<'e> {
         if self.is_code_block(start_line) {
             return false;
         }
-        if self.list_indent >= 0
-            && self.sc(start_line) - self.list_indent >= 4
-            && self.sc(start_line) < self.blk_indent
+        if self.list_indent >= 0 && self.sc(start_line) - self.list_indent >= 4 && self.sc(start_line) < self.blk_indent
         {
             return false;
         }
@@ -1473,7 +1486,11 @@ fn at(s: &[char], i: i64) -> Option<char> {
 
 fn parse_link_destination(s: &[char], mut pos: i64, max: i64) -> DestResult {
     let start = pos;
-    let mut r = DestResult { ok: false, pos: 0, s: String::new() };
+    let mut r = DestResult {
+        ok: false,
+        pos: 0,
+        s: String::new(),
+    };
     if at(s, pos) == Some('<') {
         pos += 1;
         while pos < max {
@@ -1552,7 +1569,13 @@ struct TitleState {
 
 fn parse_link_title(s: &[char], mut start: i64, max: i64, prev: Option<&TitleState>) -> TitleState {
     let mut pos = start;
-    let mut st = TitleState { ok: false, can_continue: false, pos: 0, s: String::new(), marker: '\0' };
+    let mut st = TitleState {
+        ok: false,
+        can_continue: false,
+        pos: 0,
+        s: String::new(),
+        marker: '\0',
+    };
     if let Some(p) = prev {
         st.s = p.s.clone();
         st.marker = p.marker;
@@ -1746,8 +1769,7 @@ fn parse_inline(src: Vec<char>, env: &Env) -> Vec<Token> {
 }
 
 const TERMINATORS: &[char] = &[
-    '\n', '!', '#', '$', '%', '&', '*', '+', '-', ':', '<', '=', '>', '@', '[', '\\', ']', '^', '_', '`', '{', '}',
-    '~',
+    '\n', '!', '#', '$', '%', '&', '*', '+', '-', ':', '<', '=', '>', '@', '[', '\\', ']', '^', '_', '`', '{', '}', '~',
 ];
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -1786,7 +1808,10 @@ fn is_white_space(c: char) -> bool {
     if (0x2000..=0x200A).contains(&cp) {
         return true;
     }
-    matches!(cp, 0x09 | 0x0A | 0x0B | 0x0C | 0x0D | 0x20 | 0xA0 | 0x1680 | 0x202F | 0x205F | 0x3000)
+    matches!(
+        cp,
+        0x09 | 0x0A | 0x0B | 0x0C | 0x0D | 0x20 | 0xA0 | 0x1680 | 0x202F | 0x205F | 0x3000
+    )
 }
 
 impl<'a> InlineState<'a> {
@@ -1842,7 +1867,11 @@ impl<'a> InlineState<'a> {
         let mut pos = start;
         let max = self.pos_max;
         let marker = self.c(start);
-        let last_char = if start > 0 { self.c(start - 1).unwrap_or(' ') } else { ' ' };
+        let last_char = if start > 0 {
+            self.c(start - 1).unwrap_or(' ')
+        } else {
+            ' '
+        };
         while pos < max && self.c(pos) == marker {
             pos += 1;
         }
@@ -2008,7 +2037,11 @@ impl<'a> InlineState<'a> {
         let orig = format!("\\{}", ch1);
         if !silent {
             let t = self.push("text_special", "", 0);
-            self.tokens[t].content = if ch1.is_ascii_punctuation() { ch1.to_string() } else { orig.clone() };
+            self.tokens[t].content = if ch1.is_ascii_punctuation() {
+                ch1.to_string()
+            } else {
+                orig.clone()
+            };
             self.tokens[t].markup = orig;
             self.tokens[t].info = "escape".into();
         }
@@ -2682,8 +2715,11 @@ fn emphasis_post(tokens: &mut [Token], delims: &[Delimiter]) {
             && delims[(start.end + 1) as usize].token == end.token + 1;
         let ch = start.marker.to_string();
         let markup = if is_strong { format!("{}{}", ch, ch) } else { ch };
-        let (ty_o, ty_c, tag) =
-            if is_strong { ("strong_open", "strong_close", "strong") } else { ("em_open", "em_close", "em") };
+        let (ty_o, ty_c, tag) = if is_strong {
+            ("strong_open", "strong_close", "strong")
+        } else {
+            ("em_open", "em_close", "em")
+        };
         let t = &mut tokens[start.token as usize];
         t.ty = ty_o;
         t.tag = tag;
@@ -2721,7 +2757,9 @@ fn is_autolink_url(u: &[char]) -> bool {
     if !(2..=32).contains(&i) || i >= u.len() || u[i] != ':' {
         return false;
     }
-    u[i + 1..].iter().all(|&c| !(c == '<' || c == '>' || (c as u32) <= 0x20))
+    u[i + 1..]
+        .iter()
+        .all(|&c| !(c == '<' || c == '>' || (c as u32) <= 0x20))
 }
 
 /// The markdown-it EMAIL_RE.
@@ -2733,7 +2771,9 @@ fn is_email(u: &[char]) -> bool {
     };
     let local = &u[..at];
     if local.is_empty()
-        || !local.iter().all(|&c| c.is_ascii_alphanumeric() || ".!#$%&'*+/=?^_`{|}~-".contains(c))
+        || !local
+            .iter()
+            .all(|&c| c.is_ascii_alphanumeric() || ".!#$%&'*+/=?^_`{|}~-".contains(c))
     {
         return false;
     }
@@ -2820,11 +2860,19 @@ fn render_rule(tokens: &mut [Token], idx: usize) -> String {
         }
         "code_block" => {
             let t = &tokens[idx];
-            format!("<pre{}><code>{}</code></pre>\n", render_attrs(t), escape_html(&t.content))
+            format!(
+                "<pre{}><code>{}</code></pre>\n",
+                render_attrs(t),
+                escape_html(&t.content)
+            )
         }
         "fence" => {
             let t = &tokens[idx];
-            let info = if t.info.is_empty() { String::new() } else { py_strip(&unescape_all(&t.info)).to_string() };
+            let info = if t.info.is_empty() {
+                String::new()
+            } else {
+                py_strip(&unescape_all(&t.info)).to_string()
+            };
             let highlighted = escape_html(&t.content);
             if !info.is_empty() {
                 let lang = py_split_ws(&info).first().map(|s| s.to_string()).unwrap_or_default();

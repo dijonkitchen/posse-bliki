@@ -3,6 +3,7 @@ title: leverage
 date: 2021-05-14
 aliases:
   - /leverage/
+  - /p/leverage/
 ---
 Leverage exaggerates both the ups and the downs. 
 

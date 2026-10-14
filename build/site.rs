@@ -17,14 +17,26 @@ use crate::webmention::{self, Mention};
 const STYLE_CSS: &str = include_str!("static/style.css");
 /// Self-hosted fonts and their licences (spec/design.md), copied to `fonts/`.
 const FONTS: &[(&str, &[u8])] = &[
-    ("atkinson-hyperlegible-next-latin.woff2", include_bytes!("static/fonts/atkinson-hyperlegible-next-latin.woff2")),
+    (
+        "atkinson-hyperlegible-next-latin.woff2",
+        include_bytes!("static/fonts/atkinson-hyperlegible-next-latin.woff2"),
+    ),
     (
         "atkinson-hyperlegible-next-italic-latin.woff2",
         include_bytes!("static/fonts/atkinson-hyperlegible-next-italic-latin.woff2"),
     ),
-    ("jetbrains-mono-latin.woff2", include_bytes!("static/fonts/jetbrains-mono-latin.woff2")),
-    ("OFL-atkinson-hyperlegible-next.txt", include_bytes!("static/fonts/OFL-atkinson-hyperlegible-next.txt")),
-    ("OFL-jetbrains-mono.txt", include_bytes!("static/fonts/OFL-jetbrains-mono.txt")),
+    (
+        "jetbrains-mono-latin.woff2",
+        include_bytes!("static/fonts/jetbrains-mono-latin.woff2"),
+    ),
+    (
+        "OFL-atkinson-hyperlegible-next.txt",
+        include_bytes!("static/fonts/OFL-atkinson-hyperlegible-next.txt"),
+    ),
+    (
+        "OFL-jetbrains-mono.txt",
+        include_bytes!("static/fonts/OFL-jetbrains-mono.txt"),
+    ),
 ];
 
 /// Site configuration (edit before going live).
@@ -78,7 +90,10 @@ impl Config {
                 Json::Obj(vec![
                     ("name".into(), json::s(self.author_name)),
                     ("url".into(), json::s(self.author_url)),
-                    ("rel_me".into(), Json::Arr(self.rel_me.iter().map(|u| json::s(u)).collect())),
+                    (
+                        "rel_me".into(),
+                        Json::Arr(self.rel_me.iter().map(|u| json::s(u)).collect()),
+                    ),
                 ]),
             ),
             (
@@ -125,12 +140,16 @@ struct Note {
 
 impl Note {
     fn title(&self) -> &str {
-        frontmatter::get(&self.fm, "title").and_then(Value::as_str).unwrap_or("")
+        frontmatter::get(&self.fm, "title")
+            .and_then(Value::as_str)
+            .unwrap_or("")
     }
 
     /// `summary` when truthy.
     fn summary(&self) -> Option<&str> {
-        frontmatter::get(&self.fm, "summary").and_then(Value::as_str).filter(|s| !s.is_empty())
+        frontmatter::get(&self.fm, "summary")
+            .and_then(Value::as_str)
+            .filter(|s| !s.is_empty())
     }
 
     fn str_list(&self, key: &str) -> Vec<String> {
@@ -141,11 +160,12 @@ impl Note {
     }
 
     fn draft(&self) -> bool {
-        frontmatter::get(&self.fm, "draft").map_or(false, Value::truthy)
+        frontmatter::get(&self.fm, "draft").is_some_and(Value::truthy)
     }
 
     fn post_date(&self) -> Result<Date, String> {
-        self.date.ok_or_else(|| format!("{}: post has no `date` (required for dt-published)", self.rel))
+        self.date
+            .ok_or_else(|| format!("{}: post has no `date` (required for dt-published)", self.rel))
     }
 }
 
@@ -227,7 +247,11 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
             return Err(format!("{}: front-matter invalid: {}", rel, msg));
         }
         let kind = kind_for(&parts);
-        let slug = if kind == Kind::Home { "index".to_string() } else { text::slugify(stem(parts.last().unwrap())) };
+        let slug = if kind == Kind::Home {
+            "index".to_string()
+        } else {
+            text::slugify(stem(parts.last().unwrap()))
+        };
         let parse_date = |key: &str| -> Result<Option<Date>, String> {
             match frontmatter::get(&fm, key).and_then(Value::as_str) {
                 None | Some("") => Ok(None),
@@ -272,14 +296,23 @@ fn write_bytes(p: &Path, content: &[u8]) -> Result<(), String> {
 /// site, empty when the site is served from a domain root.
 fn base_path(base_url: &str) -> String {
     let rest = base_url.split_once("://").map_or(base_url, |(_, r)| r);
-    rest.find('/').map_or("", |i| &rest[i..]).trim_end_matches('/').to_string()
+    rest.find('/')
+        .map_or("", |i| &rest[i..])
+        .trim_end_matches('/')
+        .to_string()
 }
 
 /// Root-relative URL openers the pages and feeds emit: attributes in HTML,
 /// the same escaped inside RSS (`&quot;`) and JSON Feed (`\"`) bodies, and
 /// the meta-refresh target of alias redirects.
 const ROOT_RELATIVE: &[&str] = &[
-    "href=\"/", "src=\"/", "href=&quot;/", "src=&quot;/", "href=\\\"/", "src=\\\"/", "url=/",
+    "href=\"/",
+    "src=\"/",
+    "href=&quot;/",
+    "src=&quot;/",
+    "href=\\\"/",
+    "src=\\\"/",
+    "url=/",
 ];
 
 /// Prefix every root-relative link with `prefix` (`/notes/` becomes
@@ -328,7 +361,9 @@ fn apply_base_path(dir: &Path, prefix: &str) -> Result<(), String> {
 
 fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str) -> String {
     let t = e(site.title);
-    let canon = canonical.map(|c| format!("<link rel=\"canonical\" href=\"{}\">", e(c))).unwrap_or_default();
+    let canon = canonical
+        .map(|c| format!("<link rel=\"canonical\" href=\"{}\">", e(c)))
+        .unwrap_or_default();
     format!(
         "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>{title}</title>\n{meta}\n{canon}\n\
@@ -349,7 +384,9 @@ fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 }
 
 fn summary_meta(n: &Note) -> String {
-    n.summary().map(|s| format!("<meta name=\"description\" content=\"{}\">", e(s))).unwrap_or_default()
+    n.summary()
+        .map(|s| format!("<meta name=\"description\" content=\"{}\">", e(s)))
+        .unwrap_or_default()
 }
 
 fn backlinks_block(notes: &[Note], n: &Note) -> String {
@@ -361,16 +398,28 @@ fn backlinks_block(notes: &[Note], n: &Note) -> String {
         .iter()
         .map(|&b| format!("<li><a href=\"{}\">{}</a></li>", e(&notes[b].url), e(notes[b].title())))
         .collect();
-    format!("\n<aside class=\"backlinks\">\n<h2>Linked from</h2>\n<ul>\n{}\n</ul>\n</aside>\n", items)
+    format!(
+        "\n<aside class=\"backlinks\">\n<h2>Linked from</h2>\n<ul>\n{}\n</ul>\n</aside>\n",
+        items
+    )
 }
 
 fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Result<String, String> {
     let d = n.post_date()?;
     let updated = n
         .updated
-        .map(|u| format!(" \u{b7} <time class=\"dt-updated\" datetime=\"{}\">updated {}</time>", u.iso(), u.human()))
+        .map(|u| {
+            format!(
+                " \u{b7} <time class=\"dt-updated\" datetime=\"{}\">updated {}</time>",
+                u.iso(),
+                u.human()
+            )
+        })
         .unwrap_or_default();
-    let summary = n.summary().map(|s| format!("<p class=\"p-summary\">{}</p>", e(s))).unwrap_or_default();
+    let summary = n
+        .summary()
+        .map(|s| format!("<p class=\"p-summary\">{}</p>", e(s)))
+        .unwrap_or_default();
     let tags = if n.tags.is_empty() {
         String::new()
     } else {
@@ -385,8 +434,10 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     let synd = if synd.is_empty() {
         String::new()
     } else {
-        let links: Vec<String> =
-            synd.iter().map(|s| format!("<a class=\"u-syndication\" href=\"{}\">{}</a>", e(s), e(s))).collect();
+        let links: Vec<String> = synd
+            .iter()
+            .map(|s| format!("<a class=\"u-syndication\" href=\"{}\">{}</a>", e(s), e(s)))
+            .collect();
         format!("\n<footer>\n<p>Also on: {}</p>\n</footer>\n", links.join(", "))
     };
     // Bridgy only publishes a page that links to it; the links carry no text.
@@ -395,7 +446,10 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         .iter()
         .map(|(t, _)| format!("\n<a href=\"{}\" hidden></a>", e(t)))
         .collect();
-    let mentions = site.mentions.get(&webmention::url_key(canonical)).map_or(String::new(), |m| webmention::render(m));
+    let mentions = site
+        .mentions
+        .get(&webmention::url_key(canonical))
+        .map_or(String::new(), |m| webmention::render(m));
     let content = format!(
         "\n<article class=\"h-entry\">\n<header>\n<h1 class=\"p-name\">{title}</h1>\n<p class=\"meta\">\n\
 <a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{human}</time></a>\n\
@@ -410,7 +464,13 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         html = n.content_html,
         back = backlinks_block(notes, n),
     );
-    Ok(base(site, &format!("{} \u{2014} {}", e(n.title()), e(site.title)), &summary_meta(n), Some(canonical), &content))
+    Ok(base(
+        site,
+        &format!("{} \u{2014} {}", e(n.title()), e(site.title)),
+        &summary_meta(n),
+        Some(canonical),
+        &content,
+    ))
 }
 
 fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> String {
@@ -420,12 +480,21 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Stri
         n.content_html,
         backlinks_block(notes, n)
     );
-    base(site, &format!("{} \u{2014} {}", e(n.title()), e(site.title)), &summary_meta(n), Some(canonical), &content)
+    base(
+        site,
+        &format!("{} \u{2014} {}", e(n.title()), e(site.title)),
+        &summary_meta(n),
+        Some(canonical),
+        &content,
+    )
 }
 
 fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonical: &str) -> Result<String, String> {
-    let rel_me: String =
-        site.rel_me.iter().map(|u| format!("\n<a class=\"u-url\" rel=\"me\" href=\"{}\">{}</a>\n", e(u), e(u))).collect();
+    let rel_me: String = site
+        .rel_me
+        .iter()
+        .map(|u| format!("\n<a class=\"u-url\" rel=\"me\" href=\"{}\">{}</a>\n", e(u), e(u)))
+        .collect();
     let mut recent = String::new();
     for &p in posts.iter().take(10) {
         let pn = &notes[p];
@@ -449,13 +518,21 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
     Ok(base(site, &e(site.title), "", Some(canonical), &content))
 }
 
-fn render_list(site: &Config, notes: &[Note], list_title: &str, posts: &[usize], canonical: &str) -> Result<String, String> {
+fn render_list(
+    site: &Config,
+    notes: &[Note],
+    list_title: &str,
+    posts: &[usize],
+    canonical: &str,
+) -> Result<String, String> {
     let mut items = String::new();
     for &p in posts {
         let pn = &notes[p];
         let d = pn.post_date()?;
-        let summary =
-            pn.summary().map(|s| format!(" \u{2014} <span class=\"p-summary\">{}</span>", e(s))).unwrap_or_default();
+        let summary = pn
+            .summary()
+            .map(|s| format!(" \u{2014} <span class=\"p-summary\">{}</span>", e(s)))
+            .unwrap_or_default();
         items.push_str(&format!(
             "\n<li class=\"h-entry\">\n<a class=\"u-url p-name\" href=\"{}\">{}</a>\n<time class=\"dt-published\" datetime=\"{}\">{}</time>\n{}\n</li>\n",
             e(&pn.url),
@@ -470,19 +547,34 @@ fn render_list(site: &Config, notes: &[Note], list_title: &str, posts: &[usize],
         e(list_title),
         items
     );
-    Ok(base(site, &format!("{} \u{2014} {}", e(list_title), e(site.title)), "", Some(canonical), &content))
+    Ok(base(
+        site,
+        &format!("{} \u{2014} {}", e(list_title), e(site.title)),
+        "",
+        Some(canonical),
+        &content,
+    ))
 }
 
 fn render_redirect(site: &Config, target: &str, canonical: &str) -> String {
     let t = e(target);
-    let meta = format!("\n<meta http-equiv=\"refresh\" content=\"0; url={}\">\n<meta name=\"robots\" content=\"noindex\">\n", t);
+    let meta = format!(
+        "\n<meta http-equiv=\"refresh\" content=\"0; url={}\">\n<meta name=\"robots\" content=\"noindex\">\n",
+        t
+    );
     let content = format!("\n<p>This page has moved to <a href=\"{}\">{}</a>.</p>\n", t, t);
     base(site, "Redirecting\u{2026}", &meta, Some(canonical), &content)
 }
 
 fn render_404(site: &Config) -> String {
     let content = "\n<article>\n<h1>Not found</h1>\n<p>That page isn't here. Try the <a href=\"/\">home page</a> or the <a href=\"/notes/\">notes index</a>.</p>\n</article>\n";
-    base(site, &format!("Not found \u{2014} {}", e(site.title)), "", None, content)
+    base(
+        site,
+        &format!("Not found \u{2014} {}", e(site.title)),
+        "",
+        None,
+        content,
+    )
 }
 
 // --- main entry point ---
@@ -497,7 +589,12 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
             continue;
         }
         if let Some(&j) = seen.get(n.slug.as_str()) {
-            return Err(format!("duplicate slug {}: {} vs {}", py_repr_str(&n.slug), notes[j].rel, n.rel));
+            return Err(format!(
+                "duplicate slug {}: {} vs {}",
+                py_repr_str(&n.slug),
+                notes[j].rel,
+                n.rel
+            ));
         }
         seen.insert(&n.slug, i);
     }
@@ -570,7 +667,10 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     }
 
     // /notes/ list
-    write(&out.join("notes").join("index.html"), &render_list(site, &notes, "Notes", &posts, &canonical("/notes/"))?)?;
+    write(
+        &out.join("notes").join("index.html"),
+        &render_list(site, &notes, "Notes", &posts, &canonical("/notes/"))?,
+    )?;
 
     // tag pages
     let mut by_tag: Vec<(String, Vec<usize>)> = Vec::new();
@@ -593,7 +693,11 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     for n in &notes {
         for alias in n.str_list("aliases") {
             let dir = alias.trim_matches('/');
-            let p = if dir.is_empty() { out.join("index.html") } else { out.join(dir).join("index.html") };
+            let p = if dir.is_empty() {
+                out.join("index.html")
+            } else {
+                out.join(dir).join("index.html")
+            };
             write(&p, &render_redirect(site, &n.url, &canonical(&n.url)))?;
         }
     }
@@ -644,12 +748,18 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
                 ("url".to_string(), Json::Str(canonical(&n.url))),
                 ("title".to_string(), json::s(n.title())),
                 ("content_html".to_string(), json::s(&n.content_html)),
-                ("date_published".to_string(), Json::Str(n.date.unwrap_or(date::EPOCH).iso_datetime())),
+                (
+                    "date_published".to_string(),
+                    Json::Str(n.date.unwrap_or(date::EPOCH).iso_datetime()),
+                ),
             ];
             if let Some(s) = n.summary() {
                 item.push(("summary".to_string(), json::s(s)));
             }
-            item.push(("tags".to_string(), Json::Arr(n.tags.iter().map(|t| json::s(t)).collect())));
+            item.push((
+                "tags".to_string(),
+                Json::Arr(n.tags.iter().map(|t| json::s(t)).collect()),
+            ));
             Json::Obj(item)
         })
         .collect();
@@ -688,13 +798,20 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">",
     );
     for (u, lastmod) in &urls {
-        sm.push_str(&format!("\n<url>\n<loc>{}</loc>\n<lastmod>{}</lastmod>\n</url>", e(u), e(lastmod)));
+        sm.push_str(&format!(
+            "\n<url>\n<loc>{}</loc>\n<lastmod>{}</lastmod>\n</url>",
+            e(u),
+            e(lastmod)
+        ));
     }
     sm.push_str("\n</urlset>\n");
     write(&out.join("sitemap.xml"), &sm)?;
 
     // robots.txt
-    write(&out.join("robots.txt"), &format!("User-agent: *\nAllow: /\n\nSitemap: {}/sitemap.xml\n", base_url))?;
+    write(
+        &out.join("robots.txt"),
+        &format!("User-agent: *\nAllow: /\n\nSitemap: {}/sitemap.xml\n", base_url),
+    )?;
 
     // static assets
     write(&out.join("style.css"), STYLE_CSS)?;
