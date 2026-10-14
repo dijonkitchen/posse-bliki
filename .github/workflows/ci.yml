@@ -36,6 +36,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install the pinned Rust toolchain
+        run: make setup
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
