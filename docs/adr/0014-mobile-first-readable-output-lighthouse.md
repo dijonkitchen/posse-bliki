@@ -1,4 +1,4 @@
-# 0013 — Mobile first, readable output, a Lighthouse budget
+# 0014 — Mobile first, readable output, a Lighthouse budget
 
 - Date: 2026-10-14
 - Status: Accepted

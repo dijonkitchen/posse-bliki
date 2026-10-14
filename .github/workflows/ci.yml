@@ -29,7 +29,7 @@ jobs:
         run: make ci
 
   lighthouse:
-    # Lighthouse budget on the built pages (ADR 0013, spec/performance.md).
+    # Lighthouse budget on the built pages (ADR 0014, spec/performance.md).
     # CI-only: it needs Node and Chrome, so it stays out of `make ci` and
     # the build. The runner image ships Chrome.
     runs-on: ubuntu-latest

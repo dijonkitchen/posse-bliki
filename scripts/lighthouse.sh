@@ -1,5 +1,5 @@
 #!/bin/sh
-# Lighthouse budget for the built site (spec/performance.md, ADR 0013).
+# Lighthouse budget for the built site (spec/performance.md, ADR 0014).
 #
 # CI-only, like the HTML checker: it needs Node and Chrome, which the build
 # and `make ci` never do. Builds and serves the site on 127.0.0.1, audits a
