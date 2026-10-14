@@ -16,7 +16,7 @@ ADR that supersedes the old one. Don't edit history.
 | [0009](0009-a11y-design-system-self-hosted-fonts.md) | a11y design system, self-hosted fonts | Accepted |
 | [0010](0010-rust-only-toolchain.md) | Rust-only toolchain: harness, tables and a pinned compiler | Accepted |
 | [0011](0011-holocene-years-on-the-page.md) | Holocene years on the page | Accepted |
-| [0012](0012-nu-html-checker-in-ci.md) | Nu HTML Checker in CI | Accepted |
+| [2026-10-11](2026-10-11-nu-html-checker-in-ci.md) | Nu HTML Checker in CI | Accepted |
 
 ## Format
 

@@ -28,8 +28,8 @@ jobs:
 
   html:
     # Independent check of the built pages with the W3C Nu HTML Checker
-    # (ADR 0012). CI-only: it needs Java and a download, so it stays out of
-    # `make ci` and the build.
+    # (ADR 2026-10-11-nu-html-checker-in-ci). CI-only: it needs Java and a
+    # download, so it stays out of `make ci` and the build.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

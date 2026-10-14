@@ -11,7 +11,7 @@ in `tests/`.
   so the only safe markup is markup that needs no repair.
 - Passes the W3C Nu HTML Checker with no errors or warnings, including
   heading order (no skipped levels) and one `<h1>` per page. Checked by
-  `make validate` in CI's `html` job, not by `tests/` (ADR 0012).
+  `make validate` in CI's `html` job, not by `tests/` (ADR 2026-10-11-nu-html-checker-in-ci).
 - `<!DOCTYPE html>` first, `<html lang="en">`.
 - `<meta charset="utf-8">`.
 - `<meta name="viewport" content="width=device-width, initial-scale=1">`.

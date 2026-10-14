@@ -66,6 +66,176 @@ fn rss_has_items() {
     }
 }
 
+/// Day of the week for a Gregorian date, Monday = 0 (Sakamoto's method),
+/// computed here rather than with the build's own date code.
+fn weekday(y: i32, m: usize, d: i32) -> usize {
+    const T: [i32; 12] = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
+    let y = if m < 3 { y - 1 } else { y };
+    let sunday_first = (y + y / 4 - y / 100 + y / 400 + T[m - 1] + d).rem_euclid(7);
+    ((sunday_first + 6) % 7) as usize
+}
+
+/// An RFC 822 date whose weekday matches its calendar date.
+fn is_real_rfc822_date(s: &str) -> bool {
+    let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    let months = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+    if !is_rfc822(s) {
+        return false;
+    }
+    let p: Vec<&str> = s.split(' ').collect();
+    let m = months.iter().position(|x| *x == p[2]).unwrap() + 1;
+    let (day, year): (i32, i32) = (p[1].parse().unwrap(), p[3].parse().unwrap());
+    let month_len = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m - 1]
+        + i32::from(m == 2 && (year % 4 == 0 && year % 100 != 0 || year % 400 == 0));
+    (1..=month_len).contains(&day) && days[weekday(year, m, day)] == p[0].trim_end_matches(',')
+}
+
+fn is_absolute_http_url(s: &str) -> bool {
+    (s.starts_with("https://") || s.starts_with("http://")) && !s.contains(char::is_whitespace)
+}
+
+// The checks below follow the RSS 2.0 spec (https://www.rssboard.org/rss-specification)
+// and the rules the W3C Feed Validation Service applies. The service itself
+// can't be called from CI (see docs/adr/2026-10-11-nu-html-checker-in-ci.md).
+
+#[test]
+fn rss_channel_follows_rss_2() {
+    let ch = channel();
+    for required in ["title", "link", "description"] {
+        assert!(
+            !text(&ch, required).trim().is_empty(),
+            "channel <{required}> is missing or empty"
+        );
+    }
+    assert!(
+        is_absolute_http_url(&text(&ch, "link")),
+        "channel <link> is not an absolute URL"
+    );
+    let language = text(&ch, "language");
+    assert!(
+        !language.is_empty()
+            && language
+                .split('-')
+                .all(|p| (1..=8).contains(&p.len()) && p.bytes().all(|b| b.is_ascii_alphanumeric())),
+        "channel <language> {language:?} is not a language code"
+    );
+    let built = text(&ch, "lastBuildDate");
+    assert!(
+        is_real_rfc822_date(&built),
+        "lastBuildDate {built:?} is not a real RFC 822 date"
+    );
+
+    let selfs: Vec<&Element> = ch
+        .elements()
+        .filter(|e| e.name == "atom:link" && e.attr("rel") == Some("self"))
+        .collect();
+    assert_eq!(selfs.len(), 1, "channel needs exactly one atom:link rel=\"self\"");
+    let want = format!("{}/index.xml", config_str("base_url").trim_end_matches('/'));
+    assert_eq!(selfs[0].attr("href"), Some(want.as_str()), "atom:link self href");
+    assert_eq!(
+        selfs[0].attr("type"),
+        Some("application/rss+xml"),
+        "atom:link self type"
+    );
+
+    // Unknown un-namespaced elements are ignored by readers and flagged by validators.
+    let known = [
+        "title",
+        "link",
+        "description",
+        "language",
+        "copyright",
+        "managingEditor",
+        "webMaster",
+        "pubDate",
+        "lastBuildDate",
+        "category",
+        "generator",
+        "docs",
+        "cloud",
+        "ttl",
+        "image",
+        "rating",
+        "textInput",
+        "skipHours",
+        "skipDays",
+        "item",
+    ];
+    for el in ch.elements() {
+        assert!(
+            el.name.contains(':') || known.contains(&el.name.as_str()),
+            "unknown channel element <{}>",
+            el.name
+        );
+    }
+}
+
+#[test]
+fn rss_items_follow_rss_2() {
+    let ch = channel();
+    let known = [
+        "title",
+        "link",
+        "description",
+        "author",
+        "category",
+        "comments",
+        "enclosure",
+        "guid",
+        "pubDate",
+        "source",
+    ];
+    let mut guids = Vec::new();
+    for item in ch.elements().filter(|e| e.name == "item") {
+        let title = text(item, "title");
+        for el in item.elements() {
+            assert!(
+                el.name.contains(':') || known.contains(&el.name.as_str()),
+                "{title}: unknown item element <{}>",
+                el.name
+            );
+            assert!(
+                item.elements().filter(|e| e.name == el.name).count() == 1 || el.name == "category",
+                "{title}: repeated <{}>",
+                el.name
+            );
+        }
+        let link = text(item, "link");
+        assert!(
+            is_absolute_http_url(&link),
+            "{title}: link {link:?} is not an absolute URL"
+        );
+        let guid = item.child("guid").expect("guid");
+        if guid.attr("isPermaLink") != Some("false") {
+            assert!(
+                is_absolute_http_url(&guid.text()),
+                "{title}: permalink guid is not an absolute URL"
+            );
+        }
+        assert!(!guids.contains(&guid.text()), "{title}: duplicate guid {}", guid.text());
+        guids.push(guid.text());
+        let date = text(item, "pubDate");
+        assert!(
+            is_real_rfc822_date(&date),
+            "{title}: pubDate {date:?} is not a real date"
+        );
+    }
+}
+
+#[test]
+fn rfc822_weekday_check() {
+    assert!(is_real_rfc822_date("Thu, 04 Jun 2026 00:00:00 +0000"));
+    assert!(is_real_rfc822_date("Tue, 29 Feb 2000 00:00:00 +0000"));
+    assert!(!is_real_rfc822_date("Fri, 04 Jun 2026 00:00:00 +0000"), "wrong weekday");
+    assert!(
+        !is_real_rfc822_date("Sat, 29 Feb 2025 00:00:00 +0000"),
+        "no 29 Feb in 2025"
+    );
+    assert!(!is_real_rfc822_date("Thu, 31 Jun 2026 00:00:00 +0000"), "no 31 Jun");
+}
+
 #[test]
 fn sitemap_is_well_formed() {
     let root = xml::parse(&read(&site().join("sitemap.xml"))).expect("sitemap.xml is well-formed XML");

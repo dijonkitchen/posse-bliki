@@ -1,4 +1,4 @@
-# 0012 — Nu HTML Checker in CI
+# 2026-10-11 — Nu HTML Checker in CI
 
 - Date: 2026-10-11
 - Status: Accepted
@@ -32,6 +32,20 @@ Run vnu over every built page in CI, as its own `html` job:
 - It is CI-only. It is not part of `make ci`, the build, or `tests/`. The
   build stays std-only Rust (ADR 0007) and offline, and `make ci` still
   needs nothing but the repo's own toolchain.
+
+### Feeds
+
+vnu checks HTML only, so the RSS feed and JSON Feed need their own check.
+The W3C Feed Validation Service is the RSS equivalent, and one request per
+push would be a fair load. But it sits behind a Cloudflare bot challenge
+that answers automated requests with a 429 and a JavaScript page, so CI
+can't call it. Running it ourselves would bring Python back into CI, which
+ADR 0010 removed. Instead the Rust harness (`tests/harness/rss.rs`) checks
+the RSS 2.0 rules that service enforces: required channel elements, absolute
+URLs, a single matching `atom:link rel="self"`, unique permalink guids,
+real RFC 822 dates with the right weekday, and no unknown elements. JSON
+Feed has no official validator; `tests/harness/jsonfeed.rs` checks it
+against the spec.
 
 ## Consequences
 

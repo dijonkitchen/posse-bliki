@@ -16,6 +16,12 @@ external bridges (Bridgy Fed, echofeed, IFTTT) at one of them.
   with the strict XML checker in `tests/harness/support/xml.rs`). Why: feed
   readers reject a feed that isn't well-formed outright, so one bad
   character would silently cut off every subscriber.
+- Follows RSS 2.0 as the W3C Feed Validation Service reads it: absolute
+  URLs, one `atom:link rel="self"` pointing at the feed, unique permalink
+  guids, real RFC 822 dates (the weekday matches the date), and no unknown
+  un-namespaced elements. The service blocks automated requests, so the
+  harness checks these rules itself
+  (ADR 2026-10-11-nu-html-checker-in-ci).
 
 ## JSON Feed v1.1 — `/feed.json`
 
