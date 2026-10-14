@@ -20,5 +20,6 @@ mod jsonfeed;
 mod links;
 mod microformats;
 mod rss;
+mod supply_chain;
 mod url_policy;
 mod webmentions;
