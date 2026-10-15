@@ -285,17 +285,22 @@ th { background: var(--surface-sunken); font-weight: var(--weight-bold); }
   align-items: center;
   min-height: var(--target-min);
 }
+.site-brand { margin-inline-end: auto; }
 .site-header .site-title {
-  margin-inline-end: auto;
   color: var(--text-1);
   font-weight: var(--weight-heavy);
   font-size: var(--size-lg);
   text-decoration: none;
 }
 .site-header .site-title:hover { text-decoration: underline; }
+.site-tagline {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--size-sm);
+}
 /* Narrow screens: the title gets its own row, the links share the next. */
 @media (max-width: 40rem) {
-  .site-header .site-title { flex-basis: 100%; }
+  .site-brand { flex-basis: 100%; }
 }
 
 main { padding-block-end: var(--space-7); }
@@ -369,7 +374,7 @@ main { padding-block-end: var(--space-7); }
 
 .h-card { margin-bottom: var(--space-6); }
 .h-card p { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
-.h-card .p-name { font-weight: var(--weight-bold); }
+.h-card .author { font-weight: var(--weight-bold); }
 
 .backlinks {
   margin-top: var(--space-7);
