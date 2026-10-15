@@ -9,8 +9,16 @@ pub struct Date {
 }
 
 /// Python `datetime.date.min`.
-pub const MIN: Date = Date { year: 1, month: 1, day: 1 };
-pub const EPOCH: Date = Date { year: 1970, month: 1, day: 1 };
+pub const MIN: Date = Date {
+    year: 1,
+    month: 1,
+    day: 1,
+};
+pub const EPOCH: Date = Date {
+    year: 1970,
+    month: 1,
+    day: 1,
+};
 
 fn is_leap(y: i32) -> bool {
     (y % 4 == 0 && y % 100 != 0) || y % 400 == 0
@@ -46,7 +54,11 @@ impl Date {
         if y < 1 || !(1..=12).contains(&m) || d < 1 || d > days_in_month(y, m) {
             return None;
         }
-        Some(Date { year: y, month: m, day: d })
+        Some(Date {
+            year: y,
+            month: m,
+            day: d,
+        })
     }
 
     /// Days since 1970-01-01 (Howard Hinnant's days_from_civil).
@@ -81,7 +93,9 @@ impl Date {
     /// `email.utils.format_datetime` of midnight UTC.
     pub fn rfc822(&self) -> String {
         const DAYS: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        const MONTHS: [&str; 12] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const MONTHS: [&str; 12] = [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+        ];
         format!(
             "{}, {:02} {} {:04} 00:00:00 +0000",
             DAYS[self.weekday()],
@@ -105,12 +119,21 @@ mod tests {
     fn formats() {
         let d = Date::parse("2026-05-10").unwrap();
         assert_eq!(d.rfc822(), "Sun, 10 May 2026 00:00:00 +0000");
-        assert_eq!(Date::parse("2023-04-11").unwrap().rfc822(), "Tue, 11 Apr 2023 00:00:00 +0000");
+        assert_eq!(
+            Date::parse("2023-04-11").unwrap().rfc822(),
+            "Tue, 11 Apr 2023 00:00:00 +0000"
+        );
         assert_eq!(EPOCH.rfc822(), "Thu, 01 Jan 1970 00:00:00 +0000");
-        assert_eq!(Date::parse("0005-01-01").unwrap().rfc822(), "Sat, 01 Jan 0005 00:00:00 +0000");
+        assert_eq!(
+            Date::parse("0005-01-01").unwrap().rfc822(),
+            "Sat, 01 Jan 0005 00:00:00 +0000"
+        );
         assert_eq!(Date::parse("0005-01-01").unwrap().human(), "10005-01-01");
         assert_eq!(Date::parse("2026-10-11").unwrap().human(), "12026-10-11");
-        assert_eq!(Date::parse("2000-02-29T10:00Z").unwrap().iso_datetime(), "2000-02-29T00:00:00+00:00");
+        assert_eq!(
+            Date::parse("2000-02-29T10:00Z").unwrap().iso_datetime(),
+            "2000-02-29T00:00:00+00:00"
+        );
         assert!(Date::parse("2021-02-29").is_none());
         assert!(Date::parse("0000-01-01").is_none());
     }

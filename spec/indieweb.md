@@ -57,7 +57,7 @@ more than 5 posts are new. The workflow's `syndicate` job posts those
 lines after the deploy, only while the `SEND_WEBMENTIONS` repository
 variable is `true`.
 
-Enforced by `tests/test_webmentions.py` and the Rust unit tests in
+Enforced by `tests/harness/webmentions.rs` and the Rust unit tests in
 `build/webmention.rs`.
 
 ## Out of scope (deliberately)
@@ -72,7 +72,7 @@ Enforced by `tests/test_webmentions.py` and the Rust unit tests in
 ## Verifying conformance
 
 ```sh
-uv run pytest tests/test_microformats.py tests/test_indieweb_links.py tests/test_webmentions.py
+cargo test --release --test harness -- microformats indieweb_links webmentions
 ```
 
 External validators (run manually before major releases):

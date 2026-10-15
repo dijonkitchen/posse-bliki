@@ -15,14 +15,15 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
-          enable-cache: true
+          persist-credentials: false
+
+      # rust-toolchain.toml pins the version; rustup on the runner installs it.
+      - name: Install the pinned Rust toolchain
+        run: make setup
 
       - name: Run CI (mirrors `make ci` locally)
         run: make ci

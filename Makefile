@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help sync test build serve ci clean tables
+.PHONY: help setup lint test build serve ci clean tables
 
 PORT ?= 8080
 OUT  ?= public
@@ -7,27 +7,38 @@ OUT  ?= public
 BASE_URL ?=
 # jf2 file of received webmentions to show on posts; empty shows none
 WEBMENTIONS ?=
+# Unicode Character Database release `make tables` reads (see build/unicode.rs)
+UNICODE_VERSION ?= 15.1.0
+TABLES_DATA ?= target/tables-data
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-8s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-sync: ## Install/update Python test-harness deps from uv.lock
-	uv sync --frozen
+setup: ## Install the pinned Rust toolchain from rust-toolchain.toml (needs rustup)
+	rustup toolchain install
 
-test: ## Run Rust unit tests, then the spec harness
-	cargo test --release --quiet
-	uv run pytest
+lint: ## Check formatting (rustfmt) and lints (clippy, warnings are errors)
+	cargo fmt --check
+	cargo clippy --locked --release --all-targets --quiet -- -D warnings
+
+test: ## Run the Rust unit tests and the spec harness (tests/harness)
+	cargo test --locked --release --quiet
 
 build: ## Build the site → ./$(OUT) (Rust binary, std only)
-	cargo run --release -- --out $(OUT) $(if $(BASE_URL),--base-url $(BASE_URL)) $(if $(WEBMENTIONS),--webmentions $(WEBMENTIONS))
+	cargo run --locked --release -- --out $(OUT) $(if $(BASE_URL),--base-url $(BASE_URL)) $(if $(WEBMENTIONS),--webmentions $(WEBMENTIONS))
 
 serve: ## Build, watch content/, and serve at :$(PORT)
-	cargo run --release -- --out $(OUT) --serve --port $(PORT)
+	cargo run --locked --release -- --out $(OUT) --serve --port $(PORT)
 
-ci: sync test build ## Full local CI: same checks .github/workflows/ci.yml runs
+ci: lint test build ## Full local CI: same checks .github/workflows/ci.yml runs
 
-tables: ## Regenerate build/entities.rs and build/unicode.rs tables (ADR 0007)
-	python3 scripts/gen_tables.py
+tables: ## Regenerate build/entities.rs and build/unicode.rs (downloads the source data)
+	mkdir -p $(TABLES_DATA)
+	curl -sSfL -o $(TABLES_DATA)/entities.json https://html.spec.whatwg.org/entities.json
+	curl -sSfL -o $(TABLES_DATA)/UnicodeData.txt https://www.unicode.org/Public/$(UNICODE_VERSION)/ucd/UnicodeData.txt
+	curl -sSfL -o $(TABLES_DATA)/DerivedNumericType.txt https://www.unicode.org/Public/$(UNICODE_VERSION)/ucd/extracted/DerivedNumericType.txt
+	cargo run --release --bin gen-tables -- $(TABLES_DATA) $(UNICODE_VERSION)
+	cargo fmt
 
-clean: ## Remove build + cache artifacts
-	rm -rf public _smoke .pytest_cache .ruff_cache target
+clean: ## Remove build artifacts
+	rm -rf public target

@@ -69,9 +69,21 @@ pub fn load(text: &str) -> Result<HashMap<String, Vec<Mention>>, String> {
         let author = c.get("author");
         let author_name = author.and_then(|a| a.str_at("name")).filter(|n| !n.trim().is_empty());
         let author_url = author.and_then(|a| a.str_at("url")).and_then(web_url);
-        let author_name = author_name.map(String::from).or_else(|| author_url.clone()).unwrap_or_else(|| "someone".into());
-        let published = c.str_at("published").or_else(|| c.str_at("wm-received")).unwrap_or("").to_string();
-        let text = c.get("content").and_then(|t| t.str_at("text")).unwrap_or("").trim().to_string();
+        let author_name = author_name
+            .map(String::from)
+            .or_else(|| author_url.clone())
+            .unwrap_or_else(|| "someone".into());
+        let published = c
+            .str_at("published")
+            .or_else(|| c.str_at("wm-received"))
+            .unwrap_or("")
+            .to_string();
+        let text = c
+            .get("content")
+            .and_then(|t| t.str_at("text"))
+            .unwrap_or("")
+            .trim()
+            .to_string();
         by_target.entry(url_key(target)).or_default().push(Mention {
             kind,
             url,
@@ -90,7 +102,11 @@ pub fn load(text: &str) -> Result<HashMap<String, Vec<Mention>>, String> {
 
 fn author(m: &Mention) -> String {
     match &m.author_url {
-        Some(u) => format!("<a class=\"p-author h-card\" href=\"{}\">{}</a>", e(u), e(&m.author_name)),
+        Some(u) => format!(
+            "<a class=\"p-author h-card\" href=\"{}\">{}</a>",
+            e(u),
+            e(&m.author_name)
+        ),
         None => format!("<span class=\"p-author h-card\">{}</span>", e(&m.author_name)),
     }
 }
@@ -124,12 +140,19 @@ pub fn render(mentions: &[Mention]) -> String {
             out.push_str(&format!("<p>{} {}: {}</p>\n", label, people.len(), people.join(", ")));
         }
     }
-    let replies: Vec<&Mention> = mentions.iter().filter(|m| matches!(m.kind, Kind::Reply | Kind::Mention)).collect();
+    let replies: Vec<&Mention> = mentions
+        .iter()
+        .filter(|m| matches!(m.kind, Kind::Reply | Kind::Mention))
+        .collect();
     if !replies.is_empty() {
         out.push_str("<ol class=\"replies\">\n");
         for m in replies {
             let date = Date::parse(&m.published).map_or_else(|| m.published.clone(), |d| d.human());
-            let verb = if m.kind == Kind::Reply { "replied" } else { "mentioned this" };
+            let verb = if m.kind == Kind::Reply {
+                "replied"
+            } else {
+                "mentioned this"
+            };
             let text = if m.text.is_empty() {
                 String::new()
             } else {
@@ -163,11 +186,20 @@ pub const MAX_NEW: usize = 5;
 pub fn pending(previous: &str, current: &str, targets: &[(&str, &str)]) -> Result<Vec<String>, String> {
     let urls = |text: &str, which: &str| -> Result<Vec<String>, String> {
         let feed = json::parse(text).map_err(|m| format!("{} feed: {}", which, m))?;
-        let items = feed.get("items").ok_or_else(|| format!("{} feed: no \"items\" array", which))?;
-        Ok(items.as_arr().iter().filter_map(|i| i.str_at("url").map(String::from)).collect())
+        let items = feed
+            .get("items")
+            .ok_or_else(|| format!("{} feed: no \"items\" array", which))?;
+        Ok(items
+            .as_arr()
+            .iter()
+            .filter_map(|i| i.str_at("url").map(String::from))
+            .collect())
     };
     let seen: Vec<String> = urls(previous, "previous")?.iter().map(|u| url_key(u)).collect();
-    let new: Vec<String> = urls(current, "current")?.into_iter().filter(|u| !seen.contains(&url_key(u))).collect();
+    let new: Vec<String> = urls(current, "current")?
+        .into_iter()
+        .filter(|u| !seen.contains(&url_key(u)))
+        .collect();
     if new.len() > MAX_NEW {
         return Err(format!(
             "{} new posts since the previous feed (more than {}); not sending, as the previous feed is probably not comparable",
@@ -190,15 +222,26 @@ mod tests {
 
     #[test]
     fn keys_ignore_scheme_www_and_trailing_slash() {
-        assert_eq!(url_key("https://www.Example.com/notes/x/"), url_key("http://example.com/notes/x#c"));
-        assert_ne!(url_key("https://example.com/notes/x/"), url_key("https://example.com/notes/y/"));
+        assert_eq!(
+            url_key("https://www.Example.com/notes/x/"),
+            url_key("http://example.com/notes/x#c")
+        );
+        assert_ne!(
+            url_key("https://example.com/notes/x/"),
+            url_key("https://example.com/notes/y/")
+        );
     }
 
     #[test]
     fn pending_lists_only_new_posts() {
         let prev = r#"{"items": [{"url": "https://example.com/notes/a/"}]}"#;
         let cur = r#"{"items": [{"url": "https://example.com/notes/b/"}, {"url": "https://example.com/notes/a/"}]}"#;
-        let got = pending(prev, cur, &[("https://brid.gy/publish/mastodon", "https://brid.gy/publish/webmention")]).unwrap();
+        let got = pending(
+            prev,
+            cur,
+            &[("https://brid.gy/publish/mastodon", "https://brid.gy/publish/webmention")],
+        )
+        .unwrap();
         assert_eq!(
             got,
             vec!["https://brid.gy/publish/webmention\thttps://example.com/notes/b/\thttps://brid.gy/publish/mastodon"]
@@ -207,7 +250,9 @@ mod tests {
 
     #[test]
     fn pending_refuses_a_flood() {
-        let cur: Vec<String> = (0..=MAX_NEW).map(|i| format!("{{\"url\": \"https://example.com/notes/{}/\"}}", i)).collect();
+        let cur: Vec<String> = (0..=MAX_NEW)
+            .map(|i| format!("{{\"url\": \"https://example.com/notes/{}/\"}}", i))
+            .collect();
         let cur = format!("{{\"items\": [{}]}}", cur.join(","));
         assert!(pending(r#"{"items": []}"#, &cur, &[("t", "e")]).is_err());
     }
