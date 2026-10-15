@@ -16,8 +16,8 @@ ADR that supersedes the old one. Don't edit history.
 | [0009](0009-a11y-design-system-self-hosted-fonts.md) | a11y design system, self-hosted fonts | Accepted |
 | [0010](0010-rust-only-toolchain.md) | Rust-only toolchain: harness, tables and a pinned compiler | Accepted |
 | [0011](0011-holocene-years-on-the-page.md) | Holocene years on the page | Accepted |
-| [2026-10-14](2026-10-14-site-and-author-naming.md) | Site and author naming | Accepted |
 | [0016](0016-supply-chain-pinned-actions.md) | Supply chain: SHA-pinned actions, least-privilege tokens | Accepted |
+| [2026-10-14](2026-10-14-site-and-author-naming.md) | Site and author naming | Accepted |
 
 ## Format
 

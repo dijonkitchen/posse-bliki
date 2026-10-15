@@ -376,11 +376,12 @@ fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
 <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n<nav aria-label=\"Site\">\n\
-<a class=\"site-title\" href=\"/\">{t}</a>\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
+<div class=\"site-brand\">\n<a class=\"site-title\" href=\"/\">{t}</a>\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
 </nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
+        tagline = e(site.tagline),
         wm = e(site.webmention_endpoint),
         pb = e(site.pingback),
     )
@@ -480,7 +481,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
 /// parsers still read the full name as `p-name` (ADR 2026-10-14-site-and-author-naming).
 fn author_label(site: &Config) -> String {
     format!(
-        "<span class=\"p-nickname\">{}</span> (<span class=\"p-name\">{}</span>)",
+        "<span class=\"author\"><span class=\"p-nickname\">{}</span> (<span class=\"p-name\">{}</span>)</span>",
         e(site.author_nickname),
         e(site.author_name)
     )

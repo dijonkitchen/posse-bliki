@@ -25,8 +25,9 @@ Jonathan Chen's thoughts." and the author shown as "Jonathan Chen".
 
 - **Title:** "Dijon Kitchen". It heads every page and ends each page's
   `<title>` ("Post — Dijon Kitchen"), so it is kept short.
-- **Tagline:** "JC's napkin logic bliki. Philosophy as a service." It is the
-  RSS and JSON Feed description.
+- **Tagline:** "JC's napkin logic bliki. Philosophy as a service." It shows
+  under the title in every page header, and is the RSS and JSON Feed
+  description.
 - **Author:** readers see "JC (Jonathan Chen)" on the home page h-card and
   in each post byline. `author_label` in `build/site.rs` renders both. The
   markup is `<span class="p-nickname">JC</span> (<span class="p-name">Jonathan Chen</span>)`,
