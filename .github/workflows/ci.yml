@@ -27,3 +27,24 @@ jobs:
 
       - name: Run CI (mirrors `make ci` locally)
         run: make ci
+
+  html:
+    # Independent check of the built pages with the W3C Nu HTML Checker
+    # (ADR 2026-10-11-nu-html-checker-in-ci). CI-only: it needs Java and a
+    # download, so it stays out of `make ci` and the build.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned Rust toolchain
+        run: make setup
+
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Validate the built site (mirrors `make validate` locally)
+        run: make validate

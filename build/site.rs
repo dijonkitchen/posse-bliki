@@ -522,7 +522,7 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         ));
     }
     let content = format!(
-        "\n<section class=\"h-card\">\n<p>\n{author}\n\
+        "\n<section class=\"h-card\">\n<h1>{author}</h1>\n<p>\n\
 <a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{base}/</a>\n{rel_me}\n</p>\n</section>\n<article>\n{html}\n</article>\n\
 <section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n</section>\n",
         author = author_label(site),
@@ -734,7 +734,8 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     if let Some(&first) = posts.first() {
         rss.push_str(&format!("\n<lastBuildDate>{}</lastBuildDate>", e(&rfc(first))));
     }
-    for &p in &posts {
+    // spec/feeds.md: the RSS feed carries at most the 50 newest posts.
+    for &p in posts.iter().take(50) {
         let n = &notes[p];
         let description = match n.summary() {
             Some(s) => s.to_string(),
