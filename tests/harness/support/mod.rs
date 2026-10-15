@@ -6,6 +6,7 @@
 //! shared; tests that need a modified vault copy it.
 
 pub mod html;
+pub mod iso639;
 pub mod mf2;
 pub mod regex;
 pub mod schema;

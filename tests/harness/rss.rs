@@ -1,7 +1,7 @@
 //! RSS 2.0 feed is well-formed and contains the expected items (spec/feeds.md).
 
 use crate::support::html::Element;
-use crate::support::{config_str, read, site, xml};
+use crate::support::{config_str, iso639, read, site, xml};
 
 fn channel() -> Element {
     let root = xml::parse(&read(&site().join("index.xml"))).expect("index.xml is well-formed XML");
@@ -115,11 +115,8 @@ fn rss_channel_follows_rss_2() {
     );
     let language = text(&ch, "language");
     assert!(
-        !language.is_empty()
-            && language
-                .split('-')
-                .all(|p| (1..=8).contains(&p.len()) && p.bytes().all(|b| b.is_ascii_alphanumeric())),
-        "channel <language> {language:?} is not a language code"
+        iso639::is_valid(&language),
+        "channel <language> {language:?} is not an ISO 639 language code"
     );
     let built = text(&ch, "lastBuildDate");
     assert!(
@@ -208,7 +205,12 @@ fn rss_items_follow_rss_2() {
             "{title}: link {link:?} is not an absolute URL"
         );
         let guid = item.child("guid").expect("guid");
-        if guid.attr("isPermaLink") != Some("false") {
+        let permalink = guid.attr("isPermaLink");
+        assert!(
+            matches!(permalink, None | Some("true" | "false")),
+            "{title}: isPermaLink must be \"true\" or \"false\", not {permalink:?}"
+        );
+        if permalink != Some("false") {
             assert!(
                 is_absolute_http_url(&guid.text()),
                 "{title}: permalink guid is not an absolute URL"
@@ -221,7 +223,53 @@ fn rss_items_follow_rss_2() {
             is_real_rfc822_date(&date),
             "{title}: pubDate {date:?} is not a real date"
         );
+        // Descriptions are plain text (spec/feeds.md). No markup at all also rules
+        // out what the validator warns about in HTML descriptions: script and other
+        // unsafe tags, and relative links or images that readers resolve wrongly.
+        let desc = text(item, "description");
+        assert!(
+            !has_markup(&desc),
+            "{title}: description contains HTML markup: {desc:?}"
+        );
     }
+}
+
+/// `<` that starts a tag, end tag, comment or processing instruction.
+fn has_markup(s: &str) -> bool {
+    s.as_bytes()
+        .windows(2)
+        .any(|w| w[0] == b'<' && (w[1].is_ascii_alphabetic() || matches!(w[1], b'/' | b'!' | b'?')))
+}
+
+#[test]
+fn rss_holds_the_50_newest_posts() {
+    let ch = channel();
+    let items: Vec<&Element> = ch.elements().filter(|e| e.name == "item").collect();
+    assert!(
+        items.len() <= 50,
+        "RSS feed has {} items; the spec allows 50",
+        items.len()
+    );
+    let feed: Vec<String> = items.iter().map(|i| text(i, "link")).collect();
+    let json = posse_bliki_build::json::parse(&read(&site().join("feed.json"))).expect("feed.json");
+    let newest: Vec<String> = json
+        .get("items")
+        .expect("items")
+        .as_arr()
+        .iter()
+        .take(50)
+        .map(|i| i.str_at("url").expect("url").to_string())
+        .collect();
+    assert_eq!(feed, newest, "RSS items are not the 50 newest posts, newest first");
+}
+
+#[test]
+fn feed_check_helpers() {
+    assert!(iso639::is_valid("en") && iso639::is_valid("en-US") && iso639::is_valid("EN"));
+    assert!(!iso639::is_valid("english") && !iso639::is_valid("jp") && !iso639::is_valid(""));
+    assert!(has_markup("a <script>x</script>") && has_markup("see <a href=\"/x/\">x</a>"));
+    assert!(has_markup("<img src=\"pic.png\">") && has_markup("x <!-- y -->"));
+    assert!(!has_markup("a < b and c > d") && !has_markup("plain text"));
 }
 
 #[test]

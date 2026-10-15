@@ -43,9 +43,21 @@ can't call it. Running it ourselves would bring Python back into CI, which
 ADR 0010 removed. Instead the Rust harness (`tests/harness/rss.rs`) checks
 the RSS 2.0 rules that service enforces: required channel elements, absolute
 URLs, a single matching `atom:link rel="self"`, unique permalink guids,
-real RFC 822 dates with the right weekday, and no unknown elements. JSON
-Feed has no official validator; `tests/harness/jsonfeed.rs` checks it
-against the spec.
+`isPermaLink` values, real RFC 822 dates with the right weekday, ISO 639
+language codes, and no unknown elements. Descriptions must carry no markup
+at all, which is stricter than the validator's warnings about script tags
+and relative links in HTML descriptions and covers both. JSON Feed has no
+official validator; `tests/harness/jsonfeed.rs` checks it against the spec.
+
+To find what those checks miss, the real validator (commit 9ce274c) was run
+locally on our feed and on 25 copies with one deliberate break each. Before
+these last additions it caught 7 breaks the harness missed; afterwards the
+harness misses only `<author>` without an email and a non-numeric `<ttl>`,
+two elements the build never writes. The language list in
+`tests/harness/support/iso639.rs` is copied from the validator under its
+MIT license, with the notice kept. Porting the whole validator (about
+10,500 lines covering Atom, RDF, iTunes and more) wasn't worth it for one
+RSS 2.0 feed.
 
 ## Consequences
 

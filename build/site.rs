@@ -734,7 +734,8 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     if let Some(&first) = posts.first() {
         rss.push_str(&format!("\n<lastBuildDate>{}</lastBuildDate>", e(&rfc(first))));
     }
-    for &p in &posts {
+    // spec/feeds.md: the RSS feed carries at most the 50 newest posts.
+    for &p in posts.iter().take(50) {
         let n = &notes[p];
         let description = match n.summary() {
             Some(s) => s.to_string(),
