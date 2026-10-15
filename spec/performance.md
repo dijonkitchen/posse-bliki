@@ -24,8 +24,9 @@ budget, which `scripts/lighthouse.sh` checks in CI.
   text, cut at a word; the home page uses its `summary` or the site tagline;
   list and tag pages say what they list. Alias redirects carry `noindex`
   and need none.
-- **An icon.** Every page links `/favicon.svg`, so browsers don't request
-  `/favicon.ico` and log a 404.
+- **An icon.** The spork from JC's Substack, self-hosted: every page links
+  a 48px PNG and a 180px Apple touch icon, and `/favicon.ico` is at the
+  root for clients that ask for it without a link. No icon request 404s.
 - **Images are self-hosted and sized.** Images live in `content/images/`,
   are referenced as `/images/<file>` and are copied to the output as is.
   The build reads each one's pixel size from its header (PNG, GIF, JPEG,

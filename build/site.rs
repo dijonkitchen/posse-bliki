@@ -16,7 +16,16 @@ use crate::util::{escape as e, py_repr_str};
 use crate::webmention::{self, Mention};
 
 const STYLE_CSS: &str = include_str!("static/style.css");
-const FAVICON_SVG: &str = include_str!("static/favicon.svg");
+/// Site icons, the same spork as the Substack (spec/performance.md).
+/// `favicon.ico` sits at the root for clients that ask for it unprompted.
+const ICONS: &[(&str, &[u8])] = &[
+    ("favicon.ico", include_bytes!("static/icons/favicon.ico")),
+    ("favicon-48x48.png", include_bytes!("static/icons/favicon-48x48.png")),
+    (
+        "apple-touch-icon.png",
+        include_bytes!("static/icons/apple-touch-icon.png"),
+    ),
+];
 
 /// Longest `<meta name="description">` written from a page's own text;
 /// search results show about this much (spec/performance.md).
@@ -376,7 +385,8 @@ fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
 <link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n\
-<link rel=\"icon\" href=\"/favicon.svg\" type=\"image/svg+xml\">\n\
+<link rel=\"icon\" href=\"/favicon-48x48.png\" type=\"image/png\" sizes=\"48x48\">\n\
+<link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
 <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n<nav aria-label=\"Site\">\n\
@@ -925,7 +935,9 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // static assets
     write(&out.join("style.css"), STYLE_CSS)?;
-    write(&out.join("favicon.svg"), FAVICON_SVG)?;
+    for (name, bytes) in ICONS {
+        write_bytes(&out.join(name), bytes)?;
+    }
     copy_images(&content.join("images"), &out.join("images"))?;
     for (name, bytes) in FONTS {
         write_bytes(&out.join("fonts").join(name), bytes)?;

@@ -117,10 +117,13 @@ fn every_indexable_page_has_a_plain_description() {
 #[test]
 fn every_page_has_an_icon() {
     // A declared icon stops browsers requesting /favicon.ico and logging a 404.
-    assert!(site().join("favicon.svg").is_file(), "favicon.svg not emitted");
+    for icon in ["favicon.ico", "favicon-48x48.png", "apple-touch-icon.png"] {
+        assert!(site().join(icon).is_file(), "{icon} not emitted");
+    }
     for (p, html) in html_files() {
         assert!(
-            html.contains("<link rel=\"icon\" href=\"/favicon.svg\" type=\"image/svg+xml\">"),
+            html.contains("<link rel=\"icon\" href=\"/favicon-48x48.png\" type=\"image/png\" sizes=\"48x48\">")
+                && html.contains("<link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">"),
             "{}",
             p.display()
         );
