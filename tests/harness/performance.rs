@@ -3,7 +3,14 @@
 
 use std::fs;
 
-use crate::support::{build, html_files, repo, site, temp_dir};
+use posse_bliki_build::image;
+
+use crate::support::{build, content_dir, html_files, repo, site, temp_dir};
+
+/// Image budget (spec/performance.md): the build ships images as they are,
+/// so a heavy one has to be caught before it is committed.
+const IMAGE_MAX_BYTES: u64 = 200 * 1024;
+const IMAGE_MAX_WIDTH: u32 = 1600;
 
 fn css() -> String {
     fs::read_to_string(site().join("style.css")).expect("read style.css")
@@ -189,4 +196,31 @@ fn missing_self_hosted_image_is_a_build_error() {
     .unwrap();
     let err = build(&content, &temp_dir("missing-image-out"), &[]).expect_err("build should fail");
     assert!(err.contains("nope.png"), "unexpected error: {err}");
+}
+
+#[test]
+fn images_fit_the_budget() {
+    let dir = content_dir().join("images");
+    let mut files: Vec<_> = fs::read_dir(&dir)
+        .expect("read content/images")
+        .flatten()
+        .map(|e| e.path())
+        .collect();
+    files.sort();
+    assert!(!files.is_empty(), "expected images in content/images/");
+    for p in files {
+        let bytes = fs::read(&p).expect("read image");
+        let name = p.file_name().unwrap().to_string_lossy();
+        assert!(
+            bytes.len() as u64 <= IMAGE_MAX_BYTES,
+            "{name} is {} KB; compress it to {} KB or less",
+            bytes.len() / 1024,
+            IMAGE_MAX_BYTES / 1024
+        );
+        let (w, _) = image::size(&bytes).unwrap_or_else(|| panic!("{name}: not a PNG, GIF, JPEG or WebP"));
+        assert!(
+            w <= IMAGE_MAX_WIDTH,
+            "{name} is {w}px wide; resize it to {IMAGE_MAX_WIDTH}px or less"
+        );
+    }
 }

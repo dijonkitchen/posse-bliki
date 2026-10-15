@@ -31,8 +31,10 @@ budget, which `scripts/lighthouse.sh` checks in CI.
   are referenced as `/images/<file>` and are copied to the output as is.
   The build reads each one's pixel size from its header (PNG, GIF, JPEG,
   WebP) and writes `width` and `height`, so nothing shifts as it loads. A
-  missing image is a build error. Keep photos at most about 800px wide and
-  well compressed before adding them.
+  missing image is a build error. The build does not resize or compress,
+  so each file in `content/images/` must be at most 200 KB and 1600px
+  wide; a test fails on anything bigger. Photos look fine on the 66ch
+  column at about 800px.
 - **Only what's needed loads first.** The first image on a page may be the
   largest thing on screen, so it loads eagerly; later images load with
   `loading="lazy"`; all decode with `decoding="async"`. Embeds (`<iframe>`)
