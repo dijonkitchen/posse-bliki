@@ -22,6 +22,7 @@ fn content_type(p: &Path) -> &'static str {
         "gif" => "image/gif",
         "webp" => "image/webp",
         "ico" => "image/x-icon",
+        "webmanifest" => "application/manifest+json",
         "woff2" => "font/woff2",
         _ => "application/octet-stream",
     }

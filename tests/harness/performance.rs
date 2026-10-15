@@ -124,13 +124,22 @@ fn every_indexable_page_has_a_plain_description() {
 #[test]
 fn every_page_has_an_icon() {
     // A declared icon stops browsers requesting /favicon.ico and logging a 404.
-    for icon in ["favicon.ico", "favicon-48x48.png", "apple-touch-icon.png"] {
+    for icon in [
+        "favicon.ico",
+        "icon.svg",
+        "apple-touch-icon.png",
+        "icon-192.png",
+        "icon-512.png",
+        "manifest.webmanifest",
+    ] {
         assert!(site().join(icon).is_file(), "{icon} not emitted");
     }
     for (p, html) in html_files() {
         assert!(
-            html.contains("<link rel=\"icon\" href=\"/favicon-48x48.png\" type=\"image/png\" sizes=\"48x48\">")
-                && html.contains("<link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">"),
+            html.contains("<link rel=\"icon\" href=\"/favicon.ico\" sizes=\"32x32\">")
+                && html.contains("<link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\">")
+                && html.contains("<link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">")
+                && html.contains("<link rel=\"manifest\" href=\"/manifest.webmanifest\">"),
             "{}",
             p.display()
         );

@@ -16,14 +16,24 @@ use crate::util::{escape as e, py_repr_str};
 use crate::webmention::{self, Mention};
 
 const STYLE_CSS: &str = include_str!("static/style.css");
-/// Site icons, the same spork as the Substack (spec/performance.md).
-/// `favicon.ico` sits at the root for clients that ask for it unprompted.
+/// Site icons, after the spork on JC's Substack (spec/performance.md):
+/// `favicon.ico` (32px) for old browsers and clients that request it
+/// unprompted, `icon.svg` for the tab (redrawn solid so it reads at 16px,
+/// with a dark-mode colour), and the original drawing at 180px for iOS and
+/// 192/512px for the web manifest. The manifest's paths are relative, so
+/// they work under a sub-path.
 const ICONS: &[(&str, &[u8])] = &[
     ("favicon.ico", include_bytes!("static/icons/favicon.ico")),
-    ("favicon-48x48.png", include_bytes!("static/icons/favicon-48x48.png")),
+    ("icon.svg", include_bytes!("static/icons/icon.svg")),
     (
         "apple-touch-icon.png",
         include_bytes!("static/icons/apple-touch-icon.png"),
+    ),
+    ("icon-192.png", include_bytes!("static/icons/icon-192.png")),
+    ("icon-512.png", include_bytes!("static/icons/icon-512.png")),
+    (
+        "manifest.webmanifest",
+        include_bytes!("static/icons/manifest.webmanifest"),
     ),
 ];
 
@@ -385,8 +395,10 @@ fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
 <link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n\
-<link rel=\"icon\" href=\"/favicon-48x48.png\" type=\"image/png\" sizes=\"48x48\">\n\
+<link rel=\"icon\" href=\"/favicon.ico\" sizes=\"32x32\">\n\
+<link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\">\n\
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
+<link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
 <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n<nav aria-label=\"Site\">\n\

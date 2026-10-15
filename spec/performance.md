@@ -24,9 +24,15 @@ budget, which `scripts/lighthouse.sh` checks in CI.
   text, cut at a word; the home page uses its `summary` or the site tagline;
   list and tag pages say what they list. Alias redirects carry `noindex`
   and need none.
-- **An icon.** The spork from JC's Substack, self-hosted: every page links
-  a 48px PNG and a 180px Apple touch icon, and `/favicon.ico` is at the
-  root for clients that ask for it without a link. No icon request 404s.
+- **Icons, the modern minimal set.** The spork from JC's Substack,
+  self-hosted, in the four files current guidance calls for: a 32px
+  `/favicon.ico` for old browsers and clients that ask for it unprompted;
+  `/icon.svg` for the tab, redrawn as a solid shape so it reads at 16px,
+  with a light colour in dark mode; `/apple-touch-icon.png` at 180px on an
+  opaque background (iOS paints transparency black); and
+  `/manifest.webmanifest` with 192px and 512px icons for Android home
+  screens. Every page links all four, and the manifest's icon paths are
+  relative so they work under a sub-path. No icon request 404s.
 - **Images are self-hosted and sized.** Images live in `content/images/`,
   are referenced as `/images/<file>` and are copied to the output as is.
   The build reads each one's pixel size from its header (PNG, GIF, JPEG,
