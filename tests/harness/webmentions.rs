@@ -39,9 +39,13 @@ fn no_responses_section_without_webmentions() {
 fn mentioned_site() -> &'static PathBuf {
     static SITE: OnceLock<PathBuf> = OnceLock::new();
     SITE.get_or_init(|| {
-        // Targets use www. and http:// on purpose: they must still match.
+        // Targets flip the www. prefix and use http:// on purpose: they must still match.
         let host = config_str("base_url").split_once("://").unwrap().1.trim_end_matches('/');
-        let target = format!("http://www.{host}/{POST}/");
+        let other = match host.strip_prefix("www.") {
+            Some(bare) => bare.to_string(),
+            None => format!("www.{host}"),
+        };
+        let target = format!("http://{other}/{POST}/");
         let children = [
             format!(r#"{{"wm-property": "like-of", "wm-target": "{target}", "url": "https://m.example/likes/1", "author": {{"name": "Ada", "url": "https://ada.example/"}}}}"#),
             format!(r#"{{"wm-property": "repost-of", "wm-target": "{target}", "url": "https://m.example/boosts/1", "author": {{"name": "Bo", "url": "https://bo.example/"}}}}"#),
