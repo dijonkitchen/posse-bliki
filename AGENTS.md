@@ -22,12 +22,16 @@ anything.
 1. Read relevant specs in `spec/`. Update them if the feature changes
    what "correct" means.
 2. If the change is architectural (new dep, new layer, new external
-   service), add an ADR in `docs/adr/` numbered after the latest one.
+   service) or a lasting choice that lives partly outside the repo
+   (hosting, domain, DNS, third-party accounts), add an ADR in `docs/adr/`
+   named `YYYY-MM-DD-short-slug.md` (see `docs/adr/README.md`).
 3. Add or update a test in `tests/` that fails today and passes when
    the feature is done.
 4. Edit `build/` (Rust, std only — no crates) to make it pass.
 5. Run `make ci` locally. Green before commit.
-6. Commit with a message that names the spec file or ADR number.
+6. Commit with a message that names the spec file or ADR.
+   The commit message carries the *why* of a change; code comments only
+   for a *why* the code and its history can't show, never a restatement.
 
 ## How to fix a bug
 
@@ -43,10 +47,12 @@ make lint                            # rustfmt check + clippy, warnings are erro
 make test                            # harness + unit tests (cargo test)
 make build                           # build site → public/
 make serve                           # build + serve at :8080 with watch
+make validate                        # Nu HTML Checker on built pages (Java, CI job `html`)
 make help                            # list all targets
 ```
 
-The CI workflow runs `make ci` — there is no separate command list. If you
+The CI workflow runs `make ci`, plus `make validate` in its `html` job —
+there is no separate command list. If you
 need to focus a single test:
 
 ```sh

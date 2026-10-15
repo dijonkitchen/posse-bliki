@@ -71,6 +71,8 @@ pub struct Config {
     pub base_url: &'static str,
     pub language: &'static str,
     pub author_name: &'static str,
+    /// Short name shown before the full name, as "JC (Jonathan Chen)" (ADR 2026-10-14-site-and-author-naming).
+    pub author_nickname: &'static str,
     pub author_url: &'static str,
     pub rel_me: &'static [&'static str],
     pub webmention_endpoint: &'static str,
@@ -85,15 +87,16 @@ pub struct Config {
 
 pub fn default_config() -> Config {
     Config {
-        title: "Philosophy as a service",
-        tagline: "Bliki of Jonathan Chen's thoughts.",
-        base_url: "https://dijonkitchen.org",
+        title: "Dijon Kitchen",
+        tagline: "JC's napkin logic bliki. Philosophy as a service.",
+        base_url: "https://www.dijonkitchen.org",
         language: "en",
         author_name: "Jonathan Chen",
-        author_url: "https://dijonkitchen.org",
+        author_nickname: "JC",
+        author_url: "https://www.dijonkitchen.org",
         rel_me: &["https://github.com/dijonkitchen"],
-        webmention_endpoint: "https://webmention.io/dijonkitchen.org/webmention",
-        pingback: "https://webmention.io/dijonkitchen.org/xmlrpc",
+        webmention_endpoint: "https://webmention.io/www.dijonkitchen.org/webmention",
+        pingback: "https://webmention.io/www.dijonkitchen.org/xmlrpc",
         syndicate_to: &[
             ("https://brid.gy/publish/mastodon", "https://brid.gy/publish/webmention"),
             ("https://brid.gy/publish/bluesky", "https://brid.gy/publish/webmention"),
@@ -402,11 +405,12 @@ fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
 <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n<nav aria-label=\"Site\">\n\
-<a class=\"site-title\" href=\"/\">{t}</a>\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
+<div class=\"site-brand\">\n<a class=\"site-title\" href=\"/\">{t}</a>\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
 </nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
+        tagline = e(site.tagline),
         wm = e(site.webmention_endpoint),
         pb = e(site.pingback),
     )
@@ -566,14 +570,14 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     let content = format!(
         "\n<article class=\"h-entry\">\n<header>\n<h1 class=\"p-name\">{title}</h1>\n<p class=\"meta\">\n\
 <a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{human}</time></a>\n\
-{updated}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url p-name\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
+{updated}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
 </p>\n{summary}\n{tags}\n</header>\n<div class=\"e-content\">\n{html}\n</div>\n{synd}{posse}{mentions}\n</article>\n{back}\n",
         title = e(n.title()),
         canon = e(canonical),
         iso = d.iso(),
         human = d.human(),
         base = e(site.base_url),
-        author = e(site.author_name),
+        author = author_label(site),
         html = n.content_html,
         back = backlinks_block(notes, n),
     );
@@ -584,6 +588,16 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         Some(canonical),
         &content,
     ))
+}
+
+/// The author as readers see it, "JC (Jonathan Chen)", marked up so mf2
+/// parsers still read the full name as `p-name` (ADR 2026-10-14-site-and-author-naming).
+fn author_label(site: &Config) -> String {
+    format!(
+        "<span class=\"author\"><span class=\"p-nickname\">{}</span> (<span class=\"p-name\">{}</span>)</span>",
+        e(site.author_nickname),
+        e(site.author_name)
+    )
 }
 
 fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> String {
@@ -621,10 +635,10 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         ));
     }
     let content = format!(
-        "\n<section class=\"h-card\">\n<p>\n<span class=\"p-name\">{author}</span>\n\
+        "\n<section class=\"h-card\">\n<h1>{author}</h1>\n<p>\n\
 <a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{base}/</a>\n{rel_me}\n</p>\n</section>\n<article>\n{html}\n</article>\n\
 <section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n</section>\n",
-        author = e(site.author_name),
+        author = author_label(site),
         base = e(site.base_url),
         html = n.content_html,
     );
@@ -852,7 +866,8 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     if let Some(&first) = posts.first() {
         rss.push_str(&format!("\n<lastBuildDate>{}</lastBuildDate>", e(&rfc(first))));
     }
-    for &p in &posts {
+    // spec/feeds.md: the RSS feed carries at most the 50 newest posts.
+    for &p in posts.iter().take(50) {
         let n = &notes[p];
         let description = match n.summary() {
             Some(s) => s.to_string(),

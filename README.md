@@ -34,6 +34,7 @@ make setup       # install the pinned Rust toolchain (once)
 make ci          # full CI — lint, test, build (mirrors GitHub Actions)
 make test        # run the spec harness and unit tests (cargo test)
 make serve       # build, watch content/, serve at http://localhost:8080
+make validate    # check built pages with the W3C Nu HTML Checker (needs Java)
 make help        # list all targets
 ```
 

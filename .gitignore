@@ -10,3 +10,7 @@ content/.obsidian/graph.json
 # Rust build output
 target/
 node_modules/
+
+# Python bytecode from the old pytest harness
+__pycache__/
+*.pyc

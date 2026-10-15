@@ -310,19 +310,24 @@ th { background: var(--surface-sunken); font-weight: var(--weight-bold); }
   align-items: center;
   min-height: var(--target-min);
 }
+.site-brand { margin-inline-end: auto; }
 .site-header .site-title {
-  margin-inline-end: auto;
   color: var(--text-1);
   font-weight: var(--weight-heavy);
   font-size: var(--size-lg);
   text-decoration: none;
 }
 .site-header .site-title:hover { text-decoration: underline; }
-/* Phones: the title gets its own row and the links share the next. Wider
-   screens fit the title and links on one row. */
-.site-header .site-title { flex-basis: 100%; }
+.site-tagline {
+  margin: 0;
+  color: var(--text-2);
+  font-size: var(--size-sm);
+}
+/* Phones: the title and tagline get their own row and the links share the
+   next. Wider screens fit the brand and links on one row. */
+.site-brand { flex-basis: 100%; }
 @media (min-width: 40rem) {
-  .site-header .site-title { flex-basis: auto; }
+  .site-brand { flex-basis: auto; }
 }
 
 main { padding-block-end: var(--space-7); }
@@ -396,7 +401,7 @@ main { padding-block-end: var(--space-7); }
 
 .h-card { margin-bottom: var(--space-6); }
 .h-card p { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
-.h-card .p-name { font-weight: var(--weight-bold); }
+.h-card .author { font-weight: var(--weight-bold); }
 
 .backlinks {
   margin-top: var(--space-7);

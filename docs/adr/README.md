@@ -4,7 +4,7 @@ Each ADR captures one decision: context, options considered, the choice made,
 and consequences. ADRs are **append-only** — to change a decision, write a new
 ADR that supersedes the old one. Don't edit history.
 
-| # | Title | Status |
+| ADR | Title | Status |
 |---|---|---|
 | [0001](0001-spec-and-harness-over-implementation.md) | Spec + harness as the durable artifact, not the build code | Accepted |
 | [0002](0002-no-quartz-no-vendored-ssg.md) | No Quartz, no vendored SSG | Accepted |
@@ -17,7 +17,18 @@ ADR that supersedes the old one. Don't edit history.
 | [0010](0010-rust-only-toolchain.md) | Rust-only toolchain: harness, tables and a pinned compiler | Accepted |
 | [0011](0011-holocene-years-on-the-page.md) | Holocene years on the page | Accepted |
 | [0016](0016-supply-chain-pinned-actions.md) | Supply chain: SHA-pinned actions, least-privilege tokens | Accepted |
+| [2026-10-11](2026-10-11-nu-html-checker-in-ci.md) | Nu HTML Checker in CI | Accepted |
+| [2026-10-14](2026-10-14-site-and-author-naming.md) | Site and author naming | Accepted |
+| [2026-10-14](2026-10-14-www-as-canonical-host.md) | www as the canonical host | Accepted |
 | [2026-10-14](2026-10-14-mobile-first-readable-output-lighthouse.md) | Mobile first, readable output, a Lighthouse budget | Accepted |
+
+## Naming
+
+New ADRs are named by date, `YYYY-MM-DD-short-slug.md`, so parallel branches
+don't race for the next number. If two land on the same day, the slug keeps
+them apart. Numbered ADRs already merged (0001–0016) keep their numbers:
+they're append-only and linked from specs, code and commit history. Refer to an ADR by its file name stem,
+e.g. `ADR 2026-10-14-www-as-canonical-host`.
 
 ## Format
 
