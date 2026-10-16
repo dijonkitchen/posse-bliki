@@ -53,7 +53,9 @@ budget, which `scripts/lighthouse.sh` checks in CI.
 `make lighthouse` (CI-only, like `make validate`) builds and serves the site
 and runs Lighthouse's default mobile audit on the home page, a post with
 code, a post with a large photo, a post with a video embed, `/notes/` and
-`/about/`. It fails if any page scores below:
+`/about/`. Each page is audited three times and each category is scored by
+the median run (ADR 2026-10-16-lighthouse-median-of-three). It fails if any
+page's median scores below:
 
 | Category | Minimum |
 |---|---|
