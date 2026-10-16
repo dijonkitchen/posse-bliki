@@ -16,6 +16,18 @@ fn home_has_h_card() {
     let cards = home.items_of_type("h-card");
     let card = cards.first().expect("home page has no h-card");
     assert!(!card.prop("name").is_empty(), "h-card.p-name missing");
+    // The page shows only the nickname; parsers still get the full name.
+    let full_name = crate::support::config()
+        .get("author")
+        .and_then(|a| a.str_at("name"))
+        .expect("config has no author.name");
+    assert!(
+        card.prop("name")
+            .iter()
+            .any(|v| matches!(v, Value::Text(t) if t == full_name)),
+        "h-card.p-name is not the author's full name: {:?}",
+        card.prop("name")
+    );
     assert!(!card.prop("url").is_empty(), "h-card.u-url missing");
 }
 

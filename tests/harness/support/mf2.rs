@@ -99,6 +99,7 @@ fn value(prefix: &str, el: &Element) -> String {
         ("u-", "img" | "audio" | "video" | "source") => el.attr("src"),
         ("dt-", "time" | "ins" | "del") => el.attr("datetime"),
         ("p-", "img" | "area") => el.attr("alt"),
+        ("p-" | "u-", "data") => el.attr("value"),
         _ => None,
     };
     attr.map(String::from).unwrap_or_else(|| el.text().trim().to_string())

@@ -31,15 +31,24 @@ hierarchy and landmark structure, which axe doesn't judge.
   page keeps the small title link and its own `<h1>`.
 - The title and tagline move out of `<nav>` into the header. The nav holds
   only the page links.
-- The author h-card becomes one byline under the header: "By JC (Jonathan
-  Chen) · github.com/dijonkitchen". The name links to the home page as the
-  h-card's `u-url u-uid` (a representative h-card, which Bridgy reads); other
-  `rel=me` links show without the scheme.
+- The author h-card becomes one short byline under the header: "By JC"
+  (JC asked for just that, without the GitHub link). "JC" links to the home
+  page as the h-card's `u-url u-uid` (a representative h-card, which Bridgy
+  reads). The full name stays in the markup as
+  `<data class="p-name" value="Jonathan Chen">`, so parsers and search still
+  see it (ADR 2026-10-14-site-and-author-naming). Post bylines keep
+  "JC (Jonathan Chen)".
+- The GitHub profile moves to `<link rel="me">` in the home page's `<head>`:
+  not shown, but still there for identity checks (IndieAuth, rel=me
+  verification).
 
 ## Consequences
 
-- The microformats are unchanged: the h-card keeps `p-name`, `p-nickname`,
-  `u-url`, `u-uid` and `rel=me`.
+- Parsers read the same h-card: `p-name` "Jonathan Chen", `p-nickname` "JC",
+  `u-url` and `u-uid` the site. The GitHub URL is no longer an h-card
+  `u-url`; it stays a page-level `rel=me`.
+- The harness's mf2 parser now reads `p-*`/`u-*` from a `<data>` element's
+  `value`, as the microformats2 parsing spec says.
 - `spec/output-contract.md` now says the home `<h1>` is the site title; the
   harness checks that and that the site brand stays outside `<nav>`.
 

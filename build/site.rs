@@ -402,12 +402,21 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
     let canon = canonical
         .map(|c| format!("<link rel=\"canonical\" href=\"{}\">", e(c)))
         .unwrap_or_default();
+    // Profiles stay machine-readable without showing on the page (ADR 2026-10-16-site-title-heads-home).
+    let rel_me: String = if home {
+        site.rel_me
+            .iter()
+            .map(|u| format!("<link rel=\"me\" href=\"{}\">\n", e(u)))
+            .collect()
+    } else {
+        String::new()
+    };
     format!(
         "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>{title}</title>\n{meta}\n{canon}\n\
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
-<link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n\
+<link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n{rel_me}\
 <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"32x32\">\n\
 <link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\">\n\
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
@@ -581,12 +590,6 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
 
 /// The author as readers see it, "JC (Jonathan Chen)", marked up so mf2
 /// parsers still read the full name as `p-name` (ADR 2026-10-14-site-and-author-naming).
-/// A profile URL as readers see it: `github.com/dijonkitchen`, not the full URL.
-fn link_label(url: &str) -> &str {
-    let rest = url.split_once("://").map_or(url, |(_, r)| r);
-    rest.trim_end_matches('/')
-}
-
 fn author_label(site: &Config) -> String {
     format!(
         "<span class=\"author\"><span class=\"p-nickname\">{}</span> (<span class=\"p-name\">{}</span>)</span>",
@@ -612,17 +615,6 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Stri
 }
 
 fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonical: &str) -> Result<String, String> {
-    let rel_me: String = site
-        .rel_me
-        .iter()
-        .map(|u| {
-            format!(
-                " \u{b7}\n<a class=\"u-url\" rel=\"me\" href=\"{}\">{}</a>",
-                e(u),
-                e(link_label(u))
-            )
-        })
-        .collect();
     let mut recent = String::new();
     for &p in posts.iter().take(10) {
         let pn = &notes[p];
@@ -636,9 +628,11 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         ));
     }
     let content = format!(
-        "\n<p class=\"h-card\">By\n<a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{author}</a>{rel_me}\n</p>\n<article>\n{html}\n</article>\n\
+        "\n<p class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\"><span class=\"p-nickname\">{nick}</span></a>\
+<data class=\"p-name\" value=\"{name}\"></data></p>\n<article>\n{html}\n</article>\n\
 <section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n</section>\n",
-        author = author_label(site),
+        nick = e(site.author_nickname),
+        name = e(site.author_name),
         base = e(site.base_url),
         html = n.content_html,
     );
