@@ -30,6 +30,8 @@ Each item is enforced by `tests/harness/design.rs`.
   `forced-colors`.
 - **Always-visible focus.** `:focus-visible` draws the system's yellow halo
   plus ink ring (`--focus-outline`), with a real outline in forced colours.
+- **Header.** Every page's header shows the site title, linking home, with
+  the tagline under it (ADR 2026-10-14-site-and-author-naming).
 - **Skip link.** The first element in `<body>` is a link to `#main`
   ("Skip to content"), and `<main id="main">` exists on every page.
 - **Readable type.** Atkinson Hyperlegible Next for text, JetBrains Mono for

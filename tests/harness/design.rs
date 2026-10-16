@@ -3,7 +3,7 @@
 
 use std::fs;
 
-use crate::support::{html_files as pages, site};
+use crate::support::{config_str, html_files as pages, site};
 
 const SEMANTIC_TOKENS: &[&str] = &[
     "--text-1",
@@ -248,6 +248,32 @@ fn skip_link_first_in_body() {
         assert!(
             html.contains("<main id=\"main\">"),
             "{}: no <main id=\"main\">",
+            p.display()
+        );
+    }
+}
+
+#[test]
+fn header_shows_title_and_tagline() {
+    let esc = |s: &str| {
+        s.replace('&', "&amp;")
+            .replace('<', "&lt;")
+            .replace('>', "&gt;")
+            .replace('"', "&quot;")
+            .replace('\'', "&#39;")
+    };
+    let brand = format!(
+        "<div class=\"site-brand\">\n<a class=\"site-title\" href=\"/\">{}</a>\n<p class=\"site-tagline\">{}</p>\n</div>",
+        esc(config_str("title")),
+        esc(config_str("tagline"))
+    );
+    for (p, html) in html_files().iter() {
+        if !html.contains("<body>") {
+            continue; // alias redirect stubs carry no header
+        }
+        assert!(
+            html.contains(&brand),
+            "{}: header lacks the title and tagline",
             p.display()
         );
     }
