@@ -47,8 +47,9 @@ In addition to the universal invariants, every post page must:
 
 - Contains exactly one `h-card` with `p-name` (author's full name),
   `p-nickname` (the short name shown first, see ADR 2026-10-14-site-and-author-naming), `u-url` (site),
-  shown as a "By JC" byline, not a heading; the full name is a `<data>`
-  value. `rel=me` profile links are `<link>`s in the `<head>`.
+  shown as a "By JC" byline in the footer, not a heading; the full name is a
+  `<data>` value. `rel=me` profile links are `<link>`s in the `<head>`
+  (ADR 2026-10-16-home-shows-recent-posts).
 - The site title is the page's `<h1>`, in the header (ADR 2026-10-16-site-title-heads-home).
 - Contains an `h-feed` listing recent posts as `h-entry` items.
 

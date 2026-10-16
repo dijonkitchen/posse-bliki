@@ -411,6 +411,16 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
     } else {
         String::new()
     };
+    // The home page's representative h-card, for IndieWeb tools (ADR 2026-10-16-home-shows-recent-posts).
+    let card = if home {
+        format!(
+            "<span class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{}/\">{}</a></span> \u{b7}\n",
+            e(site.base_url),
+            author_label(site)
+        )
+    } else {
+        String::new()
+    };
     format!(
         "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>{title}</title>\n{meta}\n{canon}\n\
@@ -425,7 +435,7 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
-</nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n\
+</nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
@@ -627,12 +637,14 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
             d.human()
         ));
     }
+    let intro = if n.content_html.trim().is_empty() {
+        String::new()
+    } else {
+        format!("\n<article>\n{}\n</article>\n", n.content_html)
+    };
     let content = format!(
-        "\n<p class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{author}</a></p>\n<article>\n{html}\n</article>\n\
-<section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n</section>\n",
-        author = author_label(site),
-        base = e(site.base_url),
-        html = n.content_html,
+        "{intro}\n<section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n\
+<p><a href=\"/notes/\">All notes</a></p>\n</section>\n"
     );
     let meta = match n.summary() {
         Some(s) => description_meta(s),

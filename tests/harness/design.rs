@@ -318,3 +318,25 @@ fn header_shows_title_and_tagline() {
         );
     }
 }
+
+#[test]
+fn home_leads_with_recent_posts() {
+    // ADR 2026-10-16-home-shows-recent-posts: posts first, author in the footer.
+    let home = crate::support::read(&site().join("index.html"));
+    let doc = crate::support::html::parse(&home).expect("valid HTML");
+    let all = doc.descendants();
+    let main = all.iter().find(|e| e.name == "main").expect("no <main>");
+    let first = main.elements().next().expect("empty <main>");
+    assert!(
+        first.classes().contains(&"h-feed"),
+        "home <main> doesn't start with the h-feed"
+    );
+    let footer = all
+        .iter()
+        .find(|e| e.classes().contains(&"site-footer"))
+        .expect("no site footer");
+    assert!(
+        footer.descendants().iter().any(|e| e.classes().contains(&"h-card")),
+        "home h-card is not in the footer"
+    );
+}

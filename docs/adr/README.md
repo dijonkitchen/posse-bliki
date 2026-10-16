@@ -26,6 +26,7 @@ ADR that supersedes the old one. Don't edit history.
 | 2026-10-16 | [Redirect the old /all page to the notes index](2026-10-16-old-all-page.md) | Accepted |
 | 2026-10-16 | [Relative Markdown links between notes](2026-10-16-relative-markdown-links.md) | Accepted |
 | 2026-10-16 | [The site title heads the home page](2026-10-16-site-title-heads-home.md) | Accepted |
+| 2026-10-16 | [The home page shows recent posts](2026-10-16-home-shows-recent-posts.md) | Proposed |
 
 ## Naming
 

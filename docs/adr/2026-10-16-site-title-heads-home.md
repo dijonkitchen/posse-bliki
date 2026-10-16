@@ -31,10 +31,10 @@ hierarchy and landmark structure, which axe doesn't judge.
   page keeps the small title link and its own `<h1>`.
 - The title and tagline move out of `<nav>` into the header. The nav holds
   only the page links.
-- The author h-card becomes one short byline under the header: "By JC"
+- The author h-card becomes one short byline, "By JC"
   (JC asked for just that, without the GitHub link). "JC" links to the home
   page as the h-card's `u-url u-uid` (a representative h-card, which Bridgy
-  reads). The full name stays in the markup as
+  reads). Where it sits is ADR 2026-10-16-home-shows-recent-posts. The full name stays in the markup as
   `<data class="p-name" value="Jonathan Chen">`, so parsers and search still
   see it (ADR 2026-10-14-site-and-author-naming).
 - Post bylines show "JC" the same way, also at JC's request. This replaces

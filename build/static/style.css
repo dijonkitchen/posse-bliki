@@ -451,3 +451,4 @@ main { padding-block-end: var(--space-7); }
 .webmentions li p { margin-bottom: var(--space-1); }
 .webmentions time { color: var(--text-2); font-size: var(--size-sm); }
 .webmentions .p-content { color: var(--text-2); }
+.h-feed > p { margin-top: var(--space-4); }
