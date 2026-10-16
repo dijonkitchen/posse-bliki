@@ -42,6 +42,10 @@ Each item is enforced by `tests/harness/design.rs`.
   the nav holds only links. On the home page the title is the `<h1>` at h1
   size; elsewhere it is a smaller link and the page has its own `<h1>`
   (ADR 2026-10-16-site-title-heads-home).
+- **Browser bars match the page.** Every page declares `theme-color` for
+  light and dark, set to `--surface-page`, so a phone's browser bars blend
+  into the page and it reads full bleed
+  (ADR 2026-10-16-browser-bars-match-page).
 - **Targets.** Navigation links and tags are at least 44px tall.
 - **Mobile first.** The phone layout is the default; see
   [performance.md](performance.md).
