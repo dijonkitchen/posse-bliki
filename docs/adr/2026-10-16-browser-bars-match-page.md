@@ -18,6 +18,10 @@ them, which can differ from the page colour, especially in dark mode.
   for `(prefers-color-scheme: light)` and one for dark, each set to
   `--surface-page` written as hex (`#fbfaf7` and `#15171b`), because
   `theme-color` cannot read CSS variables.
+- `<html>` has the page background as well as `<body>`. JC saw a different
+  colour in dark mode when scrolling past the top or bottom of a page; some
+  phone browsers paint that overscroll area from the root element's own
+  background rather than the one `<body>` passes up to it.
 - The web app manifest keeps `theme_color` and `background_color` as the light
   page colour. A manifest has no dark variant, and it is only used when the
   site is installed.

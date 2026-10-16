@@ -160,7 +160,11 @@
 
 /* --- element defaults --- */
 *, *::before, *::after { box-sizing: border-box; }
+/* The root carries the page colour too, so the area a phone shows when you
+ * scroll past the top or bottom matches the page in light and dark
+ * (ADR 2026-10-16-browser-bars-match-page). */
 html {
+  background: var(--surface-page);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-block: var(--space-8);
