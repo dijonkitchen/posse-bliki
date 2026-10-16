@@ -1,7 +1,7 @@
 //! `bliki` — the posse-bliki static site build. Rust std only, no crates.
 //!
 //! Behaviour is defined by `spec/` and verified by `tests/`; see
-//! docs/adr/0007-rust-build-zero-dependencies.md.
+//! docs/adr/2026-10-06-rust-build-zero-dependencies.md.
 
 use posse_bliki_build::{serve, site, webmention};
 use std::path::{Path, PathBuf};

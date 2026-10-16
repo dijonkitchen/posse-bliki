@@ -10,7 +10,7 @@
 //!
 //! Usage: `gen-tables DATA_DIR UNICODE_VERSION`. It replaced the Python
 //! script that read the same data out of Python's standard library
-//! (docs/adr/0010-rust-only-toolchain.md); the tables are byte-identical.
+//! (docs/adr/2026-10-11-rust-only-toolchain.md); the tables are byte-identical.
 
 use std::fs;
 use std::path::Path;

@@ -1,7 +1,7 @@
 //! A microformats2 parser covering what spec/output-contract.md and
 //! spec/indieweb.md check: root `h-*` items, `p-`/`u-`/`dt-`/`e-`
 //! properties, nested items as property values or children, and `rels`.
-//! It replaces mf2py (ADR 0010). Implied properties and value-class parsing
+//! It replaces mf2py (ADR 2026-10-11-rust-only-toolchain). Implied properties and value-class parsing
 //! are left out: the build always marks properties explicitly.
 
 use super::html::{Element, Node};

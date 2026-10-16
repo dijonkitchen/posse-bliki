@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 # Least privilege: the build job runs repository code, so it only reads.
-# Only the deploy job, which runs no repository code, can publish (ADR 0016).
+# Only the deploy job, which runs no repository code, can publish (ADR 2026-10-14-supply-chain-pinned-actions).
 permissions:
   contents: read
 

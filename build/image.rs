@@ -1,7 +1,7 @@
 //! Pixel size of the images under `content/images/`, read from the file
 //! header (PNG, GIF, JPEG, WebP), so pages can give every `<img>` a `width`
 //! and `height` and the browser can reserve its space before it loads
-//! (spec/performance.md). Standard library only (ADR 0007).
+//! (spec/performance.md). Standard library only (ADR 2026-10-06-rust-build-zero-dependencies).
 
 /// `(width, height)` in pixels, or `None` for a format this doesn't read.
 pub fn size(b: &[u8]) -> Option<(u32, u32)> {

@@ -1,6 +1,6 @@
 //! A JSON Schema (draft 2020-12) validator for the keywords
 //! spec/content-schema.json uses. It replaces the jsonschema package
-//! (ADR 0010) and reads the schema file itself, so the file stays the single
+//! (ADR 2026-10-11-rust-only-toolchain) and reads the schema file itself, so the file stays the single
 //! statement of the front-matter contract and is checked independently of the
 //! build's own `frontmatter::validate`. A keyword it does not know panics, so
 //! a schema change can't be silently ignored. Like jsonschema's default

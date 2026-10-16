@@ -1,5 +1,5 @@
 //! Dates people read show Holocene years; machine-readable dates stay ISO
-//! (spec/output-contract.md, docs/adr/0011-holocene-years-on-the-page.md).
+//! (spec/output-contract.md, docs/adr/2026-10-11-holocene-years-on-the-page.md).
 
 use crate::support::regex::Regex;
 use crate::support::{html_files, read, rel, site};

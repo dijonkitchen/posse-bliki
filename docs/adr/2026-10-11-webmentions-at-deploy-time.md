@@ -1,4 +1,4 @@
-# 0008 — Webmentions at deploy time
+# 2026-10-11 — Webmentions at deploy time
 
 - Date: 2026-10-11
 - Status: Accepted
@@ -6,13 +6,13 @@
 
 ## Context
 
-[ADR 0004](0004-indieweb-standards-supported.md) puts Webmention (via
+[ADR 2026-05-10-indieweb-standards-supported](2026-05-10-indieweb-standards-supported.md) puts Webmention (via
 webmention.io) and ActivityPub (via Bridgy Fed) in scope as external
 services, with only `<link>` tags in our HTML. That receives mentions but
 shows none, and nothing tells Bridgy when a post is published, so nothing
 reaches Mastodon, Bluesky or the fediverse.
 
-[ADR 0007](0007-rust-build-zero-dependencies.md) keeps the build std-only
+[ADR 2026-10-06-rust-build-zero-dependencies](2026-10-06-rust-build-zero-dependencies.md) keeps the build std-only
 Rust, and std has no HTTPS client. The spec also forbids `<script>`, so
 mentions can't be loaded in the browser.
 
@@ -53,7 +53,7 @@ deterministic over its inputs.
 
 ## Alternatives considered
 
-- **HTTPS in the build.** Needs a TLS crate, which ADR 0007 rules out.
+- **HTTPS in the build.** Needs a TLS crate, which ADR 2026-10-06-rust-build-zero-dependencies rules out.
 - **Client-side widget** (webmention.js). Needs JS, which the spec forbids.
 - **Bridgy Fed feed polling only.** Covers the fediverse but not Bridgy
   Publish, and gives no control over which posts go out.

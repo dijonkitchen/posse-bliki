@@ -1,4 +1,4 @@
-# 0005 — Obsidian as editor, no required plugins
+# 2026-05-10 — Obsidian as editor, no required plugins
 
 - Date: 2026-05-10
 - Status: Accepted

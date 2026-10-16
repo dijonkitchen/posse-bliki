@@ -1,4 +1,4 @@
-# 0009 — a11y design system, self-hosted fonts
+# 2026-10-11 — a11y design system, self-hosted fonts
 
 - Date: 2026-10-11
 - Status: Accepted
@@ -30,7 +30,7 @@ Fonts and says to self-host them in production.
 
 - Pages make no third-party requests, so readers aren't tracked by a font
   CDN and the site works offline and where Google Fonts is blocked.
-- The binary grows by the font bytes. The build stays std-only (ADR 0007).
+- The binary grows by the font bytes. The build stays std-only (ADR 2026-10-06-rust-build-zero-dependencies).
 - Characters outside the latin subset fall back to the system font stack.
 - When the design system changes, its values are copied into `style.css` by
   hand; there is no sync.

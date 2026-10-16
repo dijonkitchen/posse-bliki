@@ -30,7 +30,7 @@ Conformance to each item is enforced by a test in `tests/`.
 
 ## Webmentions at deploy time
 
-See [ADR 0008](../docs/adr/0008-webmentions-at-deploy-time.md). The build
+See [ADR 2026-10-11-webmentions-at-deploy-time](../docs/adr/2026-10-11-webmentions-at-deploy-time.md). The build
 does no network I/O; the deploy workflow fetches and sends.
 
 **Receiving.** `bliki --webmentions FILE` reads webmention.io's jf2 export

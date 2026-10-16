@@ -7,7 +7,7 @@
 ## Context
 
 The harness checks the HTML the build emits with a strict std-only parser
-written for this repo (`tests/harness/support/html.rs`, ADR 0010). Both the build and that checker come from the same reading of the
+written for this repo (`tests/harness/support/html.rs`, ADR 2026-10-11-rust-only-toolchain). Both the build and that checker come from the same reading of the
 spec, so a rule misread in one can be misread the same way in the other.
 
 The W3C Nu HTML Checker (vnu) is the reference conformance checker behind
@@ -30,7 +30,7 @@ Run vnu over every built page in CI, as its own `html` job:
   attributes.
 - The job installs Java with `actions/setup-java` (Temurin 21).
 - It is CI-only. It is not part of `make ci`, the build, or `tests/`. The
-  build stays std-only Rust (ADR 0007) and offline, and `make ci` still
+  build stays std-only Rust (ADR 2026-10-06-rust-build-zero-dependencies) and offline, and `make ci` still
   needs nothing but the repo's own toolchain.
 
 ### Feeds
@@ -40,7 +40,7 @@ The W3C Feed Validation Service is the RSS equivalent, and one request per
 push would be a fair load. But it sits behind a Cloudflare bot challenge
 that answers automated requests with a 429 and a JavaScript page, so CI
 can't call it. Running it ourselves would bring Python back into CI, which
-ADR 0010 removed. Instead the Rust harness (`tests/harness/rss.rs`) checks
+ADR 2026-10-11-rust-only-toolchain removed. Instead the Rust harness (`tests/harness/rss.rs`) checks
 the RSS 2.0 rules that service enforces: required channel elements, absolute
 URLs, a single matching `atom:link rel="self"`, unique permalink guids,
 `isPermaLink` values, real RFC 822 dates with the right weekday, ISO 639

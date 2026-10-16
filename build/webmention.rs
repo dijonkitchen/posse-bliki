@@ -2,7 +2,7 @@
 //! fetched by the deploy workflow) and listing the ones to send for new
 //! posts (Bridgy Publish, Bridgy Fed). No network here: std has no HTTPS,
 //! so the workflow does the fetching and posting. See spec/indieweb.md and
-//! docs/adr/0008-webmentions-at-deploy-time.md.
+//! docs/adr/2026-10-11-webmentions-at-deploy-time.md.
 
 use std::collections::HashMap;
 

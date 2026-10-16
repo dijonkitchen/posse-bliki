@@ -1,6 +1,6 @@
 //! A strict HTML5 checker and tree builder, sized to the HTML the build emits.
 //!
-//! It replaces html5lib's strict mode (ADR 0010). It parses the document into a
+//! It replaces html5lib's strict mode (ADR 2026-10-11-rust-only-toolchain). It parses the document into a
 //! tree and rejects the parse errors our output could plausibly produce:
 //! a missing doctype, unclosed or mismatched elements, end tags with no open
 //! element, block elements inside `<p>`, nested `<a>`, duplicate or malformed

@@ -10,16 +10,16 @@ Properties of the build process itself. Each enforced by `tests/`.
   edition in `Cargo.toml`. Dependencies (build, tests or tools) and
   external assets: none. Why: the same input must give the same output on
   every machine, so nothing that varies between machines may feed the
-  build (ADR 0007, ADR 0010).
+  build (ADR 2026-10-06-rust-build-zero-dependencies, ADR 2026-10-11-rust-only-toolchain).
 
 Tested by running the build with no network and verifying success.
 
 ## Supply chain
 
-- `Cargo.lock` lists exactly one package, this one (ADR 0007). Cargo runs
+- `Cargo.lock` lists exactly one package, this one (ADR 2026-10-06-rust-build-zero-dependencies). Cargo runs
   with `--locked`, so a change that would add or update a crate fails.
 - Every third-party GitHub Action is pinned to a full commit SHA, not a
-  tag, because a tag can be moved to new code after review (ADR 0016).
+  tag, because a tag can be moved to new code after review (ADR 2026-10-14-supply-chain-pinned-actions).
 - Every job names an OS release for its runner (`ubuntu-24.04`), never a
   moving `-latest` label.
 - Workflows grant the `GITHUB_TOKEN` the least it needs per job; the job
