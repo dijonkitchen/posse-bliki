@@ -27,6 +27,7 @@ ADR that supersedes the old one. Don't edit history.
 | 2026-10-16 | [Relative Markdown links between notes](2026-10-16-relative-markdown-links.md) | Accepted |
 | 2026-10-16 | [The site title heads the home page](2026-10-16-site-title-heads-home.md) | Accepted |
 | 2026-10-16 | [The home page shows recent posts](2026-10-16-home-shows-recent-posts.md) | Accepted |
+| 2026-10-16 | [Lighthouse budget scored by the median of three runs](2026-10-16-lighthouse-median-of-three.md) | Accepted |
 
 ## Naming
 
