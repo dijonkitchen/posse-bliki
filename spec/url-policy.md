@@ -37,3 +37,9 @@ Aliases produce a tiny HTML page with `<meta http-equiv=refresh>` AND
 static host (no `.htaccess`/`_redirects` required) and is robot-friendly.
 
 Once an alias is added, **never remove it**.
+
+## Old site pages
+
+`/all` and `/all.html`, the Jekyll site's list of every post, redirect to
+`/notes/` the same way (ADR 2026-10-16-old-all-page). Tested in
+`tests/harness/aliases.rs`.
