@@ -55,7 +55,7 @@ critical thinking
 
 Definitely spread your genes if you've done this
 
-[Freedom](/freedom)
+[Freedom](freedom.md)
 to create your ideal world. 
 Maximal luck from being in the [right places](https://en.wikipedia.org/wiki/Focal_point_(game_theory))
 with the right people. 

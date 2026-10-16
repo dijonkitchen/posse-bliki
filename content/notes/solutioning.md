@@ -14,7 +14,7 @@ aliases:
 0. Make it scalable/efficient, if needed
 0. Focus on restarting regularly to adapt incrementally, inexpensively, and continuously
 
-1. [Check-in relationship](/pairing), short-term concerns, long-term objectives
+1. [Check-in relationship](pairing.md), short-term concerns, long-term objectives
 2. Time-box tasks throughout lifecycle
 3. Break down goal into atomic components
 4. Isolate Model-View-Controller structure

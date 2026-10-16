@@ -1,6 +1,6 @@
 {
-  "newLinkFormat": "shortest",
-  "useMarkdownLinks": false,
+  "newLinkFormat": "relative",
+  "useMarkdownLinks": true,
   "newFileLocation": "current",
   "alwaysUpdateLinks": true
 }

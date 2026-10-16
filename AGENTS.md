@@ -86,6 +86,9 @@ cargo test --release --test harness design::focus   # tests whose name matches
 - GitHub Actions are pinned to a full commit SHA with the version in a
   comment (`uses: actions/x@<sha> # v1.2.3`); Dependabot proposes bumps
   (ADR 2026-10-14-supply-chain-pinned-actions).
+- Notes link with relative Markdown paths (`[text](other-note.md)`), not
+  wikilinks or site URLs, so links work on GitHub, in Obsidian and on the
+  site (ADR 2026-10-16-relative-markdown-links).
 - No unresolved wikilinks, no broken internal links — both are build errors.
 - No `<script>` tags in output (the site is JS-free).
 - No minifying or uglifying output: HTML and CSS ship readable so readers can audit and remix them (Stallman's reason; ADR 2026-10-14-mobile-first).

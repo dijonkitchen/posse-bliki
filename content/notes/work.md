@@ -22,7 +22,7 @@ Below was a draft post that I never got to post.
 >
 >Employees are trusted and you get the latest and greatest equipment, including the new MacBook Pro, large monitor, whiteboard standing desk, comfy hoodie, stickers, and really anything else you need can be expensed. They know that developer productivity far outweighs the cost of the equipment.
 >
->Overall, it's still early days, but I'm learning more and more about our product, especially as we dogfood it. I'm currently working on our Insights Squad - helping to make seemingly simple features, like a [fixed header on a spreadsheet](/dependencies), function with lots of work. In the future, I'll be able to work with others in different groups to learn more about different areas of the codebase.
+>Overall, it's still early days, but I'm learning more and more about our product, especially as we dogfood it. I'm currently working on our Insights Squad - helping to make seemingly simple features, like a [fixed header on a spreadsheet](dependencies.md), function with lots of work. In the future, I'll be able to work with others in different groups to learn more about different areas of the codebase.
 >
 >That's all for now! Stay tuned for updates from our [Ship It Day](https://medium.com/@taygrave/shipit-day-how-lanetix-does-the-company-hackathon-3fc5b9497253) coming soon (Spoilers: It's going to be called Maker Day going forward!) or the conferences and books I get from our continuing education budget!
 

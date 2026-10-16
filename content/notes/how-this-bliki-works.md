@@ -8,7 +8,10 @@ summary: A short tour of the conventions used in this vault.
 ## Authoring
 
 1. Open the `content/` folder as an Obsidian vault.
-2. Write notes in plain markdown. Use `[[wiki links]]` to connect ideas.
+2. Write notes in plain markdown. Link notes with relative paths, like
+   `[text](other-note.md)`, so links work on GitHub, in Obsidian and here.
+   In Obsidian, turn off *Settings → Files and links → Use \[\[Wikilinks\]\]*
+   and set *New link format* to *Relative path to file*.
 3. Tags via front-matter (`tags: [foo]`) or inline (`#foo`) — both work.
 
 ## Drafts

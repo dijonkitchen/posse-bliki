@@ -24,6 +24,7 @@ ADR that supersedes the old one. Don't edit history.
 | 2026-10-16 | [Every ADR named by date](2026-10-16-date-named-adrs.md) | Accepted |
 | 2026-10-16 | [Keep the old Substack and Jekyll feed URLs](2026-10-16-old-feed-urls.md) | Accepted |
 | 2026-10-16 | [Redirect the old /all page to the notes index](2026-10-16-old-all-page.md) | Accepted |
+| 2026-10-16 | [Relative Markdown links between notes](2026-10-16-relative-markdown-links.md) | Accepted |
 
 ## Naming
 

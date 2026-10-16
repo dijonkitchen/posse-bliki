@@ -53,8 +53,8 @@ even if it'd be really interesting.
 
 This expanse of diversity 
 can be overwhelming. 
-Or you can embrace the [freedom](/freedom).
-Perhaps [explore](/exploration) the cutting edge 
+Or you can embrace the [freedom](freedom.md).
+Perhaps [explore](exploration.md) the cutting edge 
 for easier problems others aren't looking at yet. 
 No more unique a cutting edge than 
 the intersection of disciplines. 
