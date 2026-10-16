@@ -254,6 +254,49 @@ fn skip_link_first_in_body() {
 }
 
 #[test]
+fn home_heading_is_the_site_title() {
+    // ADR 2026-10-16-site-title-heads-home: the site's name outranks the author's.
+    let home = crate::support::read(&site().join("index.html"));
+    let doc = crate::support::html::parse(&home).expect("valid HTML");
+    let all = doc.descendants();
+    let h1s: Vec<_> = all.iter().filter(|e| e.name == "h1").collect();
+    assert_eq!(h1s.len(), 1, "home page has {} <h1>s", h1s.len());
+    assert_eq!(
+        h1s[0].text(),
+        crate::support::config_str("title"),
+        "home <h1> is not the site title"
+    );
+    let card = all
+        .iter()
+        .find(|e| e.classes().contains(&"h-card"))
+        .expect("home page has no h-card");
+    assert!(
+        !card
+            .descendants()
+            .iter()
+            .any(|e| e.name.starts_with('h') && e.name.len() == 2),
+        "the author h-card holds a heading"
+    );
+}
+
+#[test]
+fn site_brand_sits_outside_the_nav() {
+    // The nav landmark holds only links, so screen readers list it as navigation.
+    for (p, html) in html_files().iter() {
+        let Ok(doc) = crate::support::html::parse(html) else {
+            continue;
+        };
+        for nav in doc.descendants().into_iter().filter(|e| e.name == "nav") {
+            assert!(
+                !nav.descendants().iter().any(|e| e.classes().contains(&"site-brand")),
+                "{}: site brand is inside <nav>",
+                p.display()
+            );
+        }
+    }
+}
+
+#[test]
 fn header_shows_title_and_tagline() {
     let esc = |s: &str| {
         s.replace('&', "&amp;")
@@ -262,19 +305,38 @@ fn header_shows_title_and_tagline() {
             .replace('"', "&quot;")
             .replace('\'', "&#39;")
     };
-    let brand = format!(
-        "<div class=\"site-brand\">\n<a class=\"site-title\" href=\"/\">{}</a>\n<p class=\"site-tagline\">{}</p>\n</div>",
-        esc(config_str("title")),
-        esc(config_str("tagline"))
-    );
+    let title = format!(">{}</a>", esc(config_str("title")));
+    let tagline = format!("<p class=\"site-tagline\">{}</p>", esc(config_str("tagline")));
     for (p, html) in html_files().iter() {
         if !html.contains("<body>") {
             continue; // alias redirect stubs carry no header
         }
         assert!(
-            html.contains(&brand),
+            html.contains(&title) && html.contains(&tagline),
             "{}: header lacks the title and tagline",
             p.display()
         );
     }
+}
+
+#[test]
+fn home_leads_with_recent_posts() {
+    // ADR 2026-10-16-home-shows-recent-posts: posts first, author in the footer.
+    let home = crate::support::read(&site().join("index.html"));
+    let doc = crate::support::html::parse(&home).expect("valid HTML");
+    let all = doc.descendants();
+    let main = all.iter().find(|e| e.name == "main").expect("no <main>");
+    let first = main.elements().next().expect("empty <main>");
+    assert!(
+        first.classes().contains(&"h-feed"),
+        "home <main> doesn't start with the h-feed"
+    );
+    let footer = all
+        .iter()
+        .find(|e| e.classes().contains(&"site-footer"))
+        .expect("no site footer");
+    assert!(
+        footer.descendants().iter().any(|e| e.classes().contains(&"h-card")),
+        "home h-card is not in the footer"
+    );
 }

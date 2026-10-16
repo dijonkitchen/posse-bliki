@@ -18,13 +18,15 @@ ADR that supersedes the old one. Don't edit history.
 | 2026-10-11 | [Rust-only toolchain: harness, tables and a pinned compiler](2026-10-11-rust-only-toolchain.md) | Accepted |
 | 2026-10-11 | [Webmentions at deploy time](2026-10-11-webmentions-at-deploy-time.md) | Accepted |
 | 2026-10-14 | [Mobile first, readable output, a Lighthouse budget](2026-10-14-mobile-first-readable-output-lighthouse.md) | Accepted |
-| 2026-10-14 | [Site and author naming](2026-10-14-site-and-author-naming.md) | Accepted |
+| 2026-10-14 | [Site and author naming](2026-10-14-site-and-author-naming.md) | Accepted; shown author name superseded by [2026-10-16-site-title-heads-home](2026-10-16-site-title-heads-home.md) |
 | 2026-10-14 | [Supply chain: SHA-pinned actions, least-privilege tokens](2026-10-14-supply-chain-pinned-actions.md) | Accepted |
 | 2026-10-14 | [www as the canonical host](2026-10-14-www-as-canonical-host.md) | Accepted |
 | 2026-10-16 | [Every ADR named by date](2026-10-16-date-named-adrs.md) | Accepted |
 | 2026-10-16 | [Keep the old Substack and Jekyll feed URLs](2026-10-16-old-feed-urls.md) | Accepted |
 | 2026-10-16 | [Redirect the old /all page to the notes index](2026-10-16-old-all-page.md) | Accepted |
 | 2026-10-16 | [Relative Markdown links between notes](2026-10-16-relative-markdown-links.md) | Accepted |
+| 2026-10-16 | [The site title heads the home page](2026-10-16-site-title-heads-home.md) | Accepted |
+| 2026-10-16 | [The home page shows recent posts](2026-10-16-home-shows-recent-posts.md) | Accepted |
 
 ## Naming
 
