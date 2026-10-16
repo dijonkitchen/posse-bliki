@@ -36,8 +36,11 @@ hierarchy and landmark structure, which axe doesn't judge.
   page as the h-card's `u-url u-uid` (a representative h-card, which Bridgy
   reads). The full name stays in the markup as
   `<data class="p-name" value="Jonathan Chen">`, so parsers and search still
-  see it (ADR 2026-10-14-site-and-author-naming). Post bylines keep
-  "JC (Jonathan Chen)".
+  see it (ADR 2026-10-14-site-and-author-naming).
+- Post bylines show "JC" the same way, also at JC's request. This replaces
+  the visible "JC (Jonathan Chen)" from ADR 2026-10-14-site-and-author-naming;
+  that ADR's markup (`p-nickname` "JC", `p-name` "Jonathan Chen") and feed
+  author name stand.
 - The GitHub profile moves to `<link rel="me">` in the home page's `<head>`:
   not shown, but still there for identity checks (IndieAuth, rel=me
   verification).

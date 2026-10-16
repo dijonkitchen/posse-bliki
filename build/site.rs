@@ -71,7 +71,7 @@ pub struct Config {
     pub base_url: &'static str,
     pub language: &'static str,
     pub author_name: &'static str,
-    /// Short name shown before the full name, as "JC (Jonathan Chen)" (ADR 2026-10-14-site-and-author-naming).
+    /// Short name readers see in bylines, "JC"; the full name stays in the markup (ADR 2026-10-16-site-title-heads-home).
     pub author_nickname: &'static str,
     pub author_url: &'static str,
     pub rel_me: &'static [&'static str],
@@ -588,11 +588,11 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     ))
 }
 
-/// The author as readers see it, "JC (Jonathan Chen)", marked up so mf2
-/// parsers still read the full name as `p-name` (ADR 2026-10-14-site-and-author-naming).
+/// The author as readers see it, "JC", with the full name kept for mf2
+/// parsers as `p-name` (ADR 2026-10-16-site-title-heads-home).
 fn author_label(site: &Config) -> String {
     format!(
-        "<span class=\"author\"><span class=\"p-nickname\">{}</span> (<span class=\"p-name\">{}</span>)</span>",
+        "<span class=\"p-nickname\">{}</span><data class=\"p-name\" value=\"{}\"></data>",
         e(site.author_nickname),
         e(site.author_name)
     )
@@ -628,11 +628,9 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         ));
     }
     let content = format!(
-        "\n<p class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\"><span class=\"p-nickname\">{nick}</span></a>\
-<data class=\"p-name\" value=\"{name}\"></data></p>\n<article>\n{html}\n</article>\n\
+        "\n<p class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{author}</a></p>\n<article>\n{html}\n</article>\n\
 <section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n</section>\n",
-        nick = e(site.author_nickname),
-        name = e(site.author_name),
+        author = author_label(site),
         base = e(site.base_url),
         html = n.content_html,
     );

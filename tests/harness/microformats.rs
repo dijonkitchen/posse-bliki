@@ -10,6 +10,14 @@ fn parsed(path: &Path) -> mf2::Parsed {
     mf2::parse(&html::parse(&read(path)).expect("valid HTML"))
 }
 
+/// Bylines show only the nickname; parsers still get the full name.
+fn full_name() -> &'static str {
+    crate::support::config()
+        .get("author")
+        .and_then(|a| a.str_at("name"))
+        .expect("config has no author.name")
+}
+
 #[test]
 fn home_has_h_card() {
     let home = parsed(&site().join("index.html"));
@@ -17,10 +25,7 @@ fn home_has_h_card() {
     let card = cards.first().expect("home page has no h-card");
     assert!(!card.prop("name").is_empty(), "h-card.p-name missing");
     // The page shows only the nickname; parsers still get the full name.
-    let full_name = crate::support::config()
-        .get("author")
-        .and_then(|a| a.str_at("name"))
-        .expect("config has no author.name");
+    let full_name = full_name();
     assert!(
         card.prop("name")
             .iter()
@@ -73,7 +78,13 @@ fn h_entry_author_is_h_card() {
         let doc = parsed(&f);
         let entry = doc.items_of_type("h-entry")[0];
         match entry.prop("author").first() {
-            Some(Value::Item(card)) if card.has_type("h-card") => {}
+            Some(Value::Item(card)) if card.has_type("h-card") => assert!(
+                card.prop("name")
+                    .iter()
+                    .any(|v| matches!(v, Value::Text(t) if t == full_name())),
+                "{}: byline h-card.p-name is not the author's full name",
+                rel(&f, site())
+            ),
             other => panic!("{}: p-author is not an h-card: {other:?}", rel(&f, site())),
         }
     }

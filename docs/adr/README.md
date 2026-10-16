@@ -18,7 +18,7 @@ ADR that supersedes the old one. Don't edit history.
 | 2026-10-11 | [Rust-only toolchain: harness, tables and a pinned compiler](2026-10-11-rust-only-toolchain.md) | Accepted |
 | 2026-10-11 | [Webmentions at deploy time](2026-10-11-webmentions-at-deploy-time.md) | Accepted |
 | 2026-10-14 | [Mobile first, readable output, a Lighthouse budget](2026-10-14-mobile-first-readable-output-lighthouse.md) | Accepted |
-| 2026-10-14 | [Site and author naming](2026-10-14-site-and-author-naming.md) | Accepted |
+| 2026-10-14 | [Site and author naming](2026-10-14-site-and-author-naming.md) | Accepted; shown author name superseded by [2026-10-16-site-title-heads-home](2026-10-16-site-title-heads-home.md) |
 | 2026-10-14 | [Supply chain: SHA-pinned actions, least-privilege tokens](2026-10-14-supply-chain-pinned-actions.md) | Accepted |
 | 2026-10-14 | [www as the canonical host](2026-10-14-www-as-canonical-host.md) | Accepted |
 | 2026-10-16 | [Every ADR named by date](2026-10-16-date-named-adrs.md) | Accepted |
