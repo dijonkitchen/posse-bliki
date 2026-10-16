@@ -423,7 +423,7 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
     };
     format!(
         "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
-<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>{title}</title>\n{meta}\n{canon}\n\
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n{THEME_COLOR}<title>{title}</title>\n{meta}\n{canon}\n\
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
 <link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n{rel_me}\
@@ -597,6 +597,12 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         &content,
     ))
 }
+
+/// Paints the phone's browser bars in the page colour, light and dark, so the
+/// page reads full bleed (ADR 2026-10-16-browser-bars-match-page). These are
+/// --surface-page as hex, since theme-color takes no CSS variables.
+const THEME_COLOR: &str = "<meta name=\"theme-color\" media=\"(prefers-color-scheme: light)\" content=\"#fbfaf7\">\n\
+<meta name=\"theme-color\" media=\"(prefers-color-scheme: dark)\" content=\"#15171b\">\n";
 
 /// The author as readers see it, "JC", with the full name kept for mf2
 /// parsers as `p-name` (ADR 2026-10-16-site-title-heads-home).

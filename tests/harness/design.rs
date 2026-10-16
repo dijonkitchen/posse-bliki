@@ -340,3 +340,21 @@ fn home_leads_with_recent_posts() {
         "home h-card is not in the footer"
     );
 }
+
+#[test]
+fn browser_bars_match_the_page() {
+    // ADR 2026-10-16-browser-bars-match-page: theme-color repeats
+    // --surface-page as hex, so it must track the stylesheet's light value.
+    let css = css();
+    assert!(
+        css.contains("--paper: #fbfaf7;"),
+        "--paper changed; update THEME_COLOR in build/site.rs"
+    );
+    for (p, html) in html_files() {
+        for (scheme, colour) in [("light", "#fbfaf7"), ("dark", "#15171b")] {
+            let tag =
+                format!("<meta name=\"theme-color\" media=\"(prefers-color-scheme: {scheme})\" content=\"{colour}\">");
+            assert!(html.contains(&tag), "{} lacks {scheme} theme-color", p.display());
+        }
+    }
+}
