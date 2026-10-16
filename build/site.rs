@@ -629,12 +629,24 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
     for &p in posts.iter().take(10) {
         let pn = &notes[p];
         let d = pn.post_date()?;
+        // Title words alone say little ("raw", "meld"), so each post shows a
+        // short excerpt (ADR 2026-10-16-home-post-excerpts).
+        let excerpt = match pn.summary() {
+            Some(s) => s.to_string(),
+            None => text::excerpt(&pn.content_html, DESCRIPTION_MAX),
+        };
+        let excerpt = if excerpt.is_empty() {
+            String::new()
+        } else {
+            format!("<p class=\"p-summary\">{}</p>\n", e(&excerpt))
+        };
         recent.push_str(&format!(
-            "\n<li class=\"h-entry\">\n<a class=\"u-url p-name\" href=\"{}\">{}</a>\n<time class=\"dt-published\" datetime=\"{}\">{}</time>\n</li>\n",
+            "\n<li class=\"h-entry\">\n<a class=\"u-url p-name\" href=\"{}\">{}</a>\n<time class=\"dt-published\" datetime=\"{}\">{}</time>\n{}</li>\n",
             e(&pn.url),
             e(pn.title()),
             d.iso(),
-            d.human()
+            d.human(),
+            excerpt
         ));
     }
     let intro = if n.content_html.trim().is_empty() {

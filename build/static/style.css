@@ -406,6 +406,7 @@ main { padding-block-end: var(--space-7); }
 }
 .h-feed li > a { font-weight: var(--weight-bold); }
 .h-feed time, .h-feed .p-summary { color: var(--text-2); }
+.h-feed li > p.p-summary { margin: var(--space-1) 0 0; }
 .h-feed time {
   margin-inline-start: var(--space-2);
   font-size: var(--size-sm);
