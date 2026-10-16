@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!--
+    Site icon: the spork from JC's Substack, redrawn as a solid shape so it
+    reads at 16px, where the original line drawing turns to grey mush.
+    Ink on light tabs, paper on dark ones (spec/performance.md).
+  -->
+  <style>
+    .spork { fill: #1e232c; }
+    @media (prefers-color-scheme: dark) {
+      .spork { fill: #fbfaf7; }
+    }
+  </style>
+  <defs>
+    <!-- The two gaps between the three tines. -->
+    <mask id="tines">
+      <rect width="32" height="32" fill="#fff"/>
+      <rect x="13.3" y="0" width="1.4" height="5.2" rx="0.7" fill="#000"/>
+      <rect x="17.3" y="0" width="1.4" height="5.2" rx="0.7" fill="#000"/>
+    </mask>
+  </defs>
+  <g class="spork" transform="rotate(40 16 16)">
+    <path mask="url(#tines)" d="M9.6 5.6 C9.6 3.2 11 1.8 13 1.8 H19 C21 1.8 22.4 3.2 22.4 5.6 V8.6 C22.4 13 19.6 16.4 16 16.4 C12.4 16.4 9.6 13 9.6 8.6 Z"/>
+    <rect x="14.3" y="14" width="3.4" height="16.4" rx="1.7"/>
+  </g>
+</svg>

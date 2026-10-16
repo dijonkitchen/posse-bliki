@@ -48,3 +48,29 @@ jobs:
 
       - name: Validate the built site (mirrors `make validate` locally)
         run: make validate
+
+  lighthouse:
+    # Lighthouse budget on the built pages (ADR 2026-10-14-mobile-first, spec/performance.md).
+    # CI-only: it needs Node and Chrome, so it stays out of `make ci` and
+    # the build. The runner image ships Chrome.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned Rust toolchain
+        run: make setup
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Lighthouse budget (mirrors `make lighthouse` locally)
+        run: make lighthouse
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: _lighthouse/*.json

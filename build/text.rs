@@ -194,6 +194,33 @@ pub fn strip_html(html: &str) -> String {
     out
 }
 
+/// Plain-text excerpt of rendered HTML for `<meta name="description">`:
+/// tags stripped, the markdown renderer's entities decoded, whitespace
+/// collapsed, and cut at a word boundary to at most `max` characters
+/// (an ellipsis marks a cut).
+pub fn excerpt(html: &str, max: usize) -> String {
+    let text = strip_html(html)
+        .replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", "\"")
+        .replace("&#39;", "'")
+        .replace("&amp;", "&");
+    let words: Vec<&str> = text.split_whitespace().collect();
+    let mut out = String::new();
+    for w in &words {
+        let len = out.chars().count() + usize::from(!out.is_empty()) + w.chars().count();
+        if len > max.saturating_sub(1) {
+            out.push('\u{2026}');
+            return out;
+        }
+        if !out.is_empty() {
+            out.push(' ');
+        }
+        out.push_str(w);
+    }
+    out
+}
+
 /// `re.findall(r'href="([^"#]+)(?:#[^"]*)?"', html)`
 pub fn hrefs(html: &str) -> Vec<String> {
     let mut out = Vec::new();
@@ -222,6 +249,16 @@ pub fn hrefs(html: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn excerpts() {
+        assert_eq!(
+            excerpt("<p>Fish &amp; chips</p>\n<p>are  &quot;good&quot;</p>", 160),
+            "Fish & chips are \"good\""
+        );
+        assert_eq!(excerpt("<p>one two three four</p>", 12), "one two\u{2026}");
+        assert_eq!(excerpt("", 160), "");
+    }
 
     #[test]
     fn slugs() {

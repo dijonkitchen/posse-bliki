@@ -88,5 +88,7 @@ cargo test --release --test harness design::focus   # tests whose name matches
   (ADR 0016).
 - No unresolved wikilinks, no broken internal links — both are build errors.
 - No `<script>` tags in output (the site is JS-free).
+- No minifying or uglifying output: HTML and CSS ship readable so readers can audit and remix them (Stallman's reason; ADR 2026-10-14-mobile-first).
+- Mobile-first CSS: `min-width` queries only (spec/performance.md).
 - No editing snapshot files in `tests/snapshots/` without a corresponding
   spec change explaining why output changed.

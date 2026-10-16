@@ -1,0 +1,12 @@
+{
+  "name": "Philosophy as a service",
+  "short_name": "PaaS",
+  "icons": [
+    { "src": "icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ],
+  "background_color": "#fbfaf7",
+  "theme_color": "#fbfaf7",
+  "display": "browser",
+  "start_url": "./"
+}

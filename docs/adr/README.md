@@ -20,6 +20,7 @@ ADR that supersedes the old one. Don't edit history.
 | [2026-10-11](2026-10-11-nu-html-checker-in-ci.md) | Nu HTML Checker in CI | Accepted |
 | [2026-10-14](2026-10-14-site-and-author-naming.md) | Site and author naming | Accepted |
 | [2026-10-14](2026-10-14-www-as-canonical-host.md) | www as the canonical host | Accepted |
+| [2026-10-14](2026-10-14-mobile-first-readable-output-lighthouse.md) | Mobile first, readable output, a Lighthouse budget | Accepted |
 
 ## Naming
 

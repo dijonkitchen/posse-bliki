@@ -13,6 +13,9 @@ The machine-readable schema lives at [`content-schema.json`](content-schema.json
 | `content/<page>.md` | page | `page.html` | no |
 | `content/notes/**/*.md` | post | `post.html` | yes |
 
+Images go in `content/images/` and are linked as `/images/<file>`
+(see [performance.md](performance.md)).
+
 The directory determines the kind. No `type:` field needed in front-matter.
 
 ## Front-matter fields
@@ -22,7 +25,7 @@ The directory determines the kind. No `type:` field needed in front-matter.
 | `title` | string | yes | Maps to `<title>` and `p-name`. |
 | `date` | ISO-8601 date | yes for posts | Maps to `dt-published`. Pages may omit. |
 | `updated` | ISO-8601 date | no | Maps to `dt-updated`. |
-| `summary` | string | no | Maps to `p-summary` and `<meta name=description>`. |
+| `summary` | string | no | Maps to `p-summary` and `<meta name=description>` (else an excerpt of the text is used). |
 | `tags` | string[] | no | Maps to `p-category` per tag. |
 | `draft` | bool | no | If `true`, excluded from build entirely. |
 | `aliases` | string[] | no | Old slugs that should redirect to this page. |

@@ -1,5 +1,5 @@
 ---
-title: information
+title: Information and disinformation
 date: 2020-01-23
 aliases:
   - /information/

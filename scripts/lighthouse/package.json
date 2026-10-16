@@ -1,0 +1,8 @@
+{
+  "name": "posse-bliki-lighthouse",
+  "private": true,
+  "description": "CI-only Lighthouse budget (scripts/lighthouse.sh, ADR 2026-10-14-mobile-first). Locked by package-lock.json; installed with npm ci.",
+  "dependencies": {
+    "lighthouse": "12.8.2"
+  }
+}

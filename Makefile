@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup lint test build serve ci validate clean tables
+.PHONY: help setup lint test build serve ci validate clean tables lighthouse
 
 PORT ?= 8080
 OUT  ?= public
@@ -48,6 +48,9 @@ $(VNU_JAR):
 	mv target/vnu/package/build/dist/vnu.jar $@
 	rm -rf target/vnu/package target/vnu/vnu.tgz
 
+lighthouse: ## Lighthouse budget on the built site (CI-only; needs Node + Chrome, ADR 2026-10-14-mobile-first)
+	scripts/lighthouse.sh
+
 tables: ## Regenerate build/entities.rs and build/unicode.rs (downloads the source data)
 	mkdir -p $(TABLES_DATA)
 	curl -sSfL -o $(TABLES_DATA)/entities.json https://html.spec.whatwg.org/entities.json
@@ -57,4 +60,4 @@ tables: ## Regenerate build/entities.rs and build/unicode.rs (downloads the sour
 	cargo fmt
 
 clean: ## Remove build artifacts
-	rm -rf public target
+	rm -rf public target _lighthouse
