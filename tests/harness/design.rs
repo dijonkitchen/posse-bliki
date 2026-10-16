@@ -252,3 +252,46 @@ fn skip_link_first_in_body() {
         );
     }
 }
+
+#[test]
+fn home_heading_is_the_site_title() {
+    // ADR 2026-10-16-site-title-heads-home: the site's name outranks the author's.
+    let home = crate::support::read(&site().join("index.html"));
+    let doc = crate::support::html::parse(&home).expect("valid HTML");
+    let all = doc.descendants();
+    let h1s: Vec<_> = all.iter().filter(|e| e.name == "h1").collect();
+    assert_eq!(h1s.len(), 1, "home page has {} <h1>s", h1s.len());
+    assert_eq!(
+        h1s[0].text(),
+        crate::support::config_str("title"),
+        "home <h1> is not the site title"
+    );
+    let card = all
+        .iter()
+        .find(|e| e.classes().contains(&"h-card"))
+        .expect("home page has no h-card");
+    assert!(
+        !card
+            .descendants()
+            .iter()
+            .any(|e| e.name.starts_with('h') && e.name.len() == 2),
+        "the author h-card holds a heading"
+    );
+}
+
+#[test]
+fn site_brand_sits_outside_the_nav() {
+    // The nav landmark holds only links, so screen readers list it as navigation.
+    for (p, html) in html_files().iter() {
+        let Ok(doc) = crate::support::html::parse(html) else {
+            continue;
+        };
+        for nav in doc.descendants().into_iter().filter(|e| e.name == "nav") {
+            assert!(
+                !nav.descendants().iter().any(|e| e.classes().contains(&"site-brand")),
+                "{}: site brand is inside <nav>",
+                p.display()
+            );
+        }
+    }
+}

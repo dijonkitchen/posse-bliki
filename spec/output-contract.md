@@ -47,7 +47,8 @@ In addition to the universal invariants, every post page must:
 
 - Contains exactly one `h-card` with `p-name` (author's full name),
   `p-nickname` (the short name shown first, see ADR 2026-10-14-site-and-author-naming), `u-url` (site),
-  and any `rel=me` links. The author label is the page's `<h1>`.
+  and any `rel=me` links, shown as a byline, not a heading.
+- The site title is the page's `<h1>`, in the header (ADR 2026-10-16-site-title-heads-home).
 - Contains an `h-feed` listing recent posts as `h-entry` items.
 
 ## List pages (`/notes/`, `/tags/<tag>/`)

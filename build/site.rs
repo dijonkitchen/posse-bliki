@@ -388,7 +388,17 @@ fn apply_base_path(dir: &Path, prefix: &str) -> Result<(), String> {
 // --- templates ---
 
 fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str) -> String {
+    page(site, title, meta, canonical, content, false)
+}
+
+/// `home` makes the site title the page's `<h1>` (ADR 2026-10-16-site-title-heads-home).
+fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str, home: bool) -> String {
     let t = e(site.title);
+    let brand = if home {
+        format!("<h1 class=\"site-title\"><a href=\"/\" aria-current=\"page\">{t}</a></h1>")
+    } else {
+        format!("<a class=\"site-title\" href=\"/\">{t}</a>")
+    };
     let canon = canonical
         .map(|c| format!("<link rel=\"canonical\" href=\"{}\">", e(c)))
         .unwrap_or_default();
@@ -404,8 +414,8 @@ fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
 <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
-<header class=\"site-header\">\n<nav aria-label=\"Site\">\n\
-<div class=\"site-brand\">\n<a class=\"site-title\" href=\"/\">{t}</a>\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
+<header class=\"site-header\">\n\
+<div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
 </nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
@@ -571,6 +581,12 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
 
 /// The author as readers see it, "JC (Jonathan Chen)", marked up so mf2
 /// parsers still read the full name as `p-name` (ADR 2026-10-14-site-and-author-naming).
+/// A profile URL as readers see it: `github.com/dijonkitchen`, not the full URL.
+fn link_label(url: &str) -> &str {
+    let rest = url.split_once("://").map_or(url, |(_, r)| r);
+    rest.trim_end_matches('/')
+}
+
 fn author_label(site: &Config) -> String {
     format!(
         "<span class=\"author\"><span class=\"p-nickname\">{}</span> (<span class=\"p-name\">{}</span>)</span>",
@@ -599,7 +615,13 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
     let rel_me: String = site
         .rel_me
         .iter()
-        .map(|u| format!("\n<a class=\"u-url\" rel=\"me\" href=\"{}\">{}</a>\n", e(u), e(u)))
+        .map(|u| {
+            format!(
+                " \u{b7}\n<a class=\"u-url\" rel=\"me\" href=\"{}\">{}</a>",
+                e(u),
+                e(link_label(u))
+            )
+        })
         .collect();
     let mut recent = String::new();
     for &p in posts.iter().take(10) {
@@ -614,8 +636,7 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         ));
     }
     let content = format!(
-        "\n<section class=\"h-card\">\n<h1>{author}</h1>\n<p>\n\
-<a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{base}/</a>\n{rel_me}\n</p>\n</section>\n<article>\n{html}\n</article>\n\
+        "\n<p class=\"h-card\">By\n<a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{author}</a>{rel_me}\n</p>\n<article>\n{html}\n</article>\n\
 <section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n</section>\n",
         author = author_label(site),
         base = e(site.base_url),
@@ -625,7 +646,7 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         Some(s) => description_meta(s),
         None => description_meta(site.tagline),
     };
-    Ok(base(site, &e(site.title), &meta, Some(canonical), &content))
+    Ok(page(site, &e(site.title), &meta, Some(canonical), &content, true))
 }
 
 fn render_list(

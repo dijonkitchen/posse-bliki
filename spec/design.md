@@ -36,6 +36,10 @@ Each item is enforced by `tests/harness/design.rs`.
   code, 18px (`1.125rem`) body, nothing below 16px, line-height 1.6, text
   measure 66ch. Sizes are in `rem` so the reader's own text-size setting
   scales the page.
+- **Header.** The site title and tagline sit in the header outside `<nav>`;
+  the nav holds only links. On the home page the title is the `<h1>` at h1
+  size; elsewhere it is a smaller link and the page has its own `<h1>`
+  (ADR 2026-10-16-site-title-heads-home).
 - **Targets.** Navigation links and tags are at least 44px tall.
 - **Mobile first.** The phone layout is the default; see
   [performance.md](performance.md).

@@ -298,12 +298,15 @@ th { background: var(--surface-sunken); font-weight: var(--weight-bold); }
 .skip-link:focus { transform: none; }
 
 .site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
   padding-block: var(--space-5) var(--space-6);
 }
 .site-header nav {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: var(--space-2) var(--space-5);
 }
 .site-header nav a {
@@ -312,18 +315,28 @@ th { background: var(--surface-sunken); font-weight: var(--weight-bold); }
   min-height: var(--target-min);
 }
 .site-brand { margin-inline-end: auto; }
-.site-header .site-title {
-  color: var(--text-1);
+.site-title {
+  margin: 0;
   font-weight: var(--weight-heavy);
   font-size: var(--size-lg);
+}
+.site-title, .site-title a {
+  color: var(--text-1);
   text-decoration: none;
 }
-.site-header .site-title:hover { text-decoration: underline; }
+.site-title:hover, .site-title a:hover { text-decoration: underline; }
+/* Home: the title is the page's h1, so it takes the h1 size and outranks
+   every heading below it (ADR 2026-10-16-site-title-heads-home). */
+h1.site-title { font-size: var(--size-2xl); }
+@media (min-width: 40rem) {
+  h1.site-title { font-size: var(--size-3xl); }
+}
 .site-tagline {
   margin: 0;
   color: var(--text-2);
   font-size: var(--size-sm);
 }
+h1.site-title + .site-tagline { font-size: var(--size-base); }
 /* Phones: the title and tagline get their own row and the links share the
    next. Wider screens fit the brand and links on one row. */
 .site-brand { flex-basis: 100%; }
@@ -400,9 +413,7 @@ main { padding-block-end: var(--space-7); }
   white-space: nowrap;
 }
 
-.h-card { margin-bottom: var(--space-6); }
-.h-card p { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
-.h-card .author { font-weight: var(--weight-bold); }
+.h-card { color: var(--text-2); }
 
 .backlinks {
   margin-top: var(--space-7);
