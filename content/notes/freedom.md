@@ -29,7 +29,7 @@ Be a creative.
 
 Don't need to take over the world.
 There's room in the world
-for a [diverse](/diversity) number of businesses.
+for a [diverse](diversity.md) number of businesses.
 Many big businesses doing the same thing;
 even more smaller businesses doing something similar,
 but unique in specialization or localization.

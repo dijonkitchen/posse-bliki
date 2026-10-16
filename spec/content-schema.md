@@ -39,13 +39,27 @@ Always `YYYY-MM-DD` (or full ISO-8601 with time). Obsidian's daily-note format
 is fine. Strings only — no implicit YAML date types, since their stringification
 varies by parser.
 
-## Wikilinks
+## Links between notes
 
-Body content uses Obsidian wikilinks: `[[note-name]]` or `[[note-name|alt text]]`.
+Notes link with standard Markdown links to the file, relative to the linking
+note: `[text](other-note.md)`, `[text](../about.md#heading)`. The same path
+works on GitHub, in Obsidian and on the site (ADR 2026-10-16-relative-markdown-links).
 
+The build rewrites each relative `.md` href to the linked note's URL, with a
+`#heading` slugged the same way wikilink anchors are. A link to a file that isn't a published
+note (missing, a draft, or outside `content/`) is a build error — no silent
+broken links.
+
+Content in this repo uses no wikilinks and no site-URL links (`/other-note`)
+between notes; the harness fails on either.
+
+### Wikilinks (promoted notes)
+
+The build still resolves Obsidian wikilinks, `[[note-name]]` or
+`[[note-name|alt text]]`, so a note promoted from a wikilink vault builds.
 A wikilink resolves by **filename stem** across the entire vault. Stems must be
 unique (the build fails if two notes have the same stem). Unresolved wikilinks
-are a build error — no silent broken links.
+are a build error. Convert them to Markdown links before committing.
 
 ## Tags
 

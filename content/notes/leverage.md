@@ -35,4 +35,4 @@ Global warming may be one of those problems.
 It's one of those things that if we could have successfully completed tomorrow, 
 we'd probably wouldn't regret. 
 
-Related: [risk](/risk)
+Related: [risk](risk.md)

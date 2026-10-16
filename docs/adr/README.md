@@ -22,6 +22,7 @@ ADR that supersedes the old one. Don't edit history.
 | 2026-10-14 | [Supply chain: SHA-pinned actions, least-privilege tokens](2026-10-14-supply-chain-pinned-actions.md) | Accepted |
 | 2026-10-14 | [www as the canonical host](2026-10-14-www-as-canonical-host.md) | Accepted |
 | 2026-10-16 | [Every ADR named by date](2026-10-16-date-named-adrs.md) | Accepted |
+| 2026-10-16 | [Relative Markdown links between notes](2026-10-16-relative-markdown-links.md) | Accepted |
 
 ## Naming
 

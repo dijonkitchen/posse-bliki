@@ -13,7 +13,7 @@ may streamline all those other actions
 for what really matters. 
 You still need to figure out what really matters though.
 
-This [process](./process)
+This [process](process.md)
 may squeeze out all creativity
 for the intermediate things,
 but allow for creativity to grow

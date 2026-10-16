@@ -85,7 +85,7 @@ can and will happen.
 
 Related to maybe only moving 
 a little ahead of the herd 
-of [programming languages](/programming-language).
+of [programming languages](programming-language.md).
 
 ## References
 
