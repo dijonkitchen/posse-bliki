@@ -23,9 +23,11 @@ outline and slant: a bowl with a round spoon tip, like a real spork,
 rounding into a narrow neck, three short tines cut into the tip by two
 slots wide enough to stay open at 16px, and a handle that widens toward
 its end. No outlines, hairlines or shading. Ink `#1e232c` on light tabs
-and paper `#fbfaf7` on dark ones, both over 15:1 against their background. `favicon.ico` is
-rendered from the same SVG at 32px. The 180px, 192px and 512px icons stay
-the picture itself, where its detail survives.
+and paper `#fbfaf7` on dark ones, both over 15:1 against their
+background. `favicon.ico` is rendered from the same SVG at 32px. The
+180px, 192px and 512px icons stay the picture itself, where its detail
+survives. Three tines, as in the picture: a four-tine version was tried,
+and its slots blur together at 32px.
 
 ## Consequences
 
