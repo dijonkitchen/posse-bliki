@@ -1,6 +1,6 @@
 //! A small backtracking regex engine for the `pattern` keywords in
 //! spec/content-schema.json, so the schema file stays the single source of
-//! those rules (ADR 0010). Supports `^ $ . \d \w \s` and escaped literals,
+//! those rules (ADR 2026-10-11-rust-only-toolchain). Supports `^ $ . \d \w \s` and escaped literals,
 //! classes `[a-z0-9-]` and `[^...]`, groups with `|`, and the quantifiers
 //! `? * + {n} {n,} {n,m}`. Unsupported syntax panics rather than guessing.
 

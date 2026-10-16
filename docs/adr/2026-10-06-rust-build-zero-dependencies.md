@@ -1,4 +1,4 @@
-# 0007 — Rust build with zero dependencies
+# 2026-10-06 — Rust build with zero dependencies
 
 - Date: 2026-10-06
 - Status: Accepted
@@ -7,7 +7,7 @@
 
 ## Context
 
-[ADR 0001](0001-spec-and-harness-over-implementation.md) makes the build
+[ADR 2026-05-10-spec-and-harness-over-implementation](2026-05-10-spec-and-harness-over-implementation.md) makes the build
 replaceable: `spec/` and `tests/` are the durable artifacts, and any
 implementation that keeps the harness green is acceptable.
 
@@ -138,5 +138,5 @@ with cargo.
   markdown-it's output, so existing pages would change, and it brings back
   the dependency tree this ADR removes.
 - **An off-the-shelf SSG** (Hugo, Zola, Quartz). Already rejected by
-  [ADR 0002](0002-no-quartz-no-vendored-ssg.md), and nothing here changes
+  [ADR 2026-05-10-no-quartz-no-vendored-ssg](2026-05-10-no-quartz-no-vendored-ssg.md), and nothing here changes
   that.

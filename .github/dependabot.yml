@@ -1,5 +1,5 @@
-# Keeps the commit-pinned GitHub Actions current (ADR 0016). Cargo is not
-# listed: the build has no crates to update (ADR 0007).
+# Keeps the commit-pinned GitHub Actions current (ADR 2026-10-14-supply-chain-pinned-actions). Cargo is not
+# listed: the build has no crates to update (ADR 2026-10-06-rust-build-zero-dependencies).
 version: 2
 updates:
   - package-ecosystem: github-actions

@@ -4,32 +4,35 @@ Each ADR captures one decision: context, options considered, the choice made,
 and consequences. ADRs are **append-only** — to change a decision, write a new
 ADR that supersedes the old one. Don't edit history.
 
-| ADR | Title | Status |
+| Date | ADR | Status |
 |---|---|---|
-| [0001](0001-spec-and-harness-over-implementation.md) | Spec + harness as the durable artifact, not the build code | Accepted |
-| [0002](0002-no-quartz-no-vendored-ssg.md) | No Quartz, no vendored SSG | Accepted |
-| [0003](0003-uv-for-python-toolchain.md) | uv for Python toolchain | Superseded by 0010 |
-| [0004](0004-indieweb-standards-supported.md) | IndieWeb standards in scope | Accepted |
-| [0005](0005-obsidian-as-editor-no-required-plugins.md) | Obsidian as editor, no required plugins | Accepted |
-| [0007](0007-rust-build-zero-dependencies.md) | Rust build with zero dependencies | Accepted |
-| [0008](0008-webmentions-at-deploy-time.md) | Webmentions at deploy time | Accepted |
-| [0009](0009-a11y-design-system-self-hosted-fonts.md) | a11y design system, self-hosted fonts | Accepted |
-| [0010](0010-rust-only-toolchain.md) | Rust-only toolchain: harness, tables and a pinned compiler | Accepted |
-| [0011](0011-holocene-years-on-the-page.md) | Holocene years on the page | Accepted |
-| [0016](0016-supply-chain-pinned-actions.md) | Supply chain: SHA-pinned actions, least-privilege tokens | Accepted |
-| [2026-10-11](2026-10-11-nu-html-checker-in-ci.md) | Nu HTML Checker in CI | Accepted |
-| [2026-10-14](2026-10-14-site-and-author-naming.md) | Site and author naming | Accepted |
-| [2026-10-14](2026-10-14-www-as-canonical-host.md) | www as the canonical host | Accepted |
-| [2026-10-14](2026-10-14-mobile-first-readable-output-lighthouse.md) | Mobile first, readable output, a Lighthouse budget | Accepted |
-| [2026-10-16](2026-10-16-old-feed-urls.md) | Keep the old Substack and Jekyll feed URLs | Accepted |
-| [2026-10-16](2026-10-16-old-all-page.md) | Redirect the old /all page to the notes index | Accepted |
+| 2026-05-10 | [IndieWeb standards in scope](2026-05-10-indieweb-standards-supported.md) | Accepted |
+| 2026-05-10 | [No Quartz, no vendored SSG](2026-05-10-no-quartz-no-vendored-ssg.md) | Accepted |
+| 2026-05-10 | [Obsidian as editor, no required plugins](2026-05-10-obsidian-as-editor-no-required-plugins.md) | Accepted |
+| 2026-05-10 | [Spec + harness as the durable artifact, not the build code](2026-05-10-spec-and-harness-over-implementation.md) | Accepted |
+| 2026-05-10 | [uv for Python toolchain](2026-05-10-uv-for-python-toolchain.md) | Superseded by [2026-10-11-rust-only-toolchain](2026-10-11-rust-only-toolchain.md) |
+| 2026-10-06 | [Rust build with zero dependencies](2026-10-06-rust-build-zero-dependencies.md) | Accepted |
+| 2026-10-11 | [a11y design system, self-hosted fonts](2026-10-11-a11y-design-system-self-hosted-fonts.md) | Accepted |
+| 2026-10-11 | [Holocene years on the page](2026-10-11-holocene-years-on-the-page.md) | Accepted |
+| 2026-10-11 | [Nu HTML Checker in CI](2026-10-11-nu-html-checker-in-ci.md) | Accepted |
+| 2026-10-11 | [Rust-only toolchain: harness, tables and a pinned compiler](2026-10-11-rust-only-toolchain.md) | Accepted |
+| 2026-10-11 | [Webmentions at deploy time](2026-10-11-webmentions-at-deploy-time.md) | Accepted |
+| 2026-10-14 | [Mobile first, readable output, a Lighthouse budget](2026-10-14-mobile-first-readable-output-lighthouse.md) | Accepted |
+| 2026-10-14 | [Site and author naming](2026-10-14-site-and-author-naming.md) | Accepted |
+| 2026-10-14 | [Supply chain: SHA-pinned actions, least-privilege tokens](2026-10-14-supply-chain-pinned-actions.md) | Accepted |
+| 2026-10-14 | [www as the canonical host](2026-10-14-www-as-canonical-host.md) | Accepted |
+| 2026-10-16 | [Every ADR named by date](2026-10-16-date-named-adrs.md) | Accepted |
+| 2026-10-16 | [Keep the old Substack and Jekyll feed URLs](2026-10-16-old-feed-urls.md) | Accepted |
+| 2026-10-16 | [Redirect the old /all page to the notes index](2026-10-16-old-all-page.md) | Accepted |
 
 ## Naming
 
 New ADRs are named by date, `YYYY-MM-DD-short-slug.md`, so parallel branches
 don't race for the next number. If two land on the same day, the slug keeps
-them apart. Numbered ADRs already merged (0001–0016) keep their numbers:
-they're append-only and linked from specs, code and commit history. Refer to an ADR by its file name stem,
+them apart. The date is the day the decision was accepted. The ADRs that
+were once numbered (0001–0016) were renamed to this form; see
+[ADR 2026-10-16-date-named-adrs](2026-10-16-date-named-adrs.md) for the
+mapping. Refer to an ADR by its file name stem,
 e.g. `ADR 2026-10-14-www-as-canonical-host`.
 
 ## Format

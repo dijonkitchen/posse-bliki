@@ -1,6 +1,6 @@
 //! The posse-bliki build as a library: the `bliki` binary (main.rs) drives it,
 //! and the test harness in `tests/` reuses its JSON and front-matter parsers.
-//! Rust std only, no crates (docs/adr/0007-rust-build-zero-dependencies.md).
+//! Rust std only, no crates (docs/adr/2026-10-06-rust-build-zero-dependencies.md).
 
 pub mod date;
 pub mod entities;

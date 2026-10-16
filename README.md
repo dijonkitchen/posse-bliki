@@ -8,7 +8,7 @@ built by a small dependency-free Rust program, and deployed to GitHub Pages. Fol
 Webmention, RSS, JSON Feed).
 
 The architecture is **spec + harness + replaceable build** — see
-[`AGENTS.md`](AGENTS.md) and [`docs/adr/0001`](docs/adr/0001-spec-and-harness-over-implementation.md).
+[`AGENTS.md`](AGENTS.md) and [`docs/adr/2026-05-10-spec-and-harness-over-implementation`](docs/adr/2026-05-10-spec-and-harness-over-implementation.md).
 
 ## Layout
 
@@ -43,8 +43,8 @@ Requires [rustup](https://rustup.rs) and `make`, nothing else. rustup reads
 every machine and CI run uses the same compiler. Make ships with macOS and
 every Linux distro. The build, the test harness and the tools are all Rust
 with zero crate dependencies — see
-[`docs/adr/0007`](docs/adr/0007-rust-build-zero-dependencies.md) and
-[`docs/adr/0010`](docs/adr/0010-rust-only-toolchain.md) for why.
+[`docs/adr/2026-10-06-rust-build-zero-dependencies`](docs/adr/2026-10-06-rust-build-zero-dependencies.md) and
+[`docs/adr/2026-10-11-rust-only-toolchain`](docs/adr/2026-10-11-rust-only-toolchain.md) for why.
 
 ## What gets deployed
 
@@ -67,7 +67,7 @@ in `default_config()` in [`build/site.rs`](build/site.rs).
 ## POSSE and webmentions
 
 The deploy workflow handles both directions
-([ADR 0008](docs/adr/0008-webmentions-at-deploy-time.md)):
+([ADR 2026-10-11-webmentions-at-deploy-time](docs/adr/2026-10-11-webmentions-at-deploy-time.md)):
 
 - **Received** webmentions are fetched from webmention.io and shown on
   each post. Sign in at <https://webmention.io> with the site's domain,

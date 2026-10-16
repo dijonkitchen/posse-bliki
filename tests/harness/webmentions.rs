@@ -1,5 +1,5 @@
 //! Bridgy links on posts, received mentions rendered at build time, and the
-//! list of webmentions to send for new posts (spec/indieweb.md, ADR 0008).
+//! list of webmentions to send for new posts (spec/indieweb.md, ADR 2026-10-11-webmentions-at-deploy-time).
 
 use std::path::PathBuf;
 use std::sync::OnceLock;

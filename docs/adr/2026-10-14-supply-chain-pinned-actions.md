@@ -1,4 +1,4 @@
-# 0016 — Supply chain: SHA-pinned actions, least-privilege tokens
+# 2026-10-14 — Supply chain: SHA-pinned actions, least-privilege tokens
 
 - Date: 2026-10-14
 - Status: Accepted
@@ -6,7 +6,7 @@
 
 ## Context
 
-The build has no crates (ADR 0007) and a pinned compiler (ADR 0010), so
+The build has no crates (ADR 2026-10-06-rust-build-zero-dependencies) and a pinned compiler (ADR 2026-10-11-rust-only-toolchain), so
 almost all third-party code that touches the site now runs in GitHub
 Actions: `checkout`, `configure-pages`, `upload-artifact`,
 `upload-pages-artifact`, `deploy-pages` and `download-artifact`.

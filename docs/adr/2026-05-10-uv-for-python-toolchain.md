@@ -1,4 +1,4 @@
-# 0003 — uv for Python toolchain
+# 2026-05-10 — uv for Python toolchain
 
 - Date: 2026-05-10
 - Status: Accepted

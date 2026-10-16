@@ -1,4 +1,4 @@
-# 0001 — Spec + harness as the durable artifact, not the build code
+# 2026-05-10 — Spec + harness as the durable artifact, not the build code
 
 - Date: 2026-05-10
 - Status: Accepted
@@ -44,7 +44,7 @@ The contract for any agent (or human) editing this repo:
 ## Alternatives considered
 
 - **Rely on a popular SSG (Quartz, Hugo, 11ty).** Rejected — see
-  [ADR 0002](0002-no-quartz-no-vendored-ssg.md). Their behaviour is not
+  [ADR 2026-05-10-no-quartz-no-vendored-ssg](2026-05-10-no-quartz-no-vendored-ssg.md). Their behaviour is not
   specified; "correct" means "what the SSG happens to do this version."
 - **Hand-write a small SSG without specs/tests.** Rejected — without a
   harness, an agent has no way to verify a refactor preserved behaviour,

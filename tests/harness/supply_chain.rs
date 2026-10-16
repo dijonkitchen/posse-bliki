@@ -1,4 +1,4 @@
-//! Supply chain (spec/build-invariants.md, ADR 0007, ADR 0016): no crates,
+//! Supply chain (spec/build-invariants.md, ADR 2026-10-06-rust-build-zero-dependencies, ADR 2026-10-14-supply-chain-pinned-actions): no crates,
 //! every GitHub Action pinned to a full commit SHA, and no `-latest` runners.
 
 use std::path::Path;
@@ -13,7 +13,7 @@ fn cargo_lock_lists_only_this_package() {
     let packages = lock.lines().filter(|l| l.trim() == "[[package]]").count();
     assert_eq!(
         packages, 1,
-        "Cargo.lock lists a dependency; ADR 0007 needs a new ADR first"
+        "Cargo.lock lists a dependency; ADR 2026-10-06-rust-build-zero-dependencies needs a new ADR first"
     );
 }
 
