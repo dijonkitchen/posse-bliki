@@ -1,8 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <!--
-    Site icon: the spork from JC's Substack, redrawn as a solid shape so it
-    reads at 16px, where the original line drawing turns to grey mush.
-    Ink on light tabs, paper on dark ones (spec/performance.md).
+    Site icon: the spork from JC's Substack, redrawn as one bold silhouette
+    so it reads at 16px and from across a room: a long oval bowl, two wide
+    tine slots, a narrow neck and a handle that widens to a rounded end, at
+    the picture's slant. Ink on light tabs, paper on dark ones
+    (spec/performance.md).
   -->
   <style>
     .spork { fill: #1e232c; }
@@ -11,15 +13,16 @@
     }
   </style>
   <defs>
-    <!-- The two gaps between the three tines. -->
+    <!-- The two slots between the three tines. -->
     <mask id="tines">
-      <rect width="32" height="32" fill="#fff"/>
-      <rect x="13.3" y="0" width="1.4" height="5.2" rx="0.7" fill="#000"/>
-      <rect x="17.3" y="0" width="1.4" height="5.2" rx="0.7" fill="#000"/>
+      <rect x="-50" y="-10" width="100" height="120" fill="#fff"/>
+      <rect x="-8.25" y="-2" width="5.5" height="15" rx="2.75" fill="#000"/>
+      <rect x="2.75" y="-2" width="5.5" height="15" rx="2.75" fill="#000"/>
     </mask>
   </defs>
-  <g class="spork" transform="rotate(40 16 16)">
-    <path mask="url(#tines)" d="M9.6 5.6 C9.6 3.2 11 1.8 13 1.8 H19 C21 1.8 22.4 3.2 22.4 5.6 V8.6 C22.4 13 19.6 16.4 16 16.4 C12.4 16.4 9.6 13 9.6 8.6 Z"/>
-    <rect x="14.3" y="14" width="3.4" height="16.4" rx="1.7"/>
+  <!-- Drawn upright, 100 units long, then tilted 33° like the picture. -->
+  <g class="spork" transform="translate(14.7 16.8) rotate(33) scale(0.32) translate(0 -50)">
+    <path mask="url(#tines)" d="M-10 0 H10 Q14 0 15 5 C17 12 17.5 22 15 30 C12.5 39 6.5 45 3.5 52 H-3.5 C-6.5 45 -12.5 39 -15 30 C-17.5 22 -17 12 -15 5 Q-14 0 -10 0 Z"/>
+    <path d="M-3 48 H3 L5.5 95 Q5.5 100 1.5 100 H-1.5 Q-5.5 100 -5.5 95 Z"/>
   </g>
 </svg>
