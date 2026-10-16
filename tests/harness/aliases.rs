@@ -4,7 +4,7 @@
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
-use crate::support::{build, read, temp_dir, vault_copy};
+use crate::support::{build, read, site, temp_dir, vault_copy};
 
 const ALIAS: &str = "/old-location/";
 const TARGET: &str = "/notes/moved-note/";
@@ -48,4 +48,16 @@ fn alias_has_canonical() {
     let html = redirect();
     assert!(html.contains("rel=\"canonical\""));
     assert!(html.contains(TARGET));
+}
+
+#[test]
+fn old_all_page_redirects_to_notes() {
+    for path in ["all/index.html", "all.html"] {
+        let html = read(&site().join(path));
+        assert!(
+            html.contains("http-equiv=\"refresh\" content=\"0; url=/notes/\""),
+            "{path}"
+        );
+        assert!(html.contains("rel=\"canonical\""), "{path}");
+    }
 }

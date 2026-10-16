@@ -842,6 +842,11 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         }
     }
 
+    // spec/url-policy.md: the Jekyll site's A-to-Z post list (ADR 2026-10-16-old-all-page).
+    let notes_index = render_redirect(site, "/notes/", &canonical("/notes/"));
+    write(&out.join("all/index.html"), &notes_index)?;
+    write(&out.join("all.html"), &notes_index)?;
+
     // 404
     write(&out.join("404.html"), &render_404(site))?;
 
@@ -878,6 +883,11 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     }
     rss.push_str("\n</channel>\n</rss>\n");
     write(&out.join("index.xml"), &rss)?;
+    // spec/feeds.md: the feed URLs this domain served before, Substack's and
+    // Jekyll's, get the same feed (ADR 2026-10-16-old-feed-urls).
+    for old in ["feed", "feed.xml"] {
+        write(&out.join(old), &rss)?;
+    }
 
     // JSON Feed
     let items: Vec<Json> = posts

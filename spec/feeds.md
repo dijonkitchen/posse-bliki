@@ -27,6 +27,15 @@ external bridges (Bridgy Fed, echofeed, IFTTT) at one of them.
   elements. The service blocks automated requests, so the harness checks
   these rules itself (ADR 2026-10-11-nu-html-checker-in-ci).
 
+### Old feed URLs — `/feed` and `/feed.xml`
+
+Before this site, the domain served Substack's RSS at `/feed` and the
+Jekyll site's at `/feed.xml`. Both carry a byte-for-byte copy of
+`/index.xml`, whose `atom:link rel="self"` still names `/index.xml`, so
+existing subscribers keep getting posts and readers that honour `self` move
+to the canonical URL. Never remove them (ADR 2026-10-16-old-feed-urls).
+Tested in `tests/harness/rss.rs`.
+
 ## JSON Feed v1.1 — `/feed.json`
 
 Spec: <https://www.jsonfeed.org/version/1.1/>

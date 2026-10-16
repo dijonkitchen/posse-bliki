@@ -41,6 +41,16 @@ fn rss_exists() {
     assert!(site().join("index.xml").is_file());
 }
 
+/// Readers subscribed to the Substack (`/feed`) or Jekyll (`/feed.xml`) feed
+/// on this domain keep getting posts.
+#[test]
+fn old_feed_urls_serve_the_rss() {
+    let rss = read(&site().join("index.xml"));
+    for old in ["feed", "feed.xml"] {
+        assert_eq!(read(&site().join(old)), rss, "/{old} differs from /index.xml");
+    }
+}
+
 #[test]
 fn rss_has_channel_metadata() {
     let ch = channel();

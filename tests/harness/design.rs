@@ -3,7 +3,7 @@
 
 use std::fs;
 
-use crate::support::{html_files as pages, site};
+use crate::support::{config_str, html_files as pages, site};
 
 const SEMANTIC_TOKENS: &[&str] = &[
     "--text-1",
@@ -293,5 +293,28 @@ fn site_brand_sits_outside_the_nav() {
                 p.display()
             );
         }
+    }
+}
+
+#[test]
+fn header_shows_title_and_tagline() {
+    let esc = |s: &str| {
+        s.replace('&', "&amp;")
+            .replace('<', "&lt;")
+            .replace('>', "&gt;")
+            .replace('"', "&quot;")
+            .replace('\'', "&#39;")
+    };
+    let title = format!(">{}</a>", esc(config_str("title")));
+    let tagline = format!("<p class=\"site-tagline\">{}</p>", esc(config_str("tagline")));
+    for (p, html) in html_files().iter() {
+        if !html.contains("<body>") {
+            continue; // alias redirect stubs carry no header
+        }
+        assert!(
+            html.contains(&title) && html.contains(&tagline),
+            "{}: header lacks the title and tagline",
+            p.display()
+        );
     }
 }
