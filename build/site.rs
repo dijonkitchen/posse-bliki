@@ -71,7 +71,7 @@ pub struct Config {
     pub base_url: &'static str,
     pub language: &'static str,
     pub author_name: &'static str,
-    /// Short name shown before the full name, as "JC (Jonathan Chen)" (ADR 2026-10-14-site-and-author-naming).
+    /// Short name readers see in bylines, "JC"; the full name stays in the markup (ADR 2026-10-16-site-title-heads-home).
     pub author_nickname: &'static str,
     pub author_url: &'static str,
     pub rel_me: &'static [&'static str],
@@ -388,25 +388,54 @@ fn apply_base_path(dir: &Path, prefix: &str) -> Result<(), String> {
 // --- templates ---
 
 fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str) -> String {
+    page(site, title, meta, canonical, content, false)
+}
+
+/// `home` makes the site title the page's `<h1>` (ADR 2026-10-16-site-title-heads-home).
+fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str, home: bool) -> String {
     let t = e(site.title);
+    let brand = if home {
+        format!("<h1 class=\"site-title\"><a href=\"/\" aria-current=\"page\">{t}</a></h1>")
+    } else {
+        format!("<a class=\"site-title\" href=\"/\">{t}</a>")
+    };
     let canon = canonical
         .map(|c| format!("<link rel=\"canonical\" href=\"{}\">", e(c)))
         .unwrap_or_default();
+    // Profiles stay machine-readable without showing on the page (ADR 2026-10-16-site-title-heads-home).
+    let rel_me: String = if home {
+        site.rel_me
+            .iter()
+            .map(|u| format!("<link rel=\"me\" href=\"{}\">\n", e(u)))
+            .collect()
+    } else {
+        String::new()
+    };
+    // The home page's representative h-card, for IndieWeb tools (ADR 2026-10-16-home-shows-recent-posts).
+    let card = if home {
+        format!(
+            "<span class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{}/\">{}</a></span> \u{b7}\n",
+            e(site.base_url),
+            author_label(site)
+        )
+    } else {
+        String::new()
+    };
     format!(
         "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<title>{title}</title>\n{meta}\n{canon}\n\
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
-<link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n\
+<link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n{rel_me}\
 <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"32x32\">\n\
 <link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\">\n\
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
 <link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
 <link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
-<header class=\"site-header\">\n<nav aria-label=\"Site\">\n\
-<div class=\"site-brand\">\n<a class=\"site-title\" href=\"/\">{t}</a>\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
-</nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n\
+<header class=\"site-header\">\n\
+<div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
+</nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
@@ -569,11 +598,11 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     ))
 }
 
-/// The author as readers see it, "JC (Jonathan Chen)", marked up so mf2
-/// parsers still read the full name as `p-name` (ADR 2026-10-14-site-and-author-naming).
+/// The author as readers see it, "JC", with the full name kept for mf2
+/// parsers as `p-name` (ADR 2026-10-16-site-title-heads-home).
 fn author_label(site: &Config) -> String {
     format!(
-        "<span class=\"author\"><span class=\"p-nickname\">{}</span> (<span class=\"p-name\">{}</span>)</span>",
+        "<span class=\"p-nickname\">{}</span><data class=\"p-name\" value=\"{}\"></data>",
         e(site.author_nickname),
         e(site.author_name)
     )
@@ -596,11 +625,6 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Stri
 }
 
 fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonical: &str) -> Result<String, String> {
-    let rel_me: String = site
-        .rel_me
-        .iter()
-        .map(|u| format!("\n<a class=\"u-url\" rel=\"me\" href=\"{}\">{}</a>\n", e(u), e(u)))
-        .collect();
     let mut recent = String::new();
     for &p in posts.iter().take(10) {
         let pn = &notes[p];
@@ -613,19 +637,20 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
             d.human()
         ));
     }
+    let intro = if n.content_html.trim().is_empty() {
+        String::new()
+    } else {
+        format!("\n<article>\n{}\n</article>\n", n.content_html)
+    };
     let content = format!(
-        "\n<section class=\"h-card\">\n<h1>{author}</h1>\n<p>\n\
-<a class=\"u-url u-uid\" rel=\"me\" href=\"{base}/\">{base}/</a>\n{rel_me}\n</p>\n</section>\n<article>\n{html}\n</article>\n\
-<section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n</section>\n",
-        author = author_label(site),
-        base = e(site.base_url),
-        html = n.content_html,
+        "{intro}\n<section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n\
+<p><a href=\"/notes/\">All notes</a></p>\n</section>\n"
     );
     let meta = match n.summary() {
         Some(s) => description_meta(s),
         None => description_meta(site.tagline),
     };
-    Ok(base(site, &e(site.title), &meta, Some(canonical), &content))
+    Ok(page(site, &e(site.title), &meta, Some(canonical), &content, true))
 }
 
 fn render_list(

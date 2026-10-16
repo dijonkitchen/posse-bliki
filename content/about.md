@@ -14,6 +14,19 @@ The canonical version of every post lives **here**. Copies may appear on
 Mastodon, Bluesky, or elsewhere, but those are syndicated — see the
 [colophon](colophon.md) for how that works.
 
+## New here?
+
+This is a bliki, a personal blog/wiki hybrid where I think out loud,
+gather notes, and publish from my own corner of the web. It follows the
+[POSSE](https://indieweb.org/POSSE) principle: **P**ublish (on your)
+**O**wn **S**ite, **S**yndicate **E**lsewhere.
+
+Some pages here are short and unfinished. That's the point of a
+[bliki](https://martinfowler.com/bliki/WhatIsaBliki.html): notes evolve.
+
+- [How to use this bliki](notes/how-this-bliki-works.md)
+- [How this site is built](colophon.md)
+
 ## Why
 
 Cyborg memory is better than the human brain, so this tracks my wonderful adventures in thought and lets me keep in touch with memories using the [autobiography](notes/me.md) tools of the future!
