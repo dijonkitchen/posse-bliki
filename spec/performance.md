@@ -17,8 +17,10 @@ budget, which `scripts/lighthouse.sh` checks in CI.
 - **Readable output, never minified.** `style.css` ships byte for byte as
   written in `build/static/`, comments included, with no line over 200
   characters. HTML keeps one `<head>` element per line, as the templates
-  write it. GitHub Pages compresses everything over the wire, so a minifier
-  would save almost nothing.
+  write it. The reason is Stallman's: what the site sends is its source,
+  so anyone can audit it and remix it from "view source" alone. Speed
+  gives no reason to give that up: GitHub Pages compresses everything
+  over the wire, so a minifier would save almost nothing.
 - **Every indexable page has a description.** `<meta name="description">`
   comes from the note's `summary`, else the first 160 characters of its
   text, cut at a word; the home page uses its `summary` or the site tagline;

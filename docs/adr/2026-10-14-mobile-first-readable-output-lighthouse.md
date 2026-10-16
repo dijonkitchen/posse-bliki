@@ -22,14 +22,22 @@ An audit of the built site with Lighthouse 12 (mobile profile) found:
   say nothing out of context (SEO 92 on `/notes/`).
 
 JC also wants the output to stay readable: no minification or uglifying.
+The reason is Richard Stallman's: what a site sends should be source
+code, the form a person would read and change. Anyone should be able to
+audit what a page does and remix it, from "view source" alone, without
+hunting for an upstream repository. Minified or uglified code is still
+delivered but is no longer source in that sense (Stallman makes the
+argument in "The JavaScript Trap").
 
 ## Decision
 
 - Write the stylesheet mobile first: phone rules by default, `min-width`
   queries for wider screens, nothing else.
-- Ship HTML and CSS exactly as written. The templates already emit one
+- Ship HTML and CSS exactly as written, so every page can be audited and
+  remixed from what the browser receives. The templates already emit one
   element per line and `style.css` is copied as is; tests now hold that.
-  Minifying would save about 3 KB on a page GitHub Pages already gzips.
+  Minifying would save only about 3 KB on a page GitHub Pages already
+  gzips, so speed gives no reason to give that up.
 - Give every indexable page a description, falling back to an excerpt of
   the note's own text.
 - Self-host post images in `content/images/` and have the build read each

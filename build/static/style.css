@@ -4,7 +4,8 @@
  * Mobile first (spec/performance.md): the rules outside any width query are
  * the phone layout; `@media (min-width: 40rem)` blocks add to it for wider
  * screens. There is no `max-width` query. This file ships as written, never
- * minified, so "view source" stays readable.
+ * minified, so anyone can audit and remix it from "view source" (Stallman's
+ * reason; ADR 2026-10-14-mobile-first).
  *
  * Token values are copied from the system's tokens/*.css. Use the semantic
  * tokens (--text-*, --surface-*, --border-*) in rules below, not the
