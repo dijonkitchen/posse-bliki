@@ -297,6 +297,26 @@ fn site_brand_sits_outside_the_nav() {
 }
 
 #[test]
+fn every_page_links_the_resume() {
+    // People looking to hire find the résumé from any page (ADR 2026-10-16-resume-page).
+    for (p, html) in html_files().iter() {
+        let Ok(doc) = crate::support::html::parse(html) else {
+            continue;
+        };
+        let Some(nav) = doc.descendants().into_iter().find(|e| e.name == "nav") else {
+            continue;
+        };
+        assert!(
+            nav.descendants()
+                .iter()
+                .any(|e| e.name == "a" && e.attr("href") == Some("/resume/")),
+            "{}: site nav has no link to /resume/",
+            p.display()
+        );
+    }
+}
+
+#[test]
 fn header_shows_title_and_tagline() {
     let esc = |s: &str| {
         s.replace('&', "&amp;")
