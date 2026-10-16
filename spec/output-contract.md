@@ -51,7 +51,9 @@ In addition to the universal invariants, every post page must:
   `<data>` value. `rel=me` profile links are `<link>`s in the `<head>`
   (ADR 2026-10-16-home-shows-recent-posts).
 - The site title is the page's `<h1>`, in the header (ADR 2026-10-16-site-title-heads-home).
-- Contains an `h-feed` listing recent posts as `h-entry` items.
+- Contains an `h-feed` listing recent posts as `h-entry` items, each with a
+  `p-summary` excerpt (its `summary`, else the start of its text; ADR
+  2026-10-16-home-post-excerpts).
 
 ## List pages (`/notes/`, `/tags/<tag>/`)
 

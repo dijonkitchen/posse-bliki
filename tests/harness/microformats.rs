@@ -99,3 +99,22 @@ fn notes_index_has_h_feed() {
         "/notes/ has no h-feed"
     );
 }
+
+#[test]
+fn home_posts_show_an_excerpt() {
+    // ADR 2026-10-16-home-post-excerpts: one-word titles need context.
+    let home = parsed(&site().join("index.html"));
+    let feed = home.items_of_type("h-feed");
+    let feed = feed.first().expect("home page has no h-feed");
+    assert!(!feed.children.is_empty(), "home h-feed lists no posts");
+    for entry in &feed.children {
+        assert!(
+            entry
+                .prop("summary")
+                .iter()
+                .any(|v| matches!(v, Value::Text(t) if !t.is_empty())),
+            "home post {:?} has no p-summary",
+            entry.prop("name")
+        );
+    }
+}
