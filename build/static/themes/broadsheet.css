@@ -1,0 +1,76 @@
+/*
+ * Broadsheet: a style for the style garden (/garden/broadsheet/).
+ *
+ * Loads after /style.css and only changes what it has to: the colour tokens,
+ * the fonts and a few flourishes. Copy it, change it, make your own
+ * (ADR 2026-10-16-style-garden). Text pairs still meet WCAG AAA 7:1.
+ */
+
+/* Newsprint and ink, always light. Serif faces the reader already has. */
+:root {
+  color-scheme: light;
+  --text-1: #111111;
+  --text-2: #3d3a33;
+  --text-link: #7a1712;
+  --text-link-hover: #4a0d0a;
+  --surface-page: #f3efe4;
+  --surface-card: #fbf8f1;
+  --surface-sunken: #ebe5d6;
+  --surface-selected: #e6dcc6;
+  --border-strong: #111111;
+  --border-subtle: #b9b09c;
+  --focus-halo: #ffd23f;
+  --focus-ring: #111111;
+  --badge-neutral-bg: #ebe5d6;
+  --badge-neutral-border: #b9b09c;
+  --font-sans: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-pill: 0;
+}
+
+/* The masthead: centred, between a thick and a thin rule. */
+.site-header {
+  justify-content: center;
+  text-align: center;
+  border-block-end: 4px double var(--border-strong);
+  margin-block-end: var(--space-6);
+}
+.site-brand { margin-inline: auto; flex-basis: 100%; }
+.site-title {
+  font-weight: var(--weight-heavy);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.site-tagline { margin-inline: auto; font-style: italic; }
+
+main h1 {
+  text-align: center;
+  font-weight: var(--weight-heavy);
+  border-block-end: 1px solid var(--border-strong);
+  padding-block-end: var(--space-3);
+}
+h2, h3 {
+  font-variant-caps: small-caps;
+  letter-spacing: .03em;
+  border-block-start: 1px solid var(--border-strong);
+  padding-block-start: var(--space-2);
+}
+.style-picker h2 { border-block-start: 0; padding-block-start: 0; }
+
+/* A drop cap on the first paragraph of the page. */
+main article > p:first-of-type::first-letter {
+  float: inline-start;
+  margin: .05em .08em 0 0;
+  font-size: 3.4em;
+  line-height: .85;
+  font-weight: var(--weight-heavy);
+}
+
+p { hyphens: auto; }
+blockquote {
+  border-inline-start: 0;
+  font-style: italic;
+  font-size: var(--size-lg);
+  text-align: center;
+}
