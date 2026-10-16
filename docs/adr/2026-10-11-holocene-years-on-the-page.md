@@ -1,4 +1,4 @@
-# 0011 — Holocene years on the page
+# 2026-10-11 — Holocene years on the page
 
 - Date: 2026-10-11
 - Status: Accepted

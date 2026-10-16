@@ -42,7 +42,7 @@ argument in "The JavaScript Trap").
   the note's own text.
 - Self-host post images in `content/images/` and have the build read each
   one's size from its header to write `width` and `height` (a few dozen
-  lines of std-only Rust, `build/image.rs`; no image crate, per ADR 0007).
+  lines of std-only Rust, `build/image.rs`; no image crate, per ADR 2026-10-06-rust-build-zero-dependencies).
   Lazy-load images after the first, and all embeds.
 - Retitle the "information" note to "Information and disinformation", its
   opening line.

@@ -1,5 +1,5 @@
 //! A strict XML 1.0 well-formedness checker and tree builder for the RSS feed
-//! and sitemap. It replaces feedparser's "bozo" check (ADR 0010): one root
+//! and sitemap. It replaces feedparser's "bozo" check (ADR 2026-10-11-rust-only-toolchain): one root
 //! element, matched tags, quoted unique attributes, only the five predefined
 //! entities plus numeric references, no stray `<` or `&`.
 

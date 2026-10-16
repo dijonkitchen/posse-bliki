@@ -1,4 +1,4 @@
-# 0002 — No Quartz, no vendored SSG
+# 2026-05-10 — No Quartz, no vendored SSG
 
 - Date: 2026-05-10
 - Status: Accepted
@@ -35,7 +35,7 @@ the smallest build script that satisfies `spec/` and passes `tests/`.
 - **Hugo.** Single Go binary is genuinely durable. Templating language is
   opaque to current agents and Obsidian wikilink support requires
   third-party shortcodes/themes. If the personal-build hypothesis fails,
-  Hugo is the recommended migration target — see ADR 0001 on the harness
+  Hugo is the recommended migration target — see ADR 2026-05-10-spec-and-harness-over-implementation on the harness
   enabling such a move.
 - **11ty.** Better Obsidian story than Hugo via plugins. Same npm-surface
   concerns as Quartz, smaller scale.

@@ -58,7 +58,7 @@ In addition to the universal invariants, every post page must:
 
 - Every date the build shows a reader uses the Holocene year, the Gregorian
   year plus 10,000 (`2026-10-11` shows as `12026-10-11`). See
-  [ADR 0011](../docs/adr/0011-holocene-years-on-the-page.md).
+  [ADR 2026-10-11-holocene-years-on-the-page](../docs/adr/2026-10-11-holocene-years-on-the-page.md).
 - Every machine-readable date stays Gregorian: `<time datetime>`, RSS,
   JSON Feed, the sitemap and URLs.
 - Enforced by `tests/harness/dates.rs`.

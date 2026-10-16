@@ -81,11 +81,11 @@ cargo test --release --test harness design::focus   # tests whose name matches
 - No network access during build.
 - No randomness, no `datetime.now()` in output.
 - No dependencies anywhere: build, tests and tools use the Rust standard
-  library only (ADR 0007, ADR 0010).
+  library only (ADR 2026-10-06-rust-build-zero-dependencies, ADR 2026-10-11-rust-only-toolchain).
 - No new dependencies without an ADR.
 - GitHub Actions are pinned to a full commit SHA with the version in a
   comment (`uses: actions/x@<sha> # v1.2.3`); Dependabot proposes bumps
-  (ADR 0016).
+  (ADR 2026-10-14-supply-chain-pinned-actions).
 - No unresolved wikilinks, no broken internal links — both are build errors.
 - No `<script>` tags in output (the site is JS-free).
 - No minifying or uglifying output: HTML and CSS ship readable so readers can audit and remix them (Stallman's reason; ADR 2026-10-14-mobile-first).

@@ -1,16 +1,16 @@
-# 0010 — Rust-only toolchain: harness, tables and a pinned compiler
+# 2026-10-11 — Rust-only toolchain: harness, tables and a pinned compiler
 
 - Date: 2026-10-11
 - Status: Accepted
 - Decided by: JC, asking for "a full refactor to Rust, along with env
-  consistency and setup" after the build moved to Rust (ADR 0007).
-- Supersedes: [0003](0003-uv-for-python-toolchain.md) (uv for Python), and
-  the "Harness" section of [0007](0007-rust-build-zero-dependencies.md),
+  consistency and setup" after the build moved to Rust (ADR 2026-10-06-rust-build-zero-dependencies).
+- Supersedes: [2026-05-10-uv-for-python-toolchain](2026-05-10-uv-for-python-toolchain.md) (uv for Python), and
+  the "Harness" section of [2026-10-06-rust-build-zero-dependencies](2026-10-06-rust-build-zero-dependencies.md),
   which kept Python for the tests.
 
 ## Context
 
-ADR 0007 replaced the Python build with a std-only Rust binary but kept
+ADR 2026-10-06-rust-build-zero-dependencies replaced the Python build with a std-only Rust binary but kept
 Python in two places:
 
 - **The test harness** — 13 pytest files on five third-party packages:
@@ -23,7 +23,7 @@ Python in two places:
 So a contributor still needed two toolchains (rustup and uv), CI installed
 both, and five Python packages sat in `uv.lock` with their own release
 cadence and supply-chain risk. The Rust compiler itself was not pinned:
-ADR 0007 names 1.97, but nothing enforced it, so `make ci` could behave
+ADR 2026-10-06-rust-build-zero-dependencies names 1.97, but nothing enforced it, so `make ci` could behave
 differently on two machines.
 
 ## Decision
@@ -72,7 +72,7 @@ entity, a bad tag) fails the matching tests.
 
 - One install (rustup) instead of two. CI no longer installs uv.
 - No third-party code anywhere: not in the build, not in the tests, not in
-  the tools (still ADR 0007's rule, now covering the whole repo).
+  the tools (still ADR 2026-10-06-rust-build-zero-dependencies's rule, now covering the whole repo).
 - The checkers are narrower than the libraries they replace. html5lib knew
   every HTML5 parse error; `html.rs` knows the ones our templates and
   markdown renderer could hit, and is stricter in places (every element
@@ -91,12 +91,12 @@ entity, a bad tag) fails the matching tests.
 
 ## Alternatives considered
 
-- **Keep pytest for the harness** (ADR 0007's choice). It worked and the
+- **Keep pytest for the harness** (ADR 2026-10-06-rust-build-zero-dependencies's choice). It worked and the
   libraries are thorough, but it kept a second toolchain and five
   dependencies for code that never ships.
 - **Use crates in tests only** (`scraper`, `quick-xml`, `jsonschema`,
   `serde_yaml` as dev-dependencies). Less code to write, but it reopens
-  ADR 0007's dependency question, and dev-dependencies are still code we
+  ADR 2026-10-06-rust-build-zero-dependencies's dependency question, and dev-dependencies are still code we
   download and run.
 - **Nix for environment consistency.** It would pin everything, but the
   repo only needs one pinned tool, and rustup already pins it from a

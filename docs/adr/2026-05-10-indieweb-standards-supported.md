@@ -1,4 +1,4 @@
-# 0004 — IndieWeb standards in scope
+# 2026-05-10 — IndieWeb standards in scope
 
 - Date: 2026-05-10
 - Status: Accepted
