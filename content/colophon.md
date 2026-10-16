@@ -9,7 +9,7 @@ This site is built on a deliberately small stack chosen for longevity:
 |---|---|
 | Editor | [Obsidian](https://obsidian.md) — local-first, plain markdown |
 | Storage | `.md` files in a Git repo |
-| Build | ~5k lines of Rust, standard library only — no crates |
+| Build | ~7k lines of Rust plus generated Unicode and entity tables, standard library only — no crates |
 | Toolchain | [Rust](https://www.rust-lang.org) only, pinned in `rust-toolchain.toml`: the build, the test harness and the tools |
 | Design | Atkinson Hyperlegible Next and JetBrains Mono, self-hosted; colours checked for AAA contrast in light and dark |
 | Hosting | GitHub Pages |

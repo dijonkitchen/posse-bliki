@@ -49,17 +49,20 @@ with zero crate dependencies — see
 ## What gets deployed
 
 - HTML pages with `h-entry` / `h-card` / `h-feed` microformats
-- `/index.xml` (RSS 2.0) and `/feed.json` (JSON Feed 1.1)
+- `/index.xml` (RSS 2.0) and `/feed.json` (JSON Feed 1.1); `/feed` and
+  `/feed.xml` repeat the RSS for readers subscribed to the old Substack
+  and Jekyll feeds
 - `/sitemap.xml`, `/robots.txt`, `/404.html`
 - Tag pages, notes index, alias redirects
 
-## Going live
+## Hosting
 
-1. Check `default_config()` in [`build/site.rs`](build/site.rs)
-   (title, base URL, author, rel=me links, webmention.io domain,
-   syndication targets).
-2. Repo Settings → Pages → Source: GitHub Actions.
-3. Push to `main`. CI builds, runs the harness, deploys.
+The site is live at <https://www.dijonkitchen.org>
+([ADR 2026-10-14-www-as-canonical-host](docs/adr/2026-10-14-www-as-canonical-host.md)),
+served by GitHub Pages (Settings → Pages → Source: GitHub Actions). Every
+push to `main` runs the harness and deploys. Site settings (title, base
+URL, author, rel=me links, webmention.io domain, syndication targets) are
+in `default_config()` in [`build/site.rs`](build/site.rs).
 
 ## POSSE and webmentions
 
