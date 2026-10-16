@@ -1,7 +1,7 @@
 # 2026-10-16 — The home page shows recent posts
 
 - Date: 2026-10-16
-- Status: Proposed (JC to confirm; the option Claude recommended)
+- Status: Accepted (JC chose "Posts only", 2026-10-16)
 - Raised by: JC, who asked whether the home page needs the byline, the
   "Start here" list and the welcome text, or just recent posts.
 
