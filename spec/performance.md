@@ -35,6 +35,12 @@ budget, which `scripts/lighthouse.sh` checks in CI.
   `/manifest.webmanifest` with 192px and 512px icons for Android home
   screens. Every page links all four, and the manifest's icon paths are
   relative so they work under a sub-path. No icon request 404s.
+  The tab icon is drawn for legibility first, so it reads at a glance and
+  at a distance: one bold silhouette with the picture's outline (a bowl
+  with a round spoon tip, three short tines, narrow neck, widening handle,
+  the same slant), no hairlines or shading, tine slots wide enough to stay
+  open at 16px, and ink on paper at over 15:1 contrast in both colour schemes
+  (ADR 2026-10-16-legible-spork-icon).
 - **Images are self-hosted and sized.** Images live in `content/images/`,
   are referenced as `/images/<file>` and are copied to the output as is.
   The build reads each one's pixel size from its header (PNG, GIF, JPEG,
