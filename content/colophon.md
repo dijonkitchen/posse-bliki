@@ -30,5 +30,8 @@ Human Era, counting from
 roughly when people started building civilisation, about 12,000 years ago.
 Feeds and machine-readable dates stay in the usual calendar.
 
+The [style garden](garden.md) shows one page in other styles, after the
+CSS Zen Garden. Each is one short stylesheet you can read and remix.
+
 If every tool listed above disappeared tomorrow, the notes would still
 open in any text editor. That's the point.

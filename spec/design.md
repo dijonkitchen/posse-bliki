@@ -12,7 +12,12 @@ See [ADR 2026-10-11-a11y-design-system-self-hosted-fonts](../docs/adr/2026-10-11
 Each item is enforced by `tests/harness/design.rs`.
 
 - **One stylesheet.** Every page links `/style.css`. No inline `style`
-  attributes, no `<style>` blocks.
+  attributes, no `<style>` blocks. The one exception is the style garden.
+- **Style garden.** `/garden/` shows its page in the house style and links to
+  a copy per file in `build/static/themes/`, at `/garden/<style>/`, which
+  links `/style.css` then `/themes/<style>.css`. Each style loads nothing
+  itself, ships as written, and keeps text at AAA contrast
+  (ADR 2026-10-16-style-garden).
 - **No third-party requests.** Pages and the stylesheet load nothing from
   another origin: no web-font CDNs, no `@import`. Fonts are self-hosted
   under `/fonts/`, with their SIL OFL licences beside them.

@@ -358,3 +358,83 @@ fn browser_bars_match_the_page() {
         }
     }
 }
+
+/// The style garden's styles: every `build/static/themes/*.css`, by slug.
+fn themes() -> Vec<(String, String)> {
+    let dir = crate::support::repo().join("build/static/themes");
+    let mut out: Vec<(String, String)> = fs::read_dir(&dir)
+        .expect("read build/static/themes")
+        .map(|f| f.unwrap().path())
+        .filter(|p| p.extension().is_some_and(|x| x == "css"))
+        .map(|p| {
+            let slug = p.file_stem().unwrap().to_str().unwrap().to_string();
+            (slug, fs::read_to_string(&p).unwrap())
+        })
+        .collect();
+    out.sort();
+    assert!(!out.is_empty(), "expected garden styles in build/static/themes");
+    out
+}
+
+#[test]
+fn garden_has_a_page_per_style() {
+    for (slug, source) in themes() {
+        let css = fs::read_to_string(site().join(format!("themes/{slug}.css"))).expect("read theme");
+        assert_eq!(css, source, "themes/{slug}.css differs from its source");
+        let html = fs::read_to_string(site().join(format!("garden/{slug}/index.html"))).expect("garden page");
+        let sheets: Vec<&str> = link_tags(&html)
+            .into_iter()
+            .filter(|t| attr(t, "rel") == Some("stylesheet"))
+            .filter_map(|t| attr(t, "href"))
+            .collect();
+        assert_eq!(sheets, ["/style.css", &format!("/themes/{slug}.css")], "garden/{slug}/");
+    }
+}
+
+#[test]
+fn garden_links_every_style_and_marks_the_current_one() {
+    let mut pages = vec![("garden/index.html".to_string(), "/garden/".to_string())];
+    for (slug, _) in themes() {
+        pages.push((format!("garden/{slug}/index.html"), format!("/garden/{slug}/")));
+    }
+    for (file, own) in &pages {
+        let html = fs::read_to_string(site().join(file)).expect("garden page");
+        for (_, url) in &pages {
+            let current = if url == own { " aria-current=\"page\"" } else { "" };
+            assert!(
+                html.contains(&format!("<a href=\"{url}\"{current}>")),
+                "{file}: link to {url}"
+            );
+        }
+    }
+}
+
+#[test]
+fn only_garden_pages_add_a_stylesheet() {
+    for (p, html) in html_files().iter() {
+        let sheets = link_tags(html)
+            .into_iter()
+            .filter(|t| attr(t, "rel") == Some("stylesheet"))
+            .count();
+        // garden/index.html is the house style; garden/<slug>/ adds one.
+        let rel = p.strip_prefix(site()).unwrap();
+        let themed = rel.starts_with("garden") && rel.components().count() == 3;
+        assert_eq!(sheets, if themed { 2 } else { 1 }, "{}", p.display());
+    }
+}
+
+#[test]
+fn garden_styles_are_self_contained_and_readable() {
+    for (slug, css) in themes() {
+        assert!(
+            !css.contains("@import") && !css.contains("url("),
+            "{slug}.css loads something"
+        );
+        assert!(
+            css.starts_with("/*"),
+            "{slug}.css should open with a comment saying what it is"
+        );
+        let longest = css.lines().map(str::len).max().unwrap_or(0);
+        assert!(longest <= 200, "{slug}.css line of {longest} characters");
+    }
+}

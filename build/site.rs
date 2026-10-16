@@ -16,6 +16,15 @@ use crate::util::{escape as e, percent_decode, py_repr_str};
 use crate::webmention::{self, Mention};
 
 const STYLE_CSS: &str = include_str!("static/style.css");
+
+/// The style garden's styles, each laid over `STYLE_CSS` on its own copy of
+/// the garden page: (slug, name, stylesheet). See ADR 2026-10-16-style-garden.
+const THEMES: &[(&str, &str, &str)] = &[
+    ("terminal", "Terminal", include_str!("static/themes/terminal.css")),
+    ("broadsheet", "Broadsheet", include_str!("static/themes/broadsheet.css")),
+    ("blueprint", "Blueprint", include_str!("static/themes/blueprint.css")),
+];
+const GARDEN_URL: &str = "/garden/";
 /// Site icons, after the spork on JC's Substack (spec/performance.md):
 /// `favicon.ico` (32px) for old browsers and clients that request it
 /// unprompted, `icon.svg` for the tab (redrawn solid so it reads at 16px,
@@ -388,11 +397,20 @@ fn apply_base_path(dir: &Path, prefix: &str) -> Result<(), String> {
 // --- templates ---
 
 fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str) -> String {
-    page(site, title, meta, canonical, content, false)
+    page(site, title, meta, canonical, content, false, None)
 }
 
 /// `home` makes the site title the page's `<h1>` (ADR 2026-10-16-site-title-heads-home).
-fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str, home: bool) -> String {
+/// `theme` is a style garden slug whose stylesheet loads after the house one.
+fn page(
+    site: &Config,
+    title: &str,
+    meta: &str,
+    canonical: Option<&str>,
+    content: &str,
+    home: bool,
+    theme: Option<&str>,
+) -> String {
     let t = e(site.title);
     let brand = if home {
         format!("<h1 class=\"site-title\"><a href=\"/\" aria-current=\"page\">{t}</a></h1>")
@@ -421,6 +439,9 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
     } else {
         String::new()
     };
+    let theme = theme
+        .map(|t| format!("\n<link rel=\"stylesheet\" href=\"/themes/{}.css\">", e(t)))
+        .unwrap_or_default();
     format!(
         "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n{THEME_COLOR}<title>{title}</title>\n{meta}\n{canon}\n\
@@ -432,7 +453,7 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
 <link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
-<link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
+<link rel=\"stylesheet\" href=\"/style.css\">{theme}\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
 </nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
@@ -630,6 +651,41 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Stri
     )
 }
 
+/// The style garden: the garden page, dressed in the house style (`theme`
+/// None) or one of `THEMES`, with links to every other style. It's one page
+/// per style because nothing can remember a choice without JavaScript
+/// (ADR 2026-10-16-style-garden).
+fn render_garden(site: &Config, notes: &[Note], n: &Note, theme: Option<&str>, canonical: &str) -> String {
+    let mut styles = vec![(GARDEN_URL.to_string(), "House", theme.is_none())];
+    for (slug, name, _) in THEMES {
+        styles.push((format!("{GARDEN_URL}{slug}/"), name, theme == Some(*slug)));
+    }
+    let items: String = styles
+        .iter()
+        .map(|(url, name, current)| {
+            let aria = if *current { " aria-current=\"page\"" } else { "" };
+            format!("<li><a href=\"{}\"{aria}>{}</a></li>\n", e(url), e(name))
+        })
+        .collect();
+    let content = format!(
+        "\n<article>\n<h1>{}</h1>\n<nav class=\"style-picker\" aria-labelledby=\"style-picker\">\n\
+<h2 id=\"style-picker\">Styles</h2>\n<ul>\n{items}</ul>\n</nav>\n{}\n</article>\n{}\n",
+        e(n.title()),
+        n.content_html,
+        backlinks_block(notes, n)
+    );
+    let name = styles.iter().find(|s| s.2).map(|s| s.1).unwrap_or("House");
+    page(
+        site,
+        &format!("{} ({}) \u{2014} {}", e(n.title()), e(name), e(site.title)),
+        &summary_meta(site, n),
+        Some(canonical),
+        &content,
+        false,
+        theme,
+    )
+}
+
 fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonical: &str) -> Result<String, String> {
     let mut recent = String::new();
     for &p in posts.iter().take(10) {
@@ -668,7 +724,7 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         Some(s) => description_meta(s),
         None => description_meta(site.tagline),
     };
-    Ok(page(site, &e(site.title), &meta, Some(canonical), &content, true))
+    Ok(page(site, &e(site.title), &meta, Some(canonical), &content, true, None))
 }
 
 fn render_list(
@@ -817,9 +873,17 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         let html = match n.kind {
             Kind::Home => render_home(site, &notes, n, &posts, &c)?,
             Kind::Post => render_post(site, &notes, n, &c)?,
+            Kind::Page if n.url == GARDEN_URL => render_garden(site, &notes, n, None, &c),
             Kind::Page => render_page(site, &notes, n, &c),
         };
         write(&n.out_path, &html)?;
+        if n.url == GARDEN_URL {
+            for (slug, _, _) in THEMES {
+                let url = format!("{GARDEN_URL}{slug}/");
+                let html = render_garden(site, &notes, n, Some(slug), &canonical(&url));
+                write(&out_path_for(out, &url), &html)?;
+            }
+        }
     }
 
     // /notes/ list
@@ -996,6 +1060,9 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // static assets
     write(&out.join("style.css"), STYLE_CSS)?;
+    for (slug, _, css) in THEMES {
+        write(&out.join("themes").join(format!("{slug}.css")), css)?;
+    }
     for (name, bytes) in ICONS {
         write_bytes(&out.join(name), bytes)?;
     }

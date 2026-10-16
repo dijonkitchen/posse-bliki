@@ -453,3 +453,27 @@ main { padding-block-end: var(--space-7); }
 .webmentions time { color: var(--text-2); font-size: var(--size-sm); }
 .webmentions .p-content { color: var(--text-2); }
 .h-feed > p { margin-top: var(--space-4); }
+
+/* The style garden's list of styles (ADR 2026-10-16-style-garden). */
+.style-picker h2 {
+  margin-top: 0;
+  font-size: var(--size-base);
+}
+.style-picker ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+.style-picker li + li { margin-top: 0; }
+.style-picker a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-min);
+}
+.style-picker a[aria-current="page"] {
+  color: var(--text-1);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+}
