@@ -1,7 +1,7 @@
 # 2026-10-16 — No hand-kept ADR index
 
 - Date: 2026-10-16
-- Status: Proposed (JC to confirm; the option Claude recommended)
+- Status: Accepted (JC chose "Drop it", 2026-10-16)
 - Raised by: JC, who asked whether the ADR list is worth having after
   PRs #24 and #32 conflicted on it.
 
