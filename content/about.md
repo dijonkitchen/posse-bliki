@@ -12,11 +12,11 @@ This is a long-lived home for my notes, writing, and half-formed ideas.
 
 The canonical version of every post lives **here**. Copies may appear on
 Mastodon, Bluesky, or elsewhere, but those are syndicated — see the
-[[colophon]] for how that works.
+[colophon](colophon.md) for how that works.
 
 ## Why
 
-Cyborg memory is better than the human brain, so this tracks my wonderful adventures in thought and lets me keep in touch with memories using the [[me|autobiography]] tools of the future!
+Cyborg memory is better than the human brain, so this tracks my wonderful adventures in thought and lets me keep in touch with memories using the [autobiography](notes/me.md) tools of the future!
 
 Writing helps organize your thoughts in a clear way for your own memories as well as to aid others. But [writing is difficult](https://www.martinfowler.com/bliki/WhatIsaBliki.html) and when it's too important to just throw away in time.
 
@@ -30,7 +30,7 @@ Not much reason to bash your own beliefs into your own head without making much 
 
 Thus I write. Perchance, I'll attract others that respect this kind of reasoning.
 
-This [[bliki]] will help with that along with random musings longer than 140 characters.
+This [bliki](notes/bliki.md) will help with that along with random musings longer than 140 characters.
 
 ### Prior art
 
@@ -42,7 +42,7 @@ My "Jonki" is a [spaced-repetition](https://en.wikipedia.org/wiki/Anki_(software
 
 ### [Slowly] wrangling legacy social media (Twitter, Facebook, Goodreads, Trello, Medium, Keep, Notes, Docs, etc) into a controlled, centralized network of thoughts
 
-The internet is be dark and full of terrors. Companies struggling to survive are gathering as much [[privacy|data as possible]] on people to sell or influence them into do things they don't want. We, the people, need a relief from these hyperactive, short-term, consumption-focused lives. Long-form content we make and control (or share) ourselves is really important.
+The internet is be dark and full of terrors. Companies struggling to survive are gathering as much [data as possible](notes/privacy.md) on people to sell or influence them into do things they don't want. We, the people, need a relief from these hyperactive, short-term, consumption-focused lives. Long-form content we make and control (or share) ourselves is really important.
 
 This bliki shows the interconnected network of philosophy, business, life, technology and much more. We all share these wonders and connections with each other.
 

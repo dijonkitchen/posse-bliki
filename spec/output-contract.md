@@ -41,7 +41,7 @@ In addition to the universal invariants, every post page must:
   - `.u-syndication` per syndication URL
   - a hidden, empty link to each configured syndication target
   - received webmentions, when given (see [indieweb.md](indieweb.md))
-- Show backlinks (incoming wikilinks) when any exist.
+- Show backlinks (incoming links from other notes) when any exist.
 
 ## Home (`/`)
 

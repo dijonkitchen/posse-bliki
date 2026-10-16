@@ -13,6 +13,6 @@ Some pages here are short and unfinished. That's the point of a
 
 ## Start here
 
-- [[about|About this site]]
-- [[colophon|How this site is built]]
-- [[how-this-bliki-works|How to use this bliki]]
+- [About this site](about.md)
+- [How this site is built](colophon.md)
+- [How to use this bliki](notes/how-this-bliki-works.md)

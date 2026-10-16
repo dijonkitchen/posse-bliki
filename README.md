@@ -24,7 +24,8 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 ## Daily workflow
 
 1. Open `content/` as an Obsidian vault.
-2. Write notes. Use `[[wiki links]]` and `#tags` freely.
+2. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
+   you when you type `[[`) and use `#tags` freely.
 3. `git commit && git push`. CI runs the harness and deploys.
 
 ## Local commands

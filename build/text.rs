@@ -1,11 +1,12 @@
 //! Text transforms applied to note bodies before Markdown rendering:
-//! slugs, `[[wikilinks]]`, inline `#tags` (both skipping code), and the
+//! slugs, `[[wikilinks]]`, inline `#tags` (both skipping code), relative
+//! `.md` links (after rendering), and the
 //! small regex-equivalents the build needs (HTML stripping, href scanning).
 
 use std::collections::HashMap;
 
 use crate::unicode;
-use crate::util::{py_repr_str, py_strip};
+use crate::util::{percent_decode, py_repr_str, py_strip};
 
 /// `_slugify`: lower, strip, `[^a-z0-9]+` → `-`, strip `-`.
 pub fn slugify(stem: &str) -> String {
@@ -119,6 +120,65 @@ pub fn resolve_wikilinks(text: &str, slug_to_url: &HashMap<String, String>, cont
         out.push(c[i]);
         i += 1;
     }
+    Ok(out)
+}
+
+/// A relative link to a Markdown file (`other.md`, `../about.md#Sec`):
+/// no scheme, not root-absolute, not a bare `#fragment`.
+fn is_md_link(href: &str) -> bool {
+    let path = &href[..href.find(['#', '?']).unwrap_or(href.len())];
+    let scheme = path.find(':').is_some_and(|c| !path[..c].contains('/'));
+    !scheme && !path.starts_with('/') && path.to_ascii_lowercase().ends_with(".md")
+}
+
+/// Rewrite relative `.md` hrefs in rendered `html` to the linked note's URL,
+/// resolving each path from the directory of `rel` (as GitHub and Obsidian
+/// do; ADR 2026-10-16-relative-markdown-links). A link to a file that isn't a
+/// published note is a build error, like an unresolved wikilink.
+pub fn resolve_md_links(html: &str, rel: &str, rel_to_url: &HashMap<String, String>) -> Result<String, String> {
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(p) = rest.find("href=\"") {
+        let start = p + 6;
+        let Some(len) = rest[start..].find('"') else { break };
+        let href = &rest[start..start + len];
+        out.push_str(&rest[..start]);
+        rest = &rest[start + len..];
+        if !is_md_link(href) {
+            out.push_str(href);
+            continue;
+        }
+        let (path, anchor) = href.split_once('#').unwrap_or((href, ""));
+        let mut parts: Vec<String> = rel.split('/').map(str::to_string).collect();
+        parts.pop();
+        for seg in percent_decode(path).replace("&amp;", "&").split('/') {
+            match seg {
+                "" | "." => {}
+                ".." => {
+                    if parts.pop().is_none() {
+                        return Err(format!("{}: link {} points outside content/", rel, py_repr_str(href)));
+                    }
+                }
+                s => parts.push(s.to_string()),
+            }
+        }
+        let target = parts.join("/");
+        let url = rel_to_url.get(&target).ok_or_else(|| {
+            format!(
+                "{}: broken link {} (no published note at content/{})",
+                rel,
+                py_repr_str(href),
+                target
+            )
+        })?;
+        out.push_str(url);
+        let anchor = slugify(&percent_decode(anchor));
+        if !anchor.is_empty() {
+            out.push('#');
+            out.push_str(&anchor);
+        }
+    }
+    out.push_str(rest);
     Ok(out)
 }
 
@@ -265,6 +325,28 @@ mod tests {
         assert_eq!(slugify("Hello, World!"), "hello-world");
         assert_eq!(slugify("  --a__b-- "), "a-b");
         assert_eq!(slugify("Économie"), "conomie");
+    }
+
+    #[test]
+    fn md_links() {
+        let mut m = HashMap::new();
+        m.insert("notes/foo.md".to_string(), "/notes/foo/".to_string());
+        m.insert("about.md".to_string(), "/about/".to_string());
+        let html = r#"<a href="foo.md#Sec%20One">x</a> <a href="./foo.md">y</a> <a href="../about.md">z</a> <a href="https://x.org/a.md">w</a> <a href="/images/a.png">v</a>"#;
+        assert_eq!(
+            resolve_md_links(html, "notes/bar.md", &m).unwrap(),
+            r#"<a href="/notes/foo/#sec-one">x</a> <a href="/notes/foo/">y</a> <a href="/about/">z</a> <a href="https://x.org/a.md">w</a> <a href="/images/a.png">v</a>"#
+        );
+        assert_eq!(
+            resolve_md_links(r#"<a href="notes/foo.md">a</a>"#, "about.md", &m).unwrap(),
+            r#"<a href="/notes/foo/">a</a>"#
+        );
+        assert!(resolve_md_links(r#"<a href="nope.md">a</a>"#, "notes/bar.md", &m)
+            .unwrap_err()
+            .contains("broken link 'nope.md' (no published note at content/notes/nope.md)"));
+        assert!(resolve_md_links(r#"<a href="../../x.md">a</a>"#, "about.md", &m)
+            .unwrap_err()
+            .contains("outside content/"));
     }
 
     #[test]

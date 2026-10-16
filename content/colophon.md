@@ -20,7 +20,7 @@ This site is built on a deliberately small stack chosen for longevity:
 The architecture is **spec + harness + replaceable build**. The build
 code is small and can be rewritten in any language; what's permanent is
 the contract in `spec/` and the test harness in `tests/`. See
-[[how-this-bliki-works]] for the day-to-day side and the repo's
+[how-this-bliki-works](notes/how-this-bliki-works.md) for the day-to-day side and the repo's
 `docs/adr/` for the reasoning.
 
 Dates here use the [Holocene calendar](https://en.wikipedia.org/wiki/Holocene_calendar):

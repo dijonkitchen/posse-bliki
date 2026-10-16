@@ -12,7 +12,7 @@ use crate::image;
 use crate::json::{self, Json};
 use crate::markdown;
 use crate::text;
-use crate::util::{escape as e, py_repr_str};
+use crate::util::{escape as e, percent_decode, py_repr_str};
 use crate::webmention::{self, Mention};
 
 const STYLE_CSS: &str = include_str!("static/style.css");
@@ -465,27 +465,6 @@ fn prepare_images(html: &str, content: &Path, rel: &str) -> Result<String, Strin
     Ok(out.replace("<iframe ", "<iframe loading=\"lazy\" "))
 }
 
-/// `%XX` escapes in a URL path back to bytes (markdown-it encodes spaces
-/// and non-ASCII in `src`).
-fn percent_decode(s: &str) -> String {
-    let b = s.as_bytes();
-    let mut out = Vec::with_capacity(b.len());
-    let mut i = 0;
-    while i < b.len() {
-        let hex = |c: u8| (c as char).to_digit(16);
-        if b[i] == b'%' && i + 2 < b.len() {
-            if let (Some(h), Some(l)) = (hex(b[i + 1]), hex(b[i + 2])) {
-                out.push((h * 16 + l) as u8);
-                i += 3;
-                continue;
-            }
-        }
-        out.push(b[i]);
-        i += 1;
-    }
-    String::from_utf8_lossy(&out).into_owned()
-}
-
 /// Copy `content/images/` to `images/` in the output, as is.
 fn copy_images(from: &Path, to: &Path) -> Result<(), String> {
     if !from.is_dir() {
@@ -735,6 +714,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         n.out_path = out_path_for(out, &n.url);
     }
     let slug_to_url: HashMap<String, String> = notes.iter().map(|n| (n.slug.clone(), n.url.clone())).collect();
+    let rel_to_url: HashMap<String, String> = notes.iter().map(|n| (n.rel.clone(), n.url.clone())).collect();
 
     // render markdown
     for n in notes.iter_mut() {
@@ -745,7 +725,8 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         tags.sort();
         tags.dedup();
         n.tags = tags;
-        n.content_html = prepare_images(&markdown::render(&body), content, &n.rel)?;
+        let html = text::resolve_md_links(&markdown::render(&body), &n.rel, &rel_to_url)?;
+        n.content_html = prepare_images(&html, content, &n.rel)?;
     }
     for n in &notes {
         for t in &n.tags {
