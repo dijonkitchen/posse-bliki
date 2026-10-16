@@ -22,6 +22,7 @@ ADR that supersedes the old one. Don't edit history.
 | [2026-10-14](2026-10-14-www-as-canonical-host.md) | www as the canonical host | Accepted |
 | [2026-10-14](2026-10-14-mobile-first-readable-output-lighthouse.md) | Mobile first, readable output, a Lighthouse budget | Accepted |
 | [2026-10-16](2026-10-16-old-feed-urls.md) | Keep the old Substack and Jekyll feed URLs | Accepted |
+| [2026-10-16](2026-10-16-old-all-page.md) | Redirect the old /all page to the notes index | Accepted |
 
 ## Naming
 
