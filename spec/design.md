@@ -42,6 +42,9 @@ Each item is enforced by `tests/harness/design.rs`.
   the nav holds only links. On the home page the title is the `<h1>` at h1
   size; elsewhere it is a smaller link and the page has its own `<h1>`
   (ADR 2026-10-16-site-title-heads-home).
+- **Résumé in the nav.** Every page's nav links Notes, Résumé, About and
+  Colophon, so people looking to hire find the work history from any page
+  (ADR 2026-10-16-resume-page).
 - **Browser bars match the page.** Every page declares `theme-color` for
   light and dark, set to `--surface-page`, so a phone's browser bars blend
   into the page and it reads full bleed. `<html>` has the page background
