@@ -109,6 +109,6 @@ and whether you're open to full-time, contract or consulting work.]_
 
 ## More about me
 
-How I think and write lives in the [notes](about.md). My first month as
+What I'm focused on right now is on my [now page](now.md). How I think and write lives in the [notes](about.md). My first month as
 an engineer in San Francisco is in [work](notes/work.md), and the long
 way I came to software is in [me](notes/me.md).
