@@ -1,7 +1,8 @@
 # 2026-10-11 — a11y design system, self-hosted fonts
 
 - Date: 2026-10-11
-- Status: Accepted
+- Status: Accepted; the JS-free rule is relaxed for one script by
+  [2026-10-18-style-picker](2026-10-18-style-picker.md)
 - Decided by: JC, asking for the site to match their design system.
 
 ## Context

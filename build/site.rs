@@ -16,6 +16,17 @@ use crate::util::{escape as e, percent_decode, py_repr_str};
 use crate::webmention::{self, Mention};
 
 const STYLE_CSS: &str = include_str!("static/style.css");
+
+/// The styles in every page's style picker besides Auto, Light and Dark:
+/// (slug, name, stylesheet). See ADR 2026-10-18-style-picker.
+const THEMES: &[(&str, &str, &str)] = &[
+    ("terminal", "Terminal", include_str!("static/themes/terminal.css")),
+    ("broadsheet", "Broadsheet", include_str!("static/themes/broadsheet.css")),
+    ("blueprint", "Blueprint", include_str!("static/themes/blueprint.css")),
+];
+/// Remembers the picked style across pages; the picker works without it on
+/// the current page (ADR 2026-10-18-style-picker).
+const STYLE_PICKER_JS: &str = include_str!("static/style-picker.js");
 /// Site icons, after the spork on JC's Substack (spec/performance.md):
 /// `favicon.ico` (32px) for old browsers and clients that request it
 /// unprompted, `icon.svg` for the tab (redrawn solid so it reads at 16px,
@@ -421,6 +432,15 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
     } else {
         String::new()
     };
+    let (theme_links, theme_options): (String, String) = THEMES
+        .iter()
+        .map(|(slug, name, _)| {
+            (
+                format!("\n<link rel=\"stylesheet\" href=\"/themes/{slug}.css\">"),
+                format!("<option value=\"{slug}\">{name}</option>\n"),
+            )
+        })
+        .unzip();
     format!(
         "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n{THEME_COLOR}<title>{title}</title>\n{meta}\n{canon}\n\
@@ -432,10 +452,12 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
 <link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
-<link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
+<link rel=\"stylesheet\" href=\"/style.css\">{theme_links}\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
-</nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
+</nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
+<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n\
+<script src=\"/style-picker.js\"></script>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
@@ -996,6 +1018,10 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // static assets
     write(&out.join("style.css"), STYLE_CSS)?;
+    for (slug, _, css) in THEMES {
+        write(&out.join("themes").join(format!("{slug}.css")), css)?;
+    }
+    write(&out.join("style-picker.js"), STYLE_PICKER_JS)?;
     for (name, bytes) in ICONS {
         write_bytes(&out.join(name), bytes)?;
     }
