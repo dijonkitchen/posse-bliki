@@ -350,6 +350,12 @@ fn browser_bars_match_the_page() {
         css.contains("--paper: #fbfaf7;"),
         "--paper changed; update THEME_COLOR in build/site.rs"
     );
+    // Overscroll on phones paints from the root's own background.
+    let root = rule_after(&css, 0, "html").expect("html rule");
+    assert!(
+        root.contains("background: var(--surface-page);"),
+        "html lacks the page background"
+    );
     for (p, html) in html_files() {
         for (scheme, colour) in [("light", "#fbfaf7"), ("dark", "#15171b")] {
             let tag =

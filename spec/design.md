@@ -52,7 +52,8 @@ Each item is enforced by `tests/harness/design.rs`.
   (ADR 2026-10-16-site-title-heads-home).
 - **Browser bars match the page.** Every page declares `theme-color` for
   light and dark, set to `--surface-page`, so a phone's browser bars blend
-  into the page and it reads full bleed
+  into the page and it reads full bleed. `<html>` has the page background
+  too, so scrolling past the top or bottom shows the page colour
   (ADR 2026-10-16-browser-bars-match-page).
 - **Targets.** Navigation links and tags are at least 44px tall.
 - **Mobile first.** The phone layout is the default; see
