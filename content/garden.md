@@ -1,23 +1,23 @@
 ---
 title: Style garden
-summary: The same page in different clothes, after the CSS Zen Garden. Every style is one stylesheet you can read and remix.
+summary: One page to try every style in the picker on, after the CSS Zen Garden. Each style is one stylesheet you can read and remix.
 ---
 
 This page is a small homage to the [CSS Zen Garden](https://csszengarden.com),
 where Dave Shea asked designers to restyle one fixed HTML page using only CSS.
-Each style here is the same markup with one extra stylesheet on top of the
-house one. Pick one from the list above.
+Pick a style from the menu at the top of any page and this one shows off what
+it does.
 
 ## How it works
 
-The house style is `/style.css`. Each garden style is a short
-file in `/themes/` that changes the colour tokens, the
-fonts and a few flourishes, and nothing else. View the source, copy a file,
-and make your own.
+The house style is `/style.css`. Each extra style is a short file in
+`/themes/` that changes the colour tokens, the fonts and a few flourishes,
+and nothing else. The menu switches between them with CSS alone, so it works
+with JavaScript off. A few lines of JavaScript remember your pick as you move
+between pages; without it, the next page starts in the house style again.
+View the source, copy a file, and make your own.
 
-There is no JavaScript on this site and nothing to remember you by, so a style
-you pick here stays on this page. The rest of the site follows your device's
-light or dark setting.
+Auto follows your device's light or dark setting. Light and Dark pin one.
 
 ## A bit of everything
 
@@ -31,13 +31,13 @@ Every style has to cope with the same things a note does:
 
 | Style | Mood |
 |---|---|
-| House | calm, readable, follows your device |
+| Auto, Light, Dark | calm and readable, the house style |
 | Terminal | green phosphor at 2 a.m. |
 | Broadsheet | the morning paper |
 | Blueprint | drafting table |
 
 ```css
-:root {
+:root:has(#style [value="terminal"]:checked) {
   --text-1: #7dff9b;
   --surface-page: #0b100c;
 }

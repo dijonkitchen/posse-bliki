@@ -87,9 +87,10 @@
   --badge-neutral-border: var(--sand-200);
   color-scheme: light dark;
 }
-/* Dark follows the operating system. Accents at L 0.795, tints at L 0.28. */
+/* Dark follows the operating system, unless the style picker says Light.
+   Accents at L 0.795, tints at L 0.28. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(:has(#style [value="light"]:checked)) {
     --text-1: oklch(0.943 0.007 88.6);
     --text-2: oklch(0.808 0.009 91.5);
     --text-link: oklch(0.795 0.104 253.8);
@@ -105,6 +106,27 @@
     --badge-neutral-bg: oklch(0.3 0.014 261.7);
     --badge-neutral-border: oklch(0.367 0.017 262.3);
   }
+}
+/* The style picker (ADR 2026-10-18-style-picker): Light and Dark override the
+   operating system. Dark repeats the tokens above; a harness test keeps the
+   two in step. */
+:root:has(#style [value="light"]:checked) { color-scheme: light; }
+:root:has(#style [value="dark"]:checked) {
+  color-scheme: dark;
+  --text-1: oklch(0.943 0.007 88.6);
+  --text-2: oklch(0.808 0.009 91.5);
+  --text-link: oklch(0.795 0.104 253.8);
+  --text-link-hover: oklch(0.889 0.055 255.2);
+  --surface-page: oklch(0.204 0.009 264.4);
+  --surface-card: oklch(0.251 0.012 264.3);
+  --surface-sunken: oklch(0.181 0.007 258.4);
+  --surface-selected: oklch(0.286 0.044 255.6);
+  --border-strong: oklch(0.704 0.016 260.7);
+  --border-subtle: oklch(0.336 0.015 264.3);
+  --focus-halo: oklch(0.879 0.162 90.9);
+  --focus-ring: oklch(1 0 0);
+  --badge-neutral-bg: oklch(0.3 0.014 261.7);
+  --badge-neutral-border: oklch(0.367 0.017 262.3);
 }
 
 /* --- type: 18px base, ~1.25 ratio, nothing below 16px --- */
@@ -454,26 +476,19 @@ main { padding-block-end: var(--space-7); }
 .webmentions .p-content { color: var(--text-2); }
 .h-feed > p { margin-top: var(--space-4); }
 
-/* The style garden's list of styles (ADR 2026-10-16-style-garden). */
-.style-picker h2 {
-  margin-top: 0;
-  font-size: var(--size-base);
-}
-.style-picker ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-5);
-  padding: 0;
-  list-style: none;
-}
-.style-picker li + li { margin-top: 0; }
-.style-picker a {
+/* The style picker in the header (ADR 2026-10-18-style-picker). */
+.style-picker {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-2);
   min-height: var(--target-min);
 }
-.style-picker a[aria-current="page"] {
+.style-picker select {
+  min-height: var(--target-min);
+  padding-inline: var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
   color: var(--text-1);
-  font-weight: var(--weight-bold);
-  text-decoration: none;
+  font: inherit;
 }

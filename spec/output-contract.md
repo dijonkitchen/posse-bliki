@@ -21,7 +21,9 @@ in `tests/`.
 - `<link rel="alternate" type="application/feed+json" href="/feed.json">`.
 - `<link rel="webmention">` and `<link rel="pingback">` (configured target).
 - All internal links resolve to a real emitted file.
-- No `<script>` tags. (Site is fully functional with JS off.)
+- No `<script>` except `<script src="/style-picker.js"></script>`, right
+  after the style picker. The site is fully functional with JS off; the
+  script only remembers the picked style (ADR 2026-10-18-style-picker).
 - Styling follows [design.md](design.md).
 - Loading follows [performance.md](performance.md).
 

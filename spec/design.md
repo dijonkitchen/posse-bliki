@@ -11,13 +11,16 @@ See [ADR 2026-10-11-a11y-design-system-self-hosted-fonts](../docs/adr/2026-10-11
 
 Each item is enforced by `tests/harness/design.rs`.
 
-- **One stylesheet.** Every page links `/style.css`. No inline `style`
-  attributes, no `<style>` blocks. The one exception is the style garden.
-- **Style garden.** `/garden/` shows its page in the house style and links to
-  a copy per file in `build/static/themes/`, at `/garden/<style>/`, which
-  links `/style.css` then `/themes/<style>.css`. Each style loads nothing
-  itself, ships as written, and keeps text at AAA contrast
-  (ADR 2026-10-16-style-garden).
+- **Stylesheets.** Every page links `/style.css`, then each style in
+  `build/static/themes/` as `/themes/<style>.css`. No inline `style`
+  attributes, no `<style>` blocks.
+- **Style picker.** Every page's header has a Style menu (`<select
+  id="style">`): Auto, Light, Dark, then each theme. Picking one restyles the
+  page through CSS `:has()`, with no JavaScript; `/style-picker.js` only
+  remembers the pick across pages. Auto follows `prefers-color-scheme`. A
+  theme's rules all sit inside `:root:has(#style [value="<style>"]:checked)`,
+  it loads nothing itself, ships as written, and keeps text at AAA contrast
+  (ADR 2026-10-18-style-picker).
 - **No third-party requests.** Pages and the stylesheet load nothing from
   another origin: no web-font CDNs, no `@import`. Fonts are self-hosted
   under `/fonts/`, with their SIL OFL licences beside them.
@@ -57,7 +60,5 @@ Each item is enforced by `tests/harness/design.rs`.
 
 ## Not yet
 
-The system's reader settings (text size, spacing, weight, line length,
-theme toggle) need JavaScript to remember a choice. The site is JS-free
-(see [output-contract](output-contract.md)), so pages follow the operating
-system's colour scheme and the browser's text size instead.
+The system's other reader settings (text size, spacing, weight, line
+length) aren't offered. The browser's own text size still scales the page.

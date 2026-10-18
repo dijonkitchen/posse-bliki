@@ -1,13 +1,14 @@
 /*
- * Terminal: a style for the style garden (/garden/terminal/).
+ * Terminal: a style for the style picker.
  *
- * Loads after /style.css and only changes what it has to: the colour tokens,
- * the fonts and a few flourishes. Copy it, change it, make your own
- * (ADR 2026-10-16-style-garden). Text pairs still meet WCAG AAA 7:1.
+ * Every page links it, but its rules only apply while the picker in the
+ * header says Terminal: they all sit inside one :has() selector, nested.
+ * On top of /style.css it changes the colour tokens, the fonts and a few
+ * flourishes. Copy it, change it, make your own (ADR 2026-10-18-style-picker).
+ * Text pairs still meet WCAG AAA 7:1.
  */
-
-/* Always dark, whatever the operating system asks for. */
-:root {
+:root:has(#style [value="terminal"]:checked) {
+  /* Always dark, whatever the operating system asks for. */
   color-scheme: dark;
   --text-1: #7dff9b;
   --text-2: #5fd47c;
@@ -27,33 +28,33 @@
   --radius-sm: 0;
   --radius-md: 0;
   --radius-pill: 0;
-}
 
-body { font-size: var(--size-sm); }
-h1, h2, h3, h4 { font-weight: var(--weight-regular); letter-spacing: 0; }
+  & body { font-size: var(--size-sm); }
+  & :is(h1, h2, h3, h4) { font-weight: var(--weight-regular); letter-spacing: 0; }
 
-/* A prompt before each heading, and a cursor after the page title. The text
-   after the slash is what screen readers say instead: nothing. */
-h2::before, h3::before { content: "## "; content: "## " / ""; color: var(--text-2); }
-main h1::before { content: "$ "; content: "$ " / ""; color: var(--text-2); }
-main h1::after {
-  content: "";
-  display: inline-block;
-  width: .6em;
-  height: 1em;
-  margin-inline-start: .15em;
-  vertical-align: -.1em;
-  background: var(--text-1);
-  animation: terminal-blink 1s steps(1) infinite;
+  /* A prompt before each heading, and a cursor after the page title. The
+     text after the slash is what screen readers say instead: nothing. */
+  & main :is(h2, h3)::before { content: "## "; content: "## " / ""; color: var(--text-2); }
+  & main h1::before { content: "$ "; content: "$ " / ""; color: var(--text-2); }
+  & main h1::after {
+    content: "";
+    display: inline-block;
+    width: .6em;
+    height: 1em;
+    margin-inline-start: .15em;
+    vertical-align: -.1em;
+    background: var(--text-1);
+    animation: terminal-blink 1s steps(1) infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    & main h1::after { animation: none; }
+  }
+
+  & blockquote { border-inline-start-style: dashed; }
+  & blockquote > :first-child::before { content: "> "; content: "> " / ""; }
+  & hr { border-top-style: dashed; }
+  & ::selection { background: var(--text-1); color: var(--surface-page); }
 }
 @keyframes terminal-blink {
   50% { opacity: 0; }
 }
-@media (prefers-reduced-motion: reduce) {
-  main h1::after { animation: none; }
-}
-
-blockquote { border-inline-start-style: dashed; }
-blockquote > :first-child::before { content: "> "; content: "> " / ""; }
-hr { border-top-style: dashed; }
-::selection { background: var(--text-1); color: var(--surface-page); }

@@ -45,13 +45,14 @@ fn universal_invariants() {
 }
 
 #[test]
-fn no_script_tags() {
-    // The site must work with JS off.
+fn only_the_style_picker_script() {
+    // The site must work with JS off; the one script only remembers the
+    // picked style (ADR 2026-10-18-style-picker).
+    let allowed = "<script src=\"/style-picker.js\"></script>";
     for (p, text) in html_files() {
-        assert!(
-            !text.to_lowercase().contains("<script"),
-            "{}: contains <script>",
-            rel(p, site())
-        );
+        let lower = text.to_lowercase();
+        let scripts = lower.matches("<script").count();
+        let picker = usize::from(text.contains(allowed));
+        assert_eq!(scripts, picker, "{}: unexpected <script>", rel(p, site()));
     }
 }

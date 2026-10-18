@@ -359,7 +359,7 @@ fn browser_bars_match_the_page() {
     }
 }
 
-/// The style garden's styles: every `build/static/themes/*.css`, by slug.
+/// The style picker's extra styles: every `build/static/themes/*.css`, by slug.
 fn themes() -> Vec<(String, String)> {
     let dir = crate::support::repo().join("build/static/themes");
     let mut out: Vec<(String, String)> = fs::read_dir(&dir)
@@ -372,59 +372,103 @@ fn themes() -> Vec<(String, String)> {
         })
         .collect();
     out.sort();
-    assert!(!out.is_empty(), "expected garden styles in build/static/themes");
+    assert!(!out.is_empty(), "expected styles in build/static/themes");
     out
 }
 
 #[test]
-fn garden_has_a_page_per_style() {
+fn every_page_links_every_style_after_the_house_one() {
+    let mut expected = vec!["/style.css".to_string()];
     for (slug, source) in themes() {
         let css = fs::read_to_string(site().join(format!("themes/{slug}.css"))).expect("read theme");
         assert_eq!(css, source, "themes/{slug}.css differs from its source");
-        let html = fs::read_to_string(site().join(format!("garden/{slug}/index.html"))).expect("garden page");
-        let sheets: Vec<&str> = link_tags(&html)
+        expected.push(format!("/themes/{slug}.css"));
+    }
+    expected.sort();
+    for (p, html) in html_files().iter() {
+        let mut sheets: Vec<&str> = link_tags(html)
             .into_iter()
             .filter(|t| attr(t, "rel") == Some("stylesheet"))
             .filter_map(|t| attr(t, "href"))
             .collect();
-        assert_eq!(sheets, ["/style.css", &format!("/themes/{slug}.css")], "garden/{slug}/");
+        assert_eq!(sheets.first(), Some(&"/style.css"), "{}", p.display());
+        sheets.sort();
+        assert_eq!(sheets, expected, "{}", p.display());
     }
 }
 
 #[test]
-fn garden_links_every_style_and_marks_the_current_one() {
-    let mut pages = vec![("garden/index.html".to_string(), "/garden/".to_string())];
+fn every_page_has_the_style_picker() {
+    let mut options = vec!["auto".to_string(), "light".into(), "dark".into()];
     for (slug, _) in themes() {
-        pages.push((format!("garden/{slug}/index.html"), format!("/garden/{slug}/")));
+        options.push(slug);
     }
-    for (file, own) in &pages {
-        let html = fs::read_to_string(site().join(file)).expect("garden page");
-        for (_, url) in &pages {
-            let current = if url == own { " aria-current=\"page\"" } else { "" };
-            assert!(
-                html.contains(&format!("<a href=\"{url}\"{current}>")),
-                "{file}: link to {url}"
-            );
-        }
-    }
-}
-
-#[test]
-fn only_garden_pages_add_a_stylesheet() {
     for (p, html) in html_files().iter() {
-        let sheets = link_tags(html)
-            .into_iter()
-            .filter(|t| attr(t, "rel") == Some("stylesheet"))
-            .count();
-        // garden/index.html is the house style; garden/<slug>/ adds one.
-        let rel = p.strip_prefix(site()).unwrap();
-        let themed = rel.starts_with("garden") && rel.components().count() == 3;
-        assert_eq!(sheets, if themed { 2 } else { 1 }, "{}", p.display());
+        if html.contains("http-equiv=\"refresh\"") {
+            continue;
+        }
+        let start = html
+            .find("<select id=\"style\">")
+            .unwrap_or_else(|| panic!("{}: no picker", p.display()));
+        let select = &html[start..start + html[start..].find("</select>").unwrap()];
+        let values: Vec<&str> = select
+            .match_indices("<option ")
+            .filter_map(|(i, _)| attr(&select[i..], "value"))
+            .collect();
+        let mut sorted_options: Vec<&str> = options[3..].iter().map(String::as_str).collect();
+        sorted_options.sort();
+        assert_eq!(&values[..3], ["auto", "light", "dark"], "{}", p.display());
+        let mut rest = values[3..].to_vec();
+        rest.sort();
+        assert_eq!(rest, sorted_options, "{}", p.display());
+        assert!(
+            select.contains("<option value=\"auto\" selected>"),
+            "{}: Auto not the default",
+            p.display()
+        );
+        let script = "</select>\n</label>\n<script src=\"/style-picker.js\"></script>";
+        assert!(
+            html.contains(script),
+            "{}: script not right after the picker",
+            p.display()
+        );
     }
 }
 
 #[test]
-fn garden_styles_are_self_contained_and_readable() {
+fn styles_apply_only_while_picked() {
+    for (slug, css) in themes() {
+        let scope = format!(":root:has(#style [value=\"{slug}\"]:checked) {{");
+        let body = css.find(&scope).unwrap_or_else(|| panic!("{slug}.css: no {scope}"));
+        // Everything after the opening comment is the scoped block, plus
+        // @keyframes, which can't be nested.
+        let start = css.find("*/").unwrap() + 2;
+        assert_eq!(css[start..body].trim(), "", "{slug}.css: rules before the scope");
+        let mut depth = 0;
+        let mut end = body;
+        for (i, c) in css[body..].char_indices() {
+            match c {
+                '{' => depth += 1,
+                '}' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        end = body + i + 1;
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        let rest = css[end..].trim();
+        assert!(
+            rest.is_empty() || rest.starts_with("@keyframes"),
+            "{slug}.css: rules outside the scope"
+        );
+    }
+}
+
+#[test]
+fn styles_are_self_contained_and_readable() {
     for (slug, css) in themes() {
         assert!(
             !css.contains("@import") && !css.contains("url("),
@@ -437,4 +481,21 @@ fn garden_styles_are_self_contained_and_readable() {
         let longest = css.lines().map(str::len).max().unwrap_or(0);
         assert!(longest <= 200, "{slug}.css line of {longest} characters");
     }
+}
+
+#[test]
+fn pinned_dark_matches_the_dark_scheme() {
+    let css = css();
+    let (_, dark) = light_and_dark(&css);
+    let pinned = rule_after(&css, 0, ":root:has(#style [value=\"dark\"]:checked)").expect("no pinned dark rule");
+    let tokens = |block: &str| -> Vec<String> {
+        block
+            .lines()
+            .map(str::trim)
+            .filter(|l| l.starts_with("--"))
+            .map(String::from)
+            .collect()
+    };
+    assert!(!tokens(dark).is_empty());
+    assert_eq!(tokens(dark), tokens(pinned), "pinned Dark differs from the dark scheme");
 }
