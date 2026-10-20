@@ -1,0 +1,76 @@
+/*
+ * Under the Sea: a style for the style picker, after the CSS Zen Garden's
+ * "Under the Sea!" by Eric Stoltz (#213): deep blue water with light from
+ * the surface and bubbles rising. Written from scratch here, with the
+ * water drawn by CSS gradients instead of images; the original's art
+ * belongs to its author.
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Under the Sea: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="under-the-sea"]:checked) {
+  /* Deep water, always dark. */
+  color-scheme: dark;
+  --text-1: #f2fbff;
+  --text-2: #c9e8f5;
+  --text-link: #ffe27a;
+  --text-link-hover: #fff4c2;
+  --surface-page: #06304a;
+  --surface-card: #0a3c5c;
+  --surface-sunken: #04253a;
+  --surface-selected: #0f4f75;
+  --border-strong: #8fd3ec;
+  --border-subtle: #2b6f93;
+  --focus-halo: #ffe27a;
+  --focus-ring: #06304a;
+  --badge-neutral-bg: #0a3c5c;
+  --badge-neutral-border: #2b6f93;
+  --radius-md: 14px;
+
+  /* Light from the surface above, darkening with depth. The top of the
+     gradient is still dark enough for AAA text. */
+  & body {
+    background-color: #052638;
+    background-image: linear-gradient(#0a4a69, #06304a 30rem, #052638);
+    background-repeat: no-repeat;
+  }
+  /* Bubbles rising in the empty margins of a wide screen. */
+  @media (min-width: 75rem) {
+    & body {
+      background-image:
+        radial-gradient(circle at 6% 30rem, rgb(255 255 255 / .16) 0 .45rem, transparent .5rem),
+        radial-gradient(circle at 4% 36rem, rgb(255 255 255 / .12) 0 .3rem, transparent .35rem),
+        radial-gradient(circle at 95% 22rem, rgb(255 255 255 / .14) 0 .6rem, transparent .65rem),
+        radial-gradient(circle at 93% 27rem, rgb(255 255 255 / .1) 0 .35rem, transparent .4rem),
+        linear-gradient(#0a4a69, #06304a 30rem, #052638);
+    }
+  }
+
+  & :is(h1, h2, h3, h4, .site-title) { font-weight: var(--weight-bold); }
+  /* Headings ripple gently, unless the reader asks for less motion. */
+  & main h1 {
+    text-shadow: 0 0 .6em rgb(143 211 236 / .5);
+    animation: sea-sway 6s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    & main h1 { animation: none; }
+  }
+
+  & main h2 {
+    border-block-end: 3px solid transparent;
+    border-image: repeating-linear-gradient(90deg, var(--border-strong) 0 12px, transparent 12px 18px) 3;
+    padding-block-end: var(--space-1);
+  }
+  & blockquote {
+    border-inline-start: 0;
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    padding: var(--space-3) var(--space-4);
+  }
+  & ::selection { background: var(--text-link); color: var(--surface-page); }
+}
+@keyframes sea-sway {
+  50% { transform: translateY(-3px); }
+}

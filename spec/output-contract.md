@@ -23,7 +23,8 @@ in `tests/`.
 - All internal links resolve to a real emitted file.
 - No `<script>` except `<script src="/style-picker.js"></script>`, right
   after the style picker. The site is fully functional with JS off; the
-  script only remembers the picked style (ADR 2026-10-18-style-picker).
+  script only loads and remembers the picked style
+  (ADR 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles).
 - Styling follows [design.md](design.md).
 - Loading follows [performance.md](performance.md).
 

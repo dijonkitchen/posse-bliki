@@ -91,7 +91,10 @@ maps onto a static, script-free site:
   which is JavaScript, and the site has none
   ([output-contract](output-contract.md)). The browser's HTTP cache keeps
   the stylesheet and fonts between pages.
-- **Lazy-load** everything else: images after the first, and embeds.
+- **Lazy-load** everything else: images after the first, embeds, and the
+  style picker's styles, which load only once picked, so adding a style
+  adds nothing to a page that doesn't use it
+  (ADR 2026-10-20-zen-garden-styles).
 
 ## Outside the build
 

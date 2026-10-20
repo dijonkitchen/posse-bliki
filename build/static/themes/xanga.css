@@ -1,0 +1,67 @@
+/*
+ * Xanga: a style for the style picker, a throwback to a 2004 Xanga blog:
+ * powder blue and bubblegum pink, Verdana, dotted borders round every box,
+ * and the entry sat in a little column with its date above.
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Xanga: they all sit inside one :has() selector, nested.
+ * Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="xanga"]:checked) {
+  /* A teenager's bedroom wall, always light. */
+  color-scheme: light;
+  --text-1: #1c1c3a;
+  --text-2: #3a3a5c;
+  --text-link: #8a0f52;
+  --text-link-hover: #5a0634;
+  --surface-page: #d8e8f8;
+  --surface-card: #ffffff;
+  --surface-sunken: #f2f7fd;
+  --surface-selected: #ffd6ea;
+  --border-strong: #c2307a;
+  --border-subtle: #9fbfe0;
+  --focus-halo: #ffd23f;
+  --focus-ring: #1c1c3a;
+  --badge-neutral-bg: #ffe6f2;
+  --badge-neutral-border: #f0a6ca;
+  --font-sans: Verdana, Geneva, Tahoma, sans-serif;
+  --radius-sm: 0;
+  --radius-md: 0;
+
+  /* Small Verdana, and pink dots all over the wallpaper. */
+  & body {
+    font-size: var(--size-sm);
+    background-image:
+      radial-gradient(circle at 40% 40%, #f7c3dd 0 3px, transparent 3.5px),
+      radial-gradient(circle at 60% 40%, #f7c3dd 0 3px, transparent 3.5px);
+    background-size: 3rem 3rem;
+  }
+
+  /* Every box: white, with a dotted pink border. */
+  & :is(.site-header, main > article, .site-footer) {
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-card);
+    border: 1px dotted var(--border-strong);
+  }
+  & .site-header { margin-block-end: var(--space-4); }
+  & .site-footer { margin-block-start: var(--space-4); }
+
+  & :is(h1, h2, h3, h4, .site-title) {
+    font-weight: var(--weight-bold);
+    letter-spacing: 0;
+  }
+  & .site-title { color: #a0185f; }
+  /* The entry title in a pink bar, the way the date sat above a post. */
+  & main h1 {
+    font-size: var(--size-lg);
+    padding: var(--space-1) var(--space-2);
+    background: var(--surface-selected);
+    border-block-end: 1px dotted var(--border-strong);
+  }
+  & main h2 { font-size: var(--size-base); text-transform: lowercase; }
+  & main h2::before { content: "~ "; content: "~ " / ""; }
+  & main h2::after { content: " ~"; content: " ~" / ""; }
+  & blockquote { border-inline-start: 1px dotted var(--border-strong); font-style: italic; }
+  & hr { border: 0; border-block-start: 1px dotted var(--border-strong); }
+}

@@ -1,0 +1,73 @@
+/*
+ * Facebook: a style for the style picker, a throwback to Facebook around
+ * 2007: the blue bar across the top, Lucida Grande on white, pale blue
+ * boxes with a blue rule on top. Written from scratch here, with no logo or
+ * images; Facebook's marks belong to Meta. Its blue is darkened a little
+ * to keep WCAG AAA 7:1.
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Facebook: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles).
+ */
+:root:has(#style [value="facebook"]:checked) {
+  /* The 2007 profile page, always light. */
+  color-scheme: light;
+  --text-1: #1c1e21;
+  --text-2: #4b4f56;
+  --text-link: #2d4373;
+  --text-link-hover: #1b2a4a;
+  --surface-page: #ffffff;
+  --surface-card: #f7f8fa;
+  --surface-sunken: #eceff5;
+  --surface-selected: #d8dfea;
+  --border-strong: #2d4373;
+  --border-subtle: #d8dfea;
+  --focus-halo: #ffd23f;
+  --focus-ring: #1c1e21;
+  --badge-neutral-bg: #eceff5;
+  --badge-neutral-border: #d8dfea;
+  --font-sans: "Lucida Grande", "Lucida Sans Unicode", Tahoma, Verdana, Arial, sans-serif;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-pill: 0;
+
+  /* The blue bar, with white text on it. The header keeps the text
+     column's width; a spread shadow, clipped top and bottom, runs the blue
+     out to both edges of the window. */
+  & .site-header {
+    --text-1: #ffffff;
+    --text-2: #ffffff;
+    --text-link: #ffffff;
+    --text-link-hover: #ffffff;
+    padding-block: var(--space-2);
+    border: 0;
+    margin-block-end: var(--space-5);
+    background: #34508a;
+    color: #ffffff;
+    box-shadow: 0 0 0 100vmax #34508a;
+    clip-path: inset(0 -100vmax);
+  }
+  & .site-title { font-weight: var(--weight-bold); letter-spacing: -.02em; }
+  & .site-header nav a { text-decoration: none; font-weight: var(--weight-bold); }
+  & .site-header nav a:hover { text-decoration: underline; }
+  & .style-picker select {
+    background: #ffffff;
+    color: #1c1e21;
+    border-color: #29447e;
+  }
+
+  /* Headings as the pale blue box titles of a profile. */
+  & :is(h1, h2, h3, h4) { font-weight: var(--weight-bold); letter-spacing: 0; }
+  & main h2 {
+    padding: var(--space-1) var(--space-2);
+    background: var(--surface-sunken);
+    border-block-start: 1px solid #3b5998;
+    font-size: var(--size-base);
+  }
+  & main h1 { font-size: var(--size-xl); }
+  & a { text-decoration: none; }
+  & a:hover { text-decoration: underline; }
+  & blockquote { border-inline-start: 2px solid var(--border-subtle); }
+  & hr { border: 0; border-block-start: 1px solid var(--border-subtle); }
+}

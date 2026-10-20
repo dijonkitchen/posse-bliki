@@ -1,0 +1,61 @@
+/*
+ * Tranquille: a style for the style picker, after the CSS Zen Garden's
+ * first design, Dave Shea's "Tranquille" (#001): a quiet Japanese garden in
+ * pale paper, sage and moss. Written from scratch here, with no images or
+ * fonts; the original's art belongs to its author.
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Tranquille: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="tranquille"]:checked) {
+  /* Rice paper and moss, always light. */
+  color-scheme: light;
+  --text-1: #263022;
+  --text-2: #3f4a39;
+  --text-link: #3b4f1d;
+  --text-link-hover: #1f2b0e;
+  --surface-page: #f4f1e6;
+  --surface-card: #fbf9f2;
+  --surface-sunken: #eae6d6;
+  --surface-selected: #dfe5cf;
+  --border-strong: #6b7a5c;
+  --border-subtle: #cdd3bd;
+  --focus-halo: #e9c46a;
+  --focus-ring: #263022;
+  --badge-neutral-bg: #eae6d6;
+  --badge-neutral-border: #cdd3bd;
+  --font-sans: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+
+  /* Morning mist over the top of the page, fading into the paper. */
+  & body {
+    background-image: linear-gradient(#dfe5cf, transparent 22rem);
+    background-repeat: no-repeat;
+  }
+
+  /* Light, airy headings in sage, spaced like a scroll's title. */
+  & :is(h1, h2, h3, h4, .site-title) {
+    font-weight: var(--weight-regular);
+    letter-spacing: .08em;
+    color: #36432c;
+  }
+  & .site-title { text-transform: lowercase; }
+  & main h1 { font-style: italic; }
+
+  /* A thin brushstroke under each section heading. */
+  & main h2 {
+    padding-block-end: var(--space-1);
+    background: linear-gradient(90deg, var(--border-strong), transparent) no-repeat left bottom / 40% 1px;
+  }
+
+  & blockquote {
+    border-inline-start-color: var(--border-subtle);
+    font-style: italic;
+  }
+  & hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+  }
+}

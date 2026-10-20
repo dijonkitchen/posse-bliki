@@ -1,0 +1,52 @@
+/*
+ * Jekyll: a style for the style picker, a throwback to this site's first
+ * home, the Jekyll blog at dijonkitchen.github.io (2015), which used
+ * Jekyll's default theme: Helvetica on near-white, a dark grey bar across
+ * the top, a light title and blue links. Its grey and blue are darkened a
+ * little here to keep WCAG AAA 7:1.
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Jekyll: they all sit inside one :has() selector, nested.
+ * Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles).
+ */
+:root:has(#style [value="jekyll"]:checked) {
+  /* The 2015 default, always light. */
+  color-scheme: light;
+  --text-1: #111111;
+  --text-2: #424242;
+  --text-link: #174a8f;
+  --text-link-hover: #0f2f5c;
+  --surface-page: #fdfdfd;
+  --surface-card: #ffffff;
+  --surface-sunken: #eeeeee;
+  --surface-selected: #e6effb;
+  --border-strong: #424242;
+  --border-subtle: #e8e8e8;
+  --focus-halo: #ffd23f;
+  --focus-ring: #111111;
+  --badge-neutral-bg: #eeeeee;
+  --badge-neutral-border: #e8e8e8;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-code: Menlo, Monaco, Consolas, "Courier New", monospace;
+  --radius-sm: 3px;
+  --radius-md: 3px;
+
+  & body { border-block-start: 5px solid #424242; }
+  & .site-header {
+    border-block-end: 1px solid var(--border-subtle);
+    margin-block-end: var(--space-6);
+  }
+  & .site-title { font-weight: 300; letter-spacing: -1px; }
+  & :is(h1, h2, h3, h4) { font-weight: var(--weight-regular); letter-spacing: -1px; }
+  & a { text-decoration: none; }
+  & a:hover { text-decoration: underline; }
+  & blockquote {
+    border-inline-start: 4px solid var(--border-subtle);
+    font-size: var(--size-lg);
+    letter-spacing: -1px;
+    font-style: italic;
+  }
+  & pre { border: 1px solid var(--border-subtle); background: var(--surface-sunken); }
+  & .site-footer { border-block-start: 1px solid var(--border-subtle); }
+}

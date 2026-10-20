@@ -1,0 +1,86 @@
+/*
+ * Diablo: a style for the style picker, after the look of the first
+ * Diablo (Blizzard North, 1996): the stone of Tristram's cathedral, gold
+ * gothic capitals, blood red, and the life and mana orbs at the foot of
+ * the screen. Written from scratch here, with no images or fonts from the
+ * game, which belong to Blizzard.
+ *
+ * It also turns itself on for Halloween: style-picker.js picks it for
+ * readers on Auto from 24 to 31 October (ADR 2026-10-20-zen-garden-styles).
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Diablo: they all sit inside one :has() selector, nested.
+ * Copy it, change it, make your own (ADR 2026-10-18-style-picker).
+ * Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="diablo"]:checked) {
+  /* Stay a while and listen. Always dark. */
+  color-scheme: dark;
+  --text-1: #e2d6bc;
+  --text-2: #bfb194;
+  --text-link: #ff7a5c;
+  --text-link-hover: #ffb59f;
+  --surface-page: #0e0b09;
+  --surface-card: #1a1511;
+  --surface-sunken: #080605;
+  --surface-selected: #3a1610;
+  --border-strong: #a68a4c;
+  --border-subtle: #4a3c2a;
+  --focus-halo: #e8c45a;
+  --focus-ring: #0e0b09;
+  --badge-neutral-bg: #1a1511;
+  --badge-neutral-border: #4a3c2a;
+  --font-sans: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-pill: 0;
+
+  /* A faint red glow from below. */
+  & body {
+    background-image: radial-gradient(ellipse at 50% 120%, rgb(140 20 10 / .3), transparent 60%);
+    background-attachment: fixed;
+  }
+  /* The life orb and the mana orb, fixed in the bottom corners of a wide
+     screen, out in the margins where they never sit behind text. */
+  @media (min-width: 75rem) {
+    & body {
+      background-image:
+        radial-gradient(circle at 35% 35%, #ff5a4a, #8b0a05 45%, #2a0201 70%, transparent 71%),
+        radial-gradient(circle at 35% 35%, #6a8cff, #0b1f8b 45%, #020829 70%, transparent 71%),
+        radial-gradient(ellipse at 50% 120%, rgb(140 20 10 / .3), transparent 60%);
+      background-size: 8rem 8rem, 8rem 8rem, 100% 100%;
+      background-position: left 1rem bottom 1rem, right 1rem bottom 1rem, center;
+      background-repeat: no-repeat;
+    }
+  }
+
+  /* Gold carved capitals. */
+  & :is(h1, h2, h3, h4, .site-title) {
+    font-family: "Trajan Pro", "Trajan", "Cinzel", Perpetua, var(--font-sans);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #e8c45a;
+    text-shadow: 0 2px 0 #000, 0 0 .5em rgb(232 196 90 / .25);
+  }
+
+  /* Stone panels with a bevelled gold edge. */
+  & :is(.site-header, main > article) {
+    padding: var(--space-4);
+    background: linear-gradient(var(--surface-card), var(--surface-sunken));
+    border: 2px solid var(--border-strong);
+    box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--border-subtle), 0 0 1.5rem #000;
+  }
+  & .site-header { margin-block-end: var(--space-6); }
+
+  & main h2 {
+    border-block-end: 1px solid var(--border-subtle);
+    padding-block-end: var(--space-1);
+  }
+  & blockquote {
+    border-inline-start-color: #8b0a05;
+    font-style: italic;
+  }
+  & hr { border: 0; height: 2px; background: linear-gradient(90deg, transparent, #8b0a05, transparent); }
+  & ::selection { background: #8b0a05; color: #fff; }
+}

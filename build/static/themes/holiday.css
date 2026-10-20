@@ -1,0 +1,74 @@
+/*
+ * Holiday: a style for the style picker, for Christmas time: pine green,
+ * cranberry and gold, candy-cane rules and a little snow.
+ *
+ * It also turns itself on for the season: style-picker.js picks it for
+ * readers on Auto from 1 to 26 December (ADR 2026-10-20-zen-garden-styles).
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Holiday: they all sit inside one :has() selector, nested.
+ * Copy it, change it, make your own (ADR 2026-10-18-style-picker).
+ * Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="holiday"]:checked) {
+  /* A pine forest at night, always dark. */
+  color-scheme: dark;
+  --text-1: #fbf6ea;
+  --text-2: #dcd6c4;
+  --text-link: #ffd770;
+  --text-link-hover: #fff0c2;
+  --surface-page: #0f3324;
+  --surface-card: #143d2b;
+  --surface-sunken: #0a281c;
+  --surface-selected: #5a1420;
+  --border-strong: #e9c46a;
+  --border-subtle: #2f5e47;
+  --focus-halo: #ffd770;
+  --focus-ring: #0f3324;
+  --badge-neutral-bg: #143d2b;
+  --badge-neutral-border: #2f5e47;
+  --font-sans: Georgia, "Times New Roman", serif;
+
+  /* Snow: three layers of flakes drifting down, unless the reader asks
+     for less motion. */
+  & body {
+    background-image:
+      radial-gradient(circle, rgb(255 255 255 / .55) 0 1.5px, transparent 2px),
+      radial-gradient(circle, rgb(255 255 255 / .35) 0 1px, transparent 1.5px),
+      radial-gradient(circle, rgb(255 255 255 / .2) 0 2.5px, transparent 3px);
+    background-size: 7rem 7rem, 4rem 4rem, 11rem 11rem;
+    background-position: 0 0, 2rem 1rem, 5rem 3rem;
+    animation: holiday-snow 40s linear infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    & body { animation: none; }
+  }
+
+  /* The text column stays clear of snow, so no flake sits on a letter. */
+  & :is(.site-header, main, .site-footer) { background-color: var(--surface-page); }
+
+  & :is(h1, h2, h3, h4, .site-title) {
+    font-weight: var(--weight-bold);
+    color: #ffd770;
+  }
+
+  /* Candy-cane stripes under the header and for rules. */
+  & .site-header {
+    border-block-end: 8px solid transparent;
+    border-image: repeating-linear-gradient(135deg, #c8102e 0 10px, #fbf6ea 10px 20px) 8;
+    margin-block-end: var(--space-6);
+  }
+  & hr {
+    border: 0;
+    height: 8px;
+    background: repeating-linear-gradient(135deg, #c8102e 0 10px, #fbf6ea 10px 20px);
+  }
+  /* A star at the top of the tree. */
+  & main h1::before { content: "\2605  "; content: "\2605  " / ""; color: #ffd770; }
+
+  & blockquote { border-inline-start-color: #c8102e; }
+  & ::selection { background: #c8102e; color: #fff; }
+}
+@keyframes holiday-snow {
+  to { background-position: 0 28rem, 2rem 17rem, 5rem 47rem; }
+}

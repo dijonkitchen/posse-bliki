@@ -1,0 +1,71 @@
+/*
+ * GeoCities: a style for the style picker, a throwback to a 1997 home page
+ * on GeoCities: grey tiles, Times New Roman, blue underlined links, a
+ * rainbow rule and the page forever under construction.
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says GeoCities: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="geocities"]:checked) {
+  /* Netscape grey, always light. */
+  color-scheme: light;
+  --text-1: #000000;
+  --text-2: #1f1f1f;
+  --text-link: #0000cc;
+  --text-link-hover: #551a8b;
+  --surface-page: #e6e6e6;
+  --surface-card: #ffffff;
+  --surface-sunken: #dddddd;
+  --surface-selected: #ffff99;
+  --border-strong: #000000;
+  --border-subtle: #808080;
+  --focus-halo: #ffff00;
+  --focus-ring: #000000;
+  --badge-neutral-bg: #ffffff;
+  --badge-neutral-border: #808080;
+  --font-sans: "Times New Roman", Times, serif;
+  --font-code: "Courier New", Courier, monospace;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-pill: 0;
+
+  /* A tiled background, the way every page had one. */
+  & body {
+    background-image:
+      linear-gradient(45deg, #d8d8d8 25%, transparent 25% 75%, #d8d8d8 75%),
+      linear-gradient(45deg, #d8d8d8 25%, transparent 25% 75%, #d8d8d8 75%);
+    background-size: 32px 32px;
+    background-position: 0 0, 16px 16px;
+  }
+
+  /* Under construction: the yellow and black tape. */
+  & .site-header {
+    border-block-start: 12px solid transparent;
+    border-image: repeating-linear-gradient(45deg, #000 0 12px, #ffd800 12px 24px) 12 0 0;
+    margin-block-end: var(--space-5);
+    padding-block-start: var(--space-3);
+  }
+  & .site-title { font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive; }
+
+  /* Content sits in a white table cell with a 3D border. */
+  & main > article {
+    padding: var(--space-4);
+    background: var(--surface-card);
+    border: 3px outset #c0c0c0;
+  }
+  & main h1 {
+    text-align: center;
+    font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive;
+    color: #800080;
+  }
+  & main h2 { color: #000080; }
+  & a { text-decoration: underline; }
+  & hr {
+    border: 0;
+    height: 4px;
+    background: linear-gradient(90deg, red, orange, yellow, lime, blue, indigo, violet);
+  }
+  & table, & :is(th, td) { border: 2px outset #c0c0c0; }
+}

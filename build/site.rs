@@ -18,14 +18,99 @@ use crate::webmention::{self, Mention};
 const STYLE_CSS: &str = include_str!("static/style.css");
 
 /// The styles in every page's style picker besides Auto, Light and Dark:
-/// (slug, name, stylesheet). See ADR 2026-10-18-style-picker.
-const THEMES: &[(&str, &str, &str)] = &[
-    ("terminal", "Terminal", include_str!("static/themes/terminal.css")),
-    ("broadsheet", "Broadsheet", include_str!("static/themes/broadsheet.css")),
-    ("blueprint", "Blueprint", include_str!("static/themes/blueprint.css")),
+/// (slug, name, menu group, stylesheet), in menu order. See ADR
+/// 2026-10-18-style-picker and ADR 2026-10-20-zen-garden-styles.
+const THEMES: &[(&str, &str, &str, &str)] = &[
+    (
+        "terminal",
+        "Terminal",
+        "Originals",
+        include_str!("static/themes/terminal.css"),
+    ),
+    (
+        "broadsheet",
+        "Broadsheet",
+        "Originals",
+        include_str!("static/themes/broadsheet.css"),
+    ),
+    (
+        "blueprint",
+        "Blueprint",
+        "Originals",
+        include_str!("static/themes/blueprint.css"),
+    ),
+    (
+        "tranquille",
+        "Tranquille",
+        "CSS Zen Garden",
+        include_str!("static/themes/tranquille.css"),
+    ),
+    (
+        "mid-century",
+        "Mid Century",
+        "CSS Zen Garden",
+        include_str!("static/themes/mid-century.css"),
+    ),
+    (
+        "steel",
+        "Steel",
+        "CSS Zen Garden",
+        include_str!("static/themes/steel.css"),
+    ),
+    (
+        "apothecary",
+        "Apothecary",
+        "CSS Zen Garden",
+        include_str!("static/themes/apothecary.css"),
+    ),
+    (
+        "under-the-sea",
+        "Under the Sea",
+        "CSS Zen Garden",
+        include_str!("static/themes/under-the-sea.css"),
+    ),
+    (
+        "garments",
+        "Garments",
+        "CSS Zen Garden",
+        include_str!("static/themes/garments.css"),
+    ),
+    ("diablo", "Diablo", "Seasonal", include_str!("static/themes/diablo.css")),
+    (
+        "holiday",
+        "Holiday",
+        "Seasonal",
+        include_str!("static/themes/holiday.css"),
+    ),
+    (
+        "geocities",
+        "GeoCities",
+        "Throwbacks",
+        include_str!("static/themes/geocities.css"),
+    ),
+    (
+        "angelfire",
+        "Angelfire",
+        "Throwbacks",
+        include_str!("static/themes/angelfire.css"),
+    ),
+    ("xanga", "Xanga", "Throwbacks", include_str!("static/themes/xanga.css")),
+    (
+        "jekyll",
+        "Jekyll",
+        "Throwbacks",
+        include_str!("static/themes/jekyll.css"),
+    ),
+    (
+        "facebook",
+        "Facebook",
+        "Throwbacks",
+        include_str!("static/themes/facebook.css"),
+    ),
 ];
-/// Remembers the picked style across pages; the picker works without it on
-/// the current page (ADR 2026-10-18-style-picker).
+/// Loads the picked style and remembers it across pages; the picker works
+/// without it on the current page (ADR 2026-10-18-style-picker,
+/// ADR 2026-10-20-zen-garden-styles).
 const STYLE_PICKER_JS: &str = include_str!("static/style-picker.js");
 /// Site icons, after the spork on JC's Substack (spec/performance.md):
 /// `favicon.ico` (32px) for old browsers and clients that request it
@@ -436,15 +521,24 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
     } else {
         String::new()
     };
-    let (theme_links, theme_options): (String, String) = THEMES
+    // Theme stylesheets load only when picked: style-picker.js adds the one
+    // in use, and with JavaScript off the <noscript> copy links them all so
+    // the picker still works through :has() (ADR 2026-10-20-zen-garden-styles).
+    let theme_links: String = THEMES
         .iter()
-        .map(|(slug, name, _)| {
-            (
-                format!("\n<link rel=\"stylesheet\" href=\"/themes/{slug}.css\">"),
-                format!("<option value=\"{slug}\">{name}</option>\n"),
-            )
-        })
-        .unzip();
+        .map(|(slug, ..)| format!("<link rel=\"stylesheet\" href=\"/themes/{slug}.css\">\n"))
+        .collect();
+    let mut theme_options = String::new();
+    for (i, (slug, name, group, _)) in THEMES.iter().enumerate() {
+        if i == 0 || THEMES[i - 1].2 != *group {
+            if i > 0 {
+                theme_options.push_str("</optgroup>\n");
+            }
+            theme_options.push_str(&format!("<optgroup label=\"{group}\">\n"));
+        }
+        theme_options.push_str(&format!("<option value=\"{slug}\">{name}</option>\n"));
+    }
+    theme_options.push_str("</optgroup>\n");
     format!(
         "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n{THEME_COLOR}<title>{title}</title>\n{meta}\n{canon}\n\
@@ -456,7 +550,7 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
 <link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
-<link rel=\"stylesheet\" href=\"/style.css\">{theme_links}\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
+<link rel=\"stylesheet\" href=\"/style.css\">\n<noscript>\n{theme_links}</noscript>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
 </nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
@@ -1025,7 +1119,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // static assets
     write(&out.join("style.css"), STYLE_CSS)?;
-    for (slug, _, css) in THEMES {
+    for (slug, _, _, css) in THEMES {
         write(&out.join("themes").join(format!("{slug}.css")), css)?;
     }
     write(&out.join("style-picker.js"), STYLE_PICKER_JS)?;
