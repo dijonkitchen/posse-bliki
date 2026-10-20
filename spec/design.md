@@ -28,7 +28,8 @@ Each item is enforced by `tests/harness/design.rs`.
   ships as written, and its text and link tokens meet AAA 7:1 on every
   surface (ADR 2026-10-18-style-picker).
 - **Seasonal styles.** A reader who has never picked a style gets Diablo
-  from 24 to 31 October and Holiday from 1 to 26 December, by their own
+  from 24 to 31 October, Holiday from 1 to 26 December, and on 1 April a
+  random style from the Throwbacks group on each page, by their own
   clock. It isn't saved, and picking anything, Auto included, overrides it
   (ADR 2026-10-20-zen-garden-styles).
 - **Tributes, not copies.** Styles after other people's designs (the CSS

@@ -101,9 +101,16 @@ const THEMES: &[(&str, &str, &str, &str)] = &[
         "Throwbacks",
         include_str!("static/themes/jekyll.css"),
     ),
+    (
+        "facebook",
+        "Facebook",
+        "Throwbacks",
+        include_str!("static/themes/facebook.css"),
+    ),
 ];
-/// Remembers the picked style across pages; the picker works without it on
-/// the current page (ADR 2026-10-18-style-picker).
+/// Loads the picked style and remembers it across pages; the picker works
+/// without it on the current page (ADR 2026-10-18-style-picker,
+/// ADR 2026-10-20-zen-garden-styles).
 const STYLE_PICKER_JS: &str = include_str!("static/style-picker.js");
 /// Site icons, after the spork on JC's Substack (spec/performance.md):
 /// `favicon.ico` (32px) for old browsers and clients that request it

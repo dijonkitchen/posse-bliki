@@ -19,8 +19,9 @@ without it, every style loads and the next page starts in the house style
 again. View the source, copy a file, and make your own.
 
 Auto follows your device's light or dark setting. Light and Dark pin one.
-If you've never picked a style, Diablo haunts the site for Halloween week
-and Holiday decks the halls in December.
+If you've never picked a style, Diablo haunts the site for Halloween week,
+Holiday decks the halls in December, and on April Fools' Day every page
+comes up in a random throwback.
 
 The CSS Zen Garden styles are new stylesheets written in tribute to famous
 designs from the Garden, not copies: no images or fonts, every shape drawn
@@ -55,6 +56,7 @@ Every style has to cope with the same things a note does:
 | Angelfire | neon in space, with flames |
 | Xanga | a 2004 blog, with dotted borders |
 | Jekyll | this site's first home, Jekyll's 2015 default theme |
+| Facebook | the 2007 profile page and its blue bar |
 
 ```css
 :root:has(#style [value="terminal"]:checked) {

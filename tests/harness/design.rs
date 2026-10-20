@@ -423,8 +423,8 @@ fn styles_load_only_when_picked() {
 
 #[test]
 fn seasonal_styles_exist() {
-    // style-picker.js picks Diablo and Holiday by date for readers who never
-    // picked a style (ADR 2026-10-20-zen-garden-styles).
+    // style-picker.js picks Diablo, Holiday or a throwback by date for
+    // readers who never picked a style (ADR 2026-10-20-zen-garden-styles).
     let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
     let slugs: Vec<String> = themes().into_iter().map(|(s, _)| s).collect();
     for seasonal in ["diablo", "holiday"] {
@@ -434,6 +434,24 @@ fn seasonal_styles_exist() {
         );
         assert!(slugs.iter().any(|s| s == seasonal), "no themes/{seasonal}.css");
     }
+    // On April Fools' Day it picks from the menu's Throwbacks, all of them.
+    let (_, html) = html_files().first().expect("a page");
+    let group = &html[html
+        .find("<optgroup label=\"Throwbacks\">")
+        .expect("no Throwbacks group")..];
+    let group = &group[..group.find("</optgroup>").unwrap()];
+    let menu: Vec<String> = group
+        .match_indices("<option ")
+        .filter_map(|(i, _)| attr(&group[i..], "value"))
+        .map(|v| format!("\"{v}\""))
+        .collect();
+    let line = js
+        .lines()
+        .find(|l| l.contains("var throwbacks = ["))
+        .expect("no throwbacks list");
+    let list = &line[line.find('[').unwrap() + 1..line.find(']').unwrap()];
+    let script: Vec<String> = list.split(", ").map(String::from).collect();
+    assert_eq!(script, menu, "style-picker.js throwbacks differ from the menu");
 }
 
 /// Relative luminance of a `#rrggbb` colour, per WCAG 2.
