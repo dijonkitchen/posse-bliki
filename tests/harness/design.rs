@@ -157,6 +157,43 @@ fn type_uses_the_design_system_fonts() {
     assert!(css.contains("--font-sans:") && css.contains("--font-code:"));
 }
 
+// Fallback faces are sized to Atkinson so the swap doesn't shift text, and
+// come straight after it in the stack, before the plain system fonts
+// (ADR 2026-10-20-metric-matched-fallback-fonts).
+#[test]
+fn fallback_fonts_are_metric_matched() {
+    let css = css();
+    let stack = css
+        .split("--font-sans:")
+        .nth(1)
+        .and_then(|rest| rest.split(';').next())
+        .expect("--font-sans defined");
+    let families: Vec<&str> = stack.split(',').map(|f| f.trim().trim_matches('"')).collect();
+    let fallbacks = ["Atkinson Fallback Verdana", "Atkinson Fallback Arial"];
+    assert_eq!(&families[2..4], &fallbacks, "--font-sans: {stack}");
+    for family in fallbacks {
+        let faces: Vec<&str> = css
+            .split("@font-face")
+            .skip(1)
+            .map(|rest| rest.split('}').next().unwrap_or(""))
+            .filter(|face| face.contains(&format!("font-family: \"{family}\"")))
+            .collect();
+        assert!(!faces.is_empty(), "no @font-face for {family}");
+        for face in faces {
+            assert!(face.contains("src: local("), "{family} must use local fonts only");
+            assert!(!face.contains("url("), "{family} must not download anything");
+            for prop in [
+                "size-adjust:",
+                "ascent-override:",
+                "descent-override:",
+                "line-gap-override:",
+            ] {
+                assert!(face.contains(prop), "{family} is missing {prop}");
+            }
+        }
+    }
+}
+
 #[test]
 fn semantic_tokens_light_and_dark() {
     let css = css();
