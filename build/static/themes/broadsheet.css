@@ -25,6 +25,7 @@
   --badge-neutral-bg: #ebe5d6;
   --badge-neutral-border: #b9b09c;
   --font-sans: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  --measure: 66ch; /* sized by this style's own font */
   --radius-sm: 0;
   --radius-md: 0;
   --radius-pill: 0;

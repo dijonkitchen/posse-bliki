@@ -25,6 +25,7 @@
   --badge-neutral-bg: #121a13;
   --badge-neutral-border: #2a4a31;
   --font-sans: var(--font-code);
+  --measure: 66ch; /* sized by this style's own font */
   --radius-sm: 0;
   --radius-md: 0;
   --radius-pill: 0;

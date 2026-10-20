@@ -35,6 +35,52 @@
   font-display: swap;
   src: url("fonts/jetbrains-mono-latin.woff2") format("woff2");
 }
+/*
+ * Fallbacks sized to match Atkinson Hyperlegible Next, so text doesn't jump
+ * when the web font swaps in (ADR 2026-10-20-metric-matched-fallback-fonts).
+ * size-adjust = Atkinson's average glyph width / the local font's; the
+ * ascent and descent overrides are Atkinson's (984 and 316 per 1000)
+ * divided by that. Widths are Capsize's latin xWidthAvg. Verdana comes
+ * first, as in --font-sans; Arial (or its metric twin Liberation Sans)
+ * covers systems without it. Italics are synthesised for the few
+ * milliseconds before the web font arrives.
+ */
+@font-face {
+  font-family: "Atkinson Fallback Verdana";
+  font-weight: 200 600;
+  src: local("Verdana");
+  size-adjust: 86.68%;
+  ascent-override: 113.52%;
+  descent-override: 36.45%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Atkinson Fallback Verdana";
+  font-weight: 700 800;
+  src: local("Verdana Bold"), local("Verdana-Bold");
+  size-adjust: 83.67%;
+  ascent-override: 117.60%;
+  descent-override: 37.77%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Atkinson Fallback Arial";
+  font-weight: 200 600;
+  src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("Arimo");
+  size-adjust: 99.60%;
+  ascent-override: 98.80%;
+  descent-override: 31.73%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Atkinson Fallback Arial";
+  font-weight: 700 800;
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("Arimo Bold");
+  size-adjust: 99.59%;
+  ascent-override: 98.81%;
+  descent-override: 31.73%;
+  line-gap-override: 0%;
+}
 
 /* --- colour: primitives (OKLCH, one lightness ladder for every hue) --- */
 :root {
@@ -131,7 +177,9 @@
 
 /* --- type: 18px base, ~1.25 ratio, nothing below 16px --- */
 :root {
-  --font-sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", Verdana, "Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans", Ubuntu, Cantarell, "DejaVu Sans", sans-serif;
+  --font-sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible",
+    "Atkinson Fallback Verdana", "Atkinson Fallback Arial",
+    Verdana, "Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans", Ubuntu, Cantarell, "DejaVu Sans", sans-serif;
   --font-code: "JetBrains Mono", "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
   --size-sm: 1rem;
   --size-base: 1.125rem;
@@ -148,7 +196,10 @@
   --tracking-body: 0.01em;
   --tracking-display: -0.01em;
   --para-space: 1em;
-  --measure: 66ch;
+  /* 66ch of Atkinson Hyperlegible Next, whose "0" is 0.648em wide. In em, the
+   * column keeps its width while a fallback font is showing; in ch it would
+   * shrink to the fallback's "0" (ADR 2026-10-20-metric-matched-fallback-fonts). */
+  --measure: 42.77em;
 }
 
 /* --- space, shape, motion --- */
@@ -299,7 +350,7 @@ th { background: var(--surface-sunken); font-weight: var(--weight-bold); }
   :focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
 }
 
-/* --- page layout: one left-aligned column, text measure 66ch --- */
+/* --- page layout: one left-aligned column, text measure 66 characters --- */
 /* Phones: a 16px gutter leaves the most room for text. */
 .site-header, main, .site-footer {
   max-width: calc(var(--measure) + 2 * var(--space-5));

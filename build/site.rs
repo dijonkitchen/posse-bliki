@@ -179,6 +179,9 @@ pub struct Config {
     /// Received webmentions keyed by `webmention::url_key` of their target;
     /// empty unless `--webmentions` is given.
     pub mentions: HashMap<String, Vec<Mention>>,
+    /// Notes dated after this day are held back until it arrives
+    /// (ADR 2026-10-20-scheduled-posts); `--today` overrides the UTC clock.
+    pub today: Date,
 }
 
 pub fn default_config() -> Config {
@@ -199,6 +202,7 @@ pub fn default_config() -> Config {
             ("https://fed.brid.gy/", "https://fed.brid.gy/webmention"),
         ],
         mentions: HashMap::new(),
+        today: Date::today_utc(),
     }
 }
 
@@ -850,7 +854,10 @@ fn render_404(site: &Config) -> String {
 // --- main entry point ---
 
 pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), String> {
-    let mut notes: Vec<Note> = load_notes(content)?.into_iter().filter(|n| !n.draft()).collect();
+    let mut notes: Vec<Note> = load_notes(content)?
+        .into_iter()
+        .filter(|n| !n.draft() && n.date.is_none_or(|d| d <= site.today))
+        .collect();
 
     // unique slugs
     let mut seen: HashMap<&str, usize> = HashMap::new();

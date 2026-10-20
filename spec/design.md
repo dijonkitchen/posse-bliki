@@ -59,8 +59,11 @@ Each item is enforced by `tests/harness/design.rs`.
   ("Skip to content"), and `<main id="main">` exists on every page.
 - **Readable type.** Atkinson Hyperlegible Next for text, JetBrains Mono for
   code, 18px (`1.125rem`) body, nothing below 16px, line-height 1.6, text
-  measure 66ch. Sizes are in `rem` so the reader's own text-size setting
-  scales the page.
+  measure 66 characters of Atkinson (`42.77em`). Sizes are in `rem` so the
+  reader's own text-size setting scales the page. Before the web font
+  arrives, text renders in Verdana or Arial resized to Atkinson's metrics,
+  so nothing jumps when it swaps in
+  (ADR 2026-10-20-metric-matched-fallback-fonts).
 - **Header.** The site title and tagline sit in the header outside `<nav>`;
   the nav holds only links. On the home page the title is the `<h1>` at h1
   size; elsewhere it is a smaller link and the page has its own `<h1>`
