@@ -3,7 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # Daily rebuild so newly received webmentions show up without a push.
+  # Daily rebuild so newly received webmentions show up, and posts dated
+  # today go live, without a push (ADR 2026-10-20-scheduled-posts).
   schedule:
     - cron: "17 6 * * *"
   workflow_dispatch:

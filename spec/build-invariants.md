@@ -40,6 +40,10 @@ consecutive builds.
   order (or as explicit ordered vectors).
 - No wall-clock timestamps end up in output. The only time-like
   values are derived from front-matter `date` / `updated`.
+- The clock is read once, for the publish cutoff: notes dated after today
+  (UTC) are left out (ADR 2026-10-20-scheduled-posts). `--today YYYY-MM-DD`
+  replaces the clock, so a build is still a function of its inputs, and
+  tests pin it.
 - No randomness. No PIDs. No hash-of-iteration-order in output.
 
 ## Fast enough

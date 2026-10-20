@@ -72,6 +72,28 @@ impl Date {
         era * 146097 + doe - 719468
     }
 
+    /// The date `days` after 1970-01-01 (Howard Hinnant's civil_from_days).
+    pub fn from_days_since_epoch(days: i64) -> Date {
+        let z = days + 719468;
+        let era = if z >= 0 { z } else { z - 146096 } / 146097;
+        let doe = z - era * 146097;
+        let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+        let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+        let mp = (5 * doy + 2) / 153;
+        let day = (doy - (153 * mp + 2) / 5 + 1) as u32;
+        let month = if mp < 10 { mp + 3 } else { mp - 9 } as u32;
+        let year = (yoe + era * 400 + if month <= 2 { 1 } else { 0 }) as i32;
+        Date { year, month, day }
+    }
+
+    /// Today in UTC, from the system clock.
+    pub fn today_utc() -> Date {
+        let secs = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| d.as_secs());
+        Date::from_days_since_epoch((secs / 86_400) as i64)
+    }
+
     /// 0 = Monday … 6 = Sunday.
     fn weekday(&self) -> usize {
         // 1970-01-01 was a Thursday (3).
@@ -136,5 +158,14 @@ mod tests {
         );
         assert!(Date::parse("2021-02-29").is_none());
         assert!(Date::parse("0000-01-01").is_none());
+    }
+
+    #[test]
+    fn days_round_trip() {
+        assert_eq!(Date::from_days_since_epoch(0), EPOCH);
+        for s in ["0001-01-01", "1969-12-31", "2000-02-29", "2026-10-20", "2100-03-01"] {
+            let d = Date::parse(s).unwrap();
+            assert_eq!(Date::from_days_since_epoch(d.days_from_epoch()), d, "{}", s);
+        }
     }
 }
