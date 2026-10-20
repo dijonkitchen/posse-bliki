@@ -383,8 +383,12 @@ fn themes() -> Vec<(String, String)> {
 }
 
 #[test]
-fn every_page_links_every_style_after_the_house_one() {
-    let mut expected = vec!["/style.css".to_string()];
+fn styles_load_only_when_picked() {
+    // ADR 2026-10-20-zen-garden-styles: the only stylesheet a page loads up
+    // front is the house one. The themes are linked inside <noscript>, for
+    // the picker to work with JavaScript off; with it on, style-picker.js
+    // adds just the one picked.
+    let mut expected = Vec::new();
     for (slug, source) in themes() {
         let css = fs::read_to_string(site().join(format!("themes/{slug}.css"))).expect("read theme");
         assert_eq!(css, source, "themes/{slug}.css differs from its source");
@@ -392,14 +396,84 @@ fn every_page_links_every_style_after_the_house_one() {
     }
     expected.sort();
     for (p, html) in html_files().iter() {
-        let mut sheets: Vec<&str> = link_tags(html)
-            .into_iter()
-            .filter(|t| attr(t, "rel") == Some("stylesheet"))
-            .filter_map(|t| attr(t, "href"))
-            .collect();
-        assert_eq!(sheets.first(), Some(&"/style.css"), "{}", p.display());
-        sheets.sort();
-        assert_eq!(sheets, expected, "{}", p.display());
+        let head = &html[..html.find("</head>").expect("no </head>")];
+        let (before, noscript) = match head.split_once("<noscript>\n") {
+            Some((b, n)) => (b, &n[..n.find("</noscript>").expect("unclosed <noscript>")]),
+            None => panic!("{}: no <noscript> with the styles", p.display()),
+        };
+        let sheets = |part: &str| -> Vec<String> {
+            link_tags(part)
+                .into_iter()
+                .filter(|t| attr(t, "rel") == Some("stylesheet"))
+                .filter_map(|t| attr(t, "href"))
+                .map(String::from)
+                .collect()
+        };
+        assert_eq!(sheets(before), ["/style.css"], "{}", p.display());
+        let mut linked = sheets(noscript);
+        linked.sort();
+        assert_eq!(linked, expected, "{}", p.display());
+        assert!(
+            !html[html.find("</head>").unwrap()..].contains("rel=\"stylesheet\""),
+            "{}: a stylesheet outside <head>",
+            p.display()
+        );
+    }
+}
+
+#[test]
+fn seasonal_styles_exist() {
+    // style-picker.js picks Diablo and Holiday by date for readers who never
+    // picked a style (ADR 2026-10-20-zen-garden-styles).
+    let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
+    let slugs: Vec<String> = themes().into_iter().map(|(s, _)| s).collect();
+    for seasonal in ["diablo", "holiday"] {
+        assert!(
+            js.contains(&format!("return \"{seasonal}\"")),
+            "script lost the {seasonal} season"
+        );
+        assert!(slugs.iter().any(|s| s == seasonal), "no themes/{seasonal}.css");
+    }
+}
+
+/// Relative luminance of a `#rrggbb` colour, per WCAG 2.
+fn luminance(hex: &str) -> f64 {
+    let channel = |i: usize| {
+        let c = f64::from(u8::from_str_radix(&hex[i..i + 2], 16).expect("hex colour")) / 255.0;
+        if c <= 0.03928 {
+            c / 12.92
+        } else {
+            ((c + 0.055) / 1.055).powf(2.4)
+        }
+    };
+    0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5)
+}
+
+fn contrast(a: &str, b: &str) -> f64 {
+    let (x, y) = (luminance(a), luminance(b));
+    (x.max(y) + 0.05) / (x.min(y) + 0.05)
+}
+
+#[test]
+fn styles_keep_aaa_contrast() {
+    // Every style's text and link colours meet WCAG AAA 7:1 on each surface
+    // (ADR 2026-10-18-style-picker), the selected surface with body text.
+    for (slug, css) in themes() {
+        let token = |name: &str| -> String {
+            let decl = format!("--{name}: #");
+            let i = css.find(&decl).unwrap_or_else(|| panic!("{slug}.css: no hex --{name}"));
+            css[i + decl.len() - 1..i + decl.len() + 6].to_string()
+        };
+        let mut pairs = vec![("text-1", "surface-selected")];
+        for fg in ["text-1", "text-2", "text-link", "text-link-hover"] {
+            for bg in ["surface-page", "surface-card", "surface-sunken"] {
+                pairs.push((fg, bg));
+            }
+        }
+        for (fg, bg) in pairs {
+            let ratio = contrast(&token(fg), &token(bg));
+            assert!(ratio >= 7.0, "{slug}.css: --{fg} on --{bg} is {ratio:.2}:1, under 7:1");
+        }
     }
 }
 

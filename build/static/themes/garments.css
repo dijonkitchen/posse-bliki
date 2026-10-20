@@ -1,0 +1,66 @@
+/*
+ * Garments: a style for the style picker, after the CSS Zen Garden's
+ * "Garments" by Dan Mall (#220): indigo denim, gold top-stitching and
+ * sewn-on labels. Written from scratch here, with the cloth drawn by CSS
+ * gradients instead of images; the original's art belongs to its author.
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Garments: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="garments"]:checked) {
+  /* Raw indigo denim, always dark. */
+  color-scheme: dark;
+  --text-1: #f4eedf;
+  --text-2: #d9d2bf;
+  --text-link: #ffcf6e;
+  --text-link-hover: #ffe7b3;
+  --surface-page: #1d2f4a;
+  --surface-card: #233857;
+  --surface-sunken: #172740;
+  --surface-selected: #2c4569;
+  --border-strong: #e0a64a;
+  --border-subtle: #4a6286;
+  --focus-halo: #ffcf6e;
+  --focus-ring: #1d2f4a;
+  --badge-neutral-bg: #233857;
+  --badge-neutral-border: #4a6286;
+  --radius-md: 6px;
+
+  /* A diagonal twill weave. */
+  & body {
+    background-image:
+      repeating-linear-gradient(45deg, rgb(255 255 255 / .035) 0 2px, transparent 2px 5px),
+      repeating-linear-gradient(-45deg, rgb(0 0 0 / .08) 0 1px, transparent 1px 4px);
+  }
+
+  /* Gold top-stitching: dashed lines set just inside each edge. */
+  & :is(.site-header, main > article) {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--surface-card);
+    outline: 2px dashed var(--border-strong);
+    outline-offset: -8px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / .35);
+  }
+  & .site-header { margin-block-end: var(--space-6); }
+
+  /* The page title as a sewn-on leather patch. */
+  & main h1 {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    background: #6b4423;
+    color: #fff4e0;
+    outline: 1px dashed #f0c48a;
+    outline-offset: -5px;
+  }
+  & :is(h1, h2, h3, h4, .site-title) {
+    font-weight: var(--weight-bold);
+    letter-spacing: .04em;
+  }
+  & main h2 { border-block-end: 2px dashed var(--border-strong); padding-block-end: var(--space-1); }
+  & blockquote { border-inline-start: 3px dashed var(--border-strong); }
+  & hr { border-top: 2px dashed var(--border-strong); }
+}

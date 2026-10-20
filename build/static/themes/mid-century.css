@@ -1,0 +1,71 @@
+/*
+ * Mid Century: a style for the style picker, after the CSS Zen Garden's
+ * "Mid Century Modern" by Andrew Lohman (#221): warm cream, mustard, burnt
+ * orange and teal, with bold geometric shapes. Written from scratch here,
+ * drawn with CSS gradients instead of images; the original's art belongs
+ * to its author.
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Mid Century: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="mid-century"]:checked) {
+  /* A 1958 living room, always light. */
+  color-scheme: light;
+  --text-1: #2b1d12;
+  --text-2: #4a3626;
+  --text-link: #0d4448;
+  --text-link-hover: #062a2d;
+  --surface-page: #f3e9d2;
+  --surface-card: #faf3e3;
+  --surface-sunken: #ebdfc2;
+  --surface-selected: #e8d29a;
+  --border-strong: #2b1d12;
+  --border-subtle: #d4c29b;
+  --focus-halo: #e3a72f;
+  --focus-ring: #2b1d12;
+  --badge-neutral-bg: #ebdfc2;
+  --badge-neutral-border: #d4c29b;
+  /* Geometric sans faces the reader may already have. */
+  --font-sans: Futura, "Century Gothic", "Avenir Next", Avenir, "Trebuchet MS", sans-serif;
+  --radius-sm: 0;
+  --radius-md: 0;
+
+  /* Three overlapping circles, mustard, orange and teal, in the empty
+     margin of a wide screen, where they never sit behind text. */
+  @media (min-width: 75rem) {
+    & body {
+      background-image:
+        radial-gradient(circle at 7rem 6rem, #e3a72f 0 3.5rem, transparent 3.55rem),
+        radial-gradient(circle at 11rem 10rem, #c8552a 0 2.25rem, transparent 2.3rem),
+        radial-gradient(circle at 5rem 12rem, #1b6f74 0 1.6rem, transparent 1.65rem);
+      background-repeat: no-repeat;
+    }
+  }
+
+  & :is(h1, h2, h3, h4, .site-title) {
+    font-weight: var(--weight-heavy);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  /* A boomerang-orange bar before each section heading. */
+  & main h2::before {
+    content: "";
+    display: inline-block;
+    width: 1.4em;
+    height: .45em;
+    margin-inline-end: .4em;
+    vertical-align: .15em;
+    background: #c8552a;
+    border-radius: 0 999px 999px 0;
+  }
+  & main h1 { border-block-end: 6px solid #e3a72f; padding-block-end: var(--space-2); }
+
+  & blockquote {
+    border-inline-start: 6px solid #1b6f74;
+    background: var(--surface-card);
+    padding: var(--space-3) var(--space-4);
+  }
+  & hr { border: 0; height: 6px; background: linear-gradient(90deg, #e3a72f 33%, #c8552a 33% 66%, #1b6f74 66%); }
+}

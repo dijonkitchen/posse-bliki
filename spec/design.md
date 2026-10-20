@@ -11,16 +11,30 @@ See [ADR 2026-10-11-a11y-design-system-self-hosted-fonts](../docs/adr/2026-10-11
 
 Each item is enforced by `tests/harness/design.rs`.
 
-- **Stylesheets.** Every page links `/style.css`, then each style in
-  `build/static/themes/` as `/themes/<style>.css`. No inline `style`
-  attributes, no `<style>` blocks.
+- **Stylesheets.** Every page's `<head>` links `/style.css`, then, inside
+  `<noscript>`, each style in `build/static/themes/` as
+  `/themes/<style>.css`. With JavaScript on, the page loads `/style.css`
+  alone and `/style-picker.js` adds only the picked style's sheet, so a
+  style costs nothing until someone picks it
+  (ADR 2026-10-20-zen-garden-styles). No inline `style` attributes, no
+  `<style>` blocks.
 - **Style picker.** Every page's header has a Style menu (`<select
-  id="style">`): Auto, Light, Dark, then each theme. Picking one restyles the
-  page through CSS `:has()`, with no JavaScript; `/style-picker.js` only
-  remembers the pick across pages. Auto follows `prefers-color-scheme`. A
-  theme's rules all sit inside `:root:has(#style [value="<style>"]:checked)`,
-  it loads nothing itself, ships as written, and keeps text at AAA contrast
-  (ADR 2026-10-18-style-picker).
+  id="style">`): Auto, Light, Dark, then each theme in an `<optgroup>`
+  (Originals, CSS Zen Garden, Seasonal, Throwbacks). Picking one restyles
+  the page through CSS `:has()`, with no JavaScript; `/style-picker.js`
+  loads the picked style's sheet and remembers the pick across pages. Auto
+  follows `prefers-color-scheme`. A theme's rules all sit inside
+  `:root:has(#style [value="<style>"]:checked)`, it loads nothing itself,
+  ships as written, and its text and link tokens meet AAA 7:1 on every
+  surface (ADR 2026-10-18-style-picker).
+- **Seasonal styles.** A reader who has never picked a style gets Diablo
+  from 24 to 31 October and Holiday from 1 to 26 December, by their own
+  clock. It isn't saved, and picking anything, Auto included, overrides it
+  (ADR 2026-10-20-zen-garden-styles).
+- **Tributes, not copies.** Styles after other people's designs (the CSS
+  Zen Garden ones, Diablo) are written from scratch: no stylesheets, images
+  or fonts from the originals, and each file credits the design it's
+  after.
 - **No third-party requests.** Pages and the stylesheet load nothing from
   another origin: no web-font CDNs, no `@import`. Fonts are self-hosted
   under `/fonts/`, with their SIL OFL licences beside them.

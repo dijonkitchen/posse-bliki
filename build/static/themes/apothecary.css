@@ -1,0 +1,85 @@
+/*
+ * Apothecary: a style for the style picker, after the CSS Zen Garden's
+ * "Apothecary" by Trent Walton (#218): an old chemist's label in aged cream,
+ * deep brown and oxblood, set in serif small capitals inside a ruled frame.
+ * Written from scratch here, with no images or fonts; the original's art
+ * belongs to its author.
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Apothecary: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="apothecary"]:checked) {
+  /* An aged paper label, always light. */
+  color-scheme: light;
+  --text-1: #2a1d13;
+  --text-2: #46331f;
+  --text-link: #6e1a10;
+  --text-link-hover: #43100a;
+  --surface-page: #eee3c8;
+  --surface-card: #f6eedb;
+  --surface-sunken: #e5d7b5;
+  --surface-selected: #e2cfa3;
+  --border-strong: #2a1d13;
+  --border-subtle: #c3ad80;
+  --focus-halo: #d9a400;
+  --focus-ring: #2a1d13;
+  --badge-neutral-bg: #e5d7b5;
+  --badge-neutral-border: #c3ad80;
+  --font-sans: Baskerville, "Baskerville Old Face", "Hoefler Text", Garamond, "Times New Roman", serif;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-pill: 0;
+
+  /* Foxing at the edges of the paper. */
+  & body {
+    background-image: radial-gradient(ellipse at center, transparent 55%, rgb(120 84 30 / .14));
+    background-attachment: fixed;
+  }
+
+  /* The label: everything centred inside a double rule. */
+  & .site-header {
+    justify-content: center;
+    text-align: center;
+    border-block-end: 3px double var(--border-strong);
+  }
+  & .site-brand { margin-inline: auto; flex-basis: 100%; }
+  & .site-title {
+    font-variant-caps: small-caps;
+    font-weight: var(--weight-bold);
+    letter-spacing: .12em;
+  }
+  & .site-tagline { margin-inline: auto; font-style: italic; }
+  & main > article {
+    padding: var(--space-5) var(--space-4);
+    border: 3px double var(--border-strong);
+    outline: 1px solid var(--border-strong);
+    outline-offset: 4px;
+    background: var(--surface-card);
+  }
+
+  & :is(h1, h2, h3, h4) {
+    text-align: center;
+    font-variant-caps: small-caps;
+    font-weight: var(--weight-bold);
+    letter-spacing: .08em;
+  }
+  /* A fleuron under the title and between sections. The text after the
+     slash is what screen readers say instead: nothing. */
+  & main h1::after {
+    content: "\2766";
+    content: "\2766" / "";
+    display: block;
+    font-size: var(--size-lg);
+    color: var(--text-link);
+  }
+  & hr { border: 0; text-align: center; }
+  & hr::after { content: "\2042"; content: "\2042" / ""; color: var(--text-link); }
+
+  & blockquote {
+    border-inline-start: 0;
+    text-align: center;
+    font-style: italic;
+  }
+}
