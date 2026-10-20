@@ -11,14 +11,15 @@
 
   // A style's stylesheet, added the first time it's picked. Auto, Light and
   // Dark live in style.css. Render-blocking, so the page doesn't flash the
-  // house style first.
+  // house style first. Only menu values ever reach here, and the URL is
+  // resolved against the house sheet so it works under a sub-path.
+  var loaded = { auto: true, light: true, dark: true };
   function load(name) {
-    if (!house || name === "auto" || name === "light" || name === "dark") return;
-    var href = house.getAttribute("href").replace(/style\.css$/, "themes/" + name + ".css");
-    if (document.querySelector('link[href="' + href + '"]')) return;
+    if (!house || loaded[name] || !/^[a-z-]+$/.test(name)) return;
+    loaded[name] = true;
     var link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = href;
+    link.href = new URL("themes/" + name + ".css", house.href).href;
     link.setAttribute("blocking", "render");
     document.head.appendChild(link);
   }
