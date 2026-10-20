@@ -33,6 +33,15 @@ The directory determines the kind. No `type:` field needed in front-matter.
 
 Unknown fields are an error — fail loudly, fix in the schema if you want a new one.
 
+## Scheduled posts
+
+A note whose `date` is after today (UTC, or `--today`) is left out of the
+build exactly like a draft: no page, no listing, no tag page entry, no feed
+item, no sitemap entry, no alias, no webmention. The first build on or after
+its date publishes it; the deploy workflow rebuilds daily, so it goes live
+that morning (UTC) with no push (ADR 2026-10-20-scheduled-posts). A link to a
+scheduled note from a published one is a broken link, as for a draft.
+
 ## Date format
 
 Always `YYYY-MM-DD` (or full ISO-8601 with time). Obsidian's daily-note format
