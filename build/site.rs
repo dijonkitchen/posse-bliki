@@ -19,7 +19,8 @@ const STYLE_CSS: &str = include_str!("static/style.css");
 
 /// The styles in every page's style picker besides Auto, Light and Dark:
 /// (slug, name, menu group, stylesheet), in menu order. See ADR
-/// 2026-10-18-style-picker and ADR 2026-10-20-zen-garden-styles.
+/// 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles and ADR
+/// 2026-10-21-doctor-who-style.
 const THEMES: &[(&str, &str, &str, &str)] = &[
     (
         "terminal",
@@ -64,12 +65,6 @@ const THEMES: &[(&str, &str, &str, &str)] = &[
         include_str!("static/themes/apothecary.css"),
     ),
     (
-        "under-the-sea",
-        "Under the Sea",
-        "CSS Zen Garden",
-        include_str!("static/themes/under-the-sea.css"),
-    ),
-    (
         "garments",
         "Garments",
         "CSS Zen Garden",
@@ -81,6 +76,12 @@ const THEMES: &[(&str, &str, &str, &str)] = &[
         "Holiday",
         "Seasonal",
         include_str!("static/themes/holiday.css"),
+    ),
+    (
+        "doctor-who",
+        "Doctor Who",
+        "Seasonal",
+        include_str!("static/themes/doctor-who.css"),
     ),
     (
         "geocities",
