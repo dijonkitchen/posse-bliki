@@ -22,8 +22,8 @@ Auto follows your device's light or dark setting. Light and Dark pin one.
 If you've never picked a style, the bridge lights up for Star Trek Day on
 8 September, Diablo haunts the site for Halloween week, the TARDIS lands
 on 23 November for Doctor Who's birthday, Holiday decks the halls in
-December, and on April Fools' Day every page comes up in a random
-throwback.
+December, and on April Fools' Day every page comes up in a style drawn at
+random from the whole menu.
 
 The CSS Zen Garden styles are new stylesheets written in tribute to famous
 designs from the Garden, not copies: no images or fonts, every shape drawn
@@ -44,7 +44,9 @@ Every style has to cope with the same things a note does:
 |---|---|
 | Auto, Light, Dark | calm and readable, the house style |
 | Terminal | green phosphor at 2 a.m. |
-| Broadsheet | the morning paper |
+| Broadsheet | after the Financial Times: salmon paper and serif headlines |
+| Solarized Light | Ethan Schoonover's Solarized, in JetBrains Mono |
+| Editor Dark | VS Code and JetBrains in the dark, in JetBrains Mono |
 | Tranquille | Dave Shea's first Zen Garden design: mist and moss |
 | Mid Century | after Andrew Lohman's Mid Century Modern: 1958 living room |
 | Steel | after Steffen Knoeller's Steel: riveted plate |

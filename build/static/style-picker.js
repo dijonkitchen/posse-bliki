@@ -36,14 +36,23 @@
   // Readers who never picked a style get Star Trek on Star Trek Day,
   // Diablo for Halloween week, Doctor Who on its birthday (ADR
   // 2026-10-21-doctor-who-style, ADR 2026-10-22-star-trek-style), Holiday
-  // for December, and a random throwback on each page on April Fools' Day,
-  // without any of it being saved.
-  var throwbacks = ["geocities", "angelfire", "xanga", "jekyll", "facebook"];
+  // for December, and on April Fools' Day any style in the menu at random,
+  // drawn again on each page (ADR
+  // 2026-10-22-ft-solarized-and-editor-styles), without any of it being
+  // saved.
+  function anyStyle() {
+    var styles = [];
+    for (var i = 0; i < picker.options.length; i++) {
+      var value = picker.options[i].value;
+      if (!/^(auto|light|dark)$/.test(value)) styles.push(value);
+    }
+    return styles[Math.floor(Math.random() * styles.length)];
+  }
   function season() {
     var now = new Date();
     var month = now.getMonth() + 1;
     var day = now.getDate();
-    if (month === 4 && day === 1) return throwbacks[Math.floor(Math.random() * throwbacks.length)];
+    if (month === 4 && day === 1) return anyStyle();
     if (month === 9 && day === 8) return "star-trek";
     if (month === 10 && day >= 24) return "diablo";
     if (month === 11 && day === 23) return "doctor-who";

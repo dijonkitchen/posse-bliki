@@ -1,0 +1,86 @@
+/*
+ * Editor Dark: a style for the style picker, after the default dark
+ * themes of VS Code (Dark Modern and Dark+) and JetBrains IDEs: charcoal
+ * panels, the page title as the open editor tab, headings coloured like
+ * syntax, quotes as comments, and a blue status bar along the foot, all
+ * in JetBrains Mono, the site's own code face. Written from scratch, with
+ * no icons or logos; colours that miss WCAG AAA 7:1 on charcoal are
+ * lightened a little (ADR 2026-10-22-ft-solarized-and-editor-styles).
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Editor Dark: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles).
+ */
+:root:has(#style [value="editor-dark"]:checked) {
+  /* The editor at night, always dark. */
+  color-scheme: dark;
+  --text-1: #d4d4d4;
+  --text-2: #bbbbbb;
+  --text-link: #9cdcfe;
+  --text-link-hover: #dcdcaa;
+  --surface-page: #1e1e1e;
+  --surface-card: #252526;
+  --surface-sunken: #181818;
+  --surface-selected: #04395e;
+  --border-strong: #0078d4;
+  --border-subtle: #3c3c3c;
+  --focus-halo: #0078d4;
+  --focus-ring: #ffffff;
+  --badge-neutral-bg: #252526;
+  --badge-neutral-border: #3c3c3c;
+  --font-sans: var(--font-code);
+  --measure: 66ch; /* sized by this style's own font */
+  --radius-sm: 3px;
+  --radius-md: 3px;
+
+  & body { font-size: var(--size-sm); }
+  & :is(h1, h2, h3, h4) { font-weight: var(--weight-bold); letter-spacing: 0; }
+
+  /* The title bar, run out to both edges of the window, and the site name
+     on it as the active tab: a blue line along its top. */
+  & .site-header {
+    margin-block-end: var(--space-5);
+    background: #181818;
+    box-shadow: 0 0 0 100vmax #181818;
+    clip-path: inset(0 -100vmax);
+    border-block-end: 1px solid #2b2b2b;
+  }
+  & .site-title {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    border-block-start: 2px solid var(--border-strong);
+    background: var(--surface-page);
+  }
+
+  /* Headings coloured like code: functions, types, keywords. */
+  & main h1 { color: #dcdcaa; }
+  & main h2 { color: #4ec9b0; }
+  & main h3 { color: #9cdcfe; }
+  & main :is(h2, h3)::before { content: "## "; content: "## " / ""; color: #7fb4e6; }
+  & :not(pre) > code { color: #e2a58a; }
+
+  /* Quotes as comments. */
+  & blockquote {
+    border-inline-start: 2px solid var(--border-subtle);
+    color: #8cbf73;
+    font-style: italic;
+  }
+  & blockquote > :first-child::before { content: "// "; content: "// " / ""; }
+  & hr { border: 0; border-block-start: 1px solid var(--border-subtle); }
+
+  /* The status bar along the foot of the window. */
+  & .site-footer {
+    --text-1: #ffffff;
+    --text-2: #ffffff;
+    --text-link: #ffffff;
+    --text-link-hover: #ffffff;
+    margin-block-start: var(--space-6);
+    padding-block: var(--space-2);
+    background: #005a9e;
+    color: #ffffff;
+    box-shadow: 0 0 0 100vmax #005a9e;
+    clip-path: inset(0 -100vmax);
+  }
+  & ::selection { background: #264f78; color: #ffffff; }
+}

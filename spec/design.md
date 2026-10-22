@@ -20,24 +20,25 @@ Each item is enforced by `tests/harness/design.rs`.
   `<style>` blocks.
 - **Style picker.** Every page's header has a Style menu (`<select
   id="style">`): Auto, Light, Dark, then each theme in an `<optgroup>`
-  (Originals, CSS Zen Garden, Seasonal, Throwbacks). Picking one restyles
-  the page through CSS `:has()`, with no JavaScript; `/style-picker.js`
-  loads the picked style's sheet and remembers the pick across pages. Auto
-  follows `prefers-color-scheme`. A theme's rules all sit inside
-  `:root:has(#style [value="<style>"]:checked)`, it loads nothing itself,
-  ships as written, and its text and link tokens meet AAA 7:1 on every
-  surface (ADR 2026-10-18-style-picker).
+  (Originals, Editors, CSS Zen Garden, Seasonal, Throwbacks). Picking one
+  restyles the page through CSS `:has()`, with no JavaScript;
+  `/style-picker.js` loads the picked style's sheet and remembers the pick
+  across pages. Auto follows `prefers-color-scheme`. A theme's rules all
+  sit inside `:root:has(#style [value="<style>"]:checked)`, it loads
+  nothing itself, ships as written, and its text and link tokens meet AAA
+  7:1 on every surface (ADR 2026-10-18-style-picker).
 - **Seasonal styles.** A reader who has never picked a style gets Star
   Trek on 8 September, Diablo from 24 to 31 October, Doctor Who on 23
-  November, Holiday from 1 to 26 December, and on 1 April a random style
-  from the Throwbacks group on each page, by their own clock. It isn't
+  November, Holiday from 1 to 26 December, and on 1 April any style in the
+  menu at random, drawn again on each page, by their own clock. It isn't
   saved, and picking anything, Auto included, overrides it (ADR
   2026-10-20-zen-garden-styles, ADR 2026-10-21-doctor-who-style, ADR
-  2026-10-22-star-trek-style).
+  2026-10-22-star-trek-style, ADR
+  2026-10-22-ft-solarized-and-editor-styles).
 - **Tributes, not copies.** Styles after other people's designs (the CSS
-  Zen Garden ones, Diablo, Doctor Who, Star Trek) are written from
-  scratch: no stylesheets, images or fonts from the originals, and each
-  file credits the design it's after.
+  Zen Garden ones, Diablo, Doctor Who, Star Trek, Broadsheet's FT, the
+  editor themes) are written from scratch: no stylesheets, images or fonts
+  from the originals, and each file credits the design it's after.
 - **No third-party requests.** Pages and the stylesheet load nothing from
   another origin: no web-font CDNs, no `@import`. Fonts are self-hosted
   under `/fonts/`, with their SIL OFL licences beside them.

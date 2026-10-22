@@ -1,77 +1,89 @@
 /*
- * Broadsheet: a style for the style picker.
+ * Broadsheet: a style for the style picker, after the Financial Times:
+ * salmon paper, slate ink, serif headlines over plain sans text, thin
+ * rules, a short thick bar over each section, and teal links with claret
+ * on hover. Written from scratch here, with no logo, masthead art or
+ * fonts; the FT's look and marks belong to the Financial Times. Its teal
+ * and grey are darkened a little to keep WCAG AAA 7:1
+ * (ADR 2026-10-22-ft-solarized-and-editor-styles).
  *
- * Every page links it, but its rules only apply while the picker in the
- * header says Broadsheet: they all sit inside one :has() selector, nested.
- * On top of /style.css it changes the colour tokens, the fonts and a few
- * flourishes. Copy it, change it, make your own (ADR 2026-10-18-style-picker).
- * Text pairs still meet WCAG AAA 7:1.
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Broadsheet: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles).
  */
 :root:has(#style [value="broadsheet"]:checked) {
-  /* Newsprint and ink, always light. Serif faces the reader already has. */
+  /* Salmon paper, always light. */
   color-scheme: light;
-  --text-1: #111111;
-  --text-2: #3d3a33;
-  --text-link: #7a1712;
-  --text-link-hover: #4a0d0a;
-  --surface-page: #f3efe4;
-  --surface-card: #fbf8f1;
-  --surface-sunken: #ebe5d6;
-  --surface-selected: #e6dcc6;
-  --border-strong: #111111;
-  --border-subtle: #b9b09c;
+  --text-1: #33302e;
+  --text-2: #4d4845;
+  --text-link: #08505a;
+  --text-link-hover: #8a0e37;
+  --surface-page: #fff1e5;
+  --surface-card: #fff7ef;
+  --surface-sunken: #f6e6d6;
+  --surface-selected: #f2dfce;
+  --border-strong: #33302e;
+  --border-subtle: #ccc1b7;
   --focus-halo: #ffd23f;
-  --focus-ring: #111111;
-  --badge-neutral-bg: #ebe5d6;
-  --badge-neutral-border: #b9b09c;
-  --font-sans: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
-  --measure: 66ch; /* sized by this style's own font */
+  --focus-ring: #33302e;
+  --badge-neutral-bg: #f6e6d6;
+  --badge-neutral-border: #ccc1b7;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --broadsheet-serif: Georgia, "Times New Roman", Times, serif;
   --radius-sm: 0;
   --radius-md: 0;
   --radius-pill: 0;
 
-  /* The masthead: centred, above a double rule. */
+  /* The masthead: a serif name in capitals, centred over a rule. */
   & .site-header {
     justify-content: center;
     text-align: center;
-    border-block-end: 4px double var(--border-strong);
+    border-block-end: 1px solid var(--border-strong);
     margin-block-end: var(--space-6);
   }
   & .site-brand { margin-inline: auto; flex-basis: 100%; }
   & .site-title {
-    font-weight: var(--weight-heavy);
-    letter-spacing: .04em;
+    font-family: var(--broadsheet-serif);
+    font-weight: var(--weight-regular);
+    letter-spacing: .06em;
     text-transform: uppercase;
   }
-  & .site-tagline { margin-inline: auto; font-style: italic; }
+  & .site-tagline { margin-inline: auto; }
+  & .site-header nav a { color: var(--text-1); text-decoration: none; font-weight: var(--weight-bold); }
+  & .site-header nav a:hover { color: var(--text-link-hover); text-decoration: underline; }
 
-  & main h1 {
-    text-align: center;
-    font-weight: var(--weight-heavy);
-    border-block-end: 1px solid var(--border-strong);
-    padding-block-end: var(--space-3);
-  }
-  & main :is(h2, h3) {
-    font-variant-caps: small-caps;
-    letter-spacing: .03em;
-    border-block-start: 1px solid var(--border-strong);
+  /* Headlines in serif; section heads as small sans capitals under a
+     short thick bar, the way the paper tops each section. */
+  & :is(h1, h3, h4) { font-family: var(--broadsheet-serif); font-weight: var(--weight-bold); letter-spacing: 0; }
+  & main h1 { font-size: var(--size-2xl); line-height: 1.15; }
+  & main h2 {
     padding-block-start: var(--space-2);
+    border-block-start: 4px solid transparent;
+    border-image: linear-gradient(90deg, var(--text-1) 0 3rem, var(--border-subtle) 3rem) 1;
+    font-size: var(--size-sm);
+    font-weight: var(--weight-bold);
+    letter-spacing: .06em;
+    text-transform: uppercase;
   }
 
-  /* A drop cap on the first paragraph of a page or post. */
-  & :is(main article > p, .e-content > p):first-of-type::first-letter {
-    float: inline-start;
-    margin: .05em .08em 0 0;
-    font-size: 3.4em;
-    line-height: .85;
-    font-weight: var(--weight-heavy);
-  }
-
+  & a { text-decoration-thickness: 1px; text-underline-offset: .2em; }
   & p { hyphens: auto; }
+  /* A pull quote: big serif, with a claret quote mark. */
   & blockquote {
     border-inline-start: 0;
-    font-style: italic;
+    font-family: var(--broadsheet-serif);
     font-size: var(--size-lg);
-    text-align: center;
   }
+  & blockquote::before {
+    content: "\201C";
+    content: "\201C" / "";
+    display: block;
+    height: .6em;
+    color: #990f3d;
+    font-size: 3em;
+    line-height: 1;
+  }
+  & hr { border: 0; border-block-start: 1px solid var(--border-subtle); }
+  & ::selection { background: #f2dfce; }
 }
