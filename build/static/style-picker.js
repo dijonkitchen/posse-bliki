@@ -29,7 +29,17 @@
       if (picker.options[i].value === name) {
         picker.value = name;
         load(name);
+        return true;
       }
+    }
+    return false;
+  }
+
+  function save(name) {
+    try {
+      localStorage.setItem("style", name);
+    } catch (e) {
+      // Storage blocked: the picker still works for this page.
     }
   }
 
@@ -60,20 +70,25 @@
     return null;
   }
 
-  var saved = null;
-  try {
-    saved = localStorage.getItem("style");
-  } catch (e) {
-    // Storage blocked: the picker still works for this page.
-  }
-  pick(saved || season());
-
-  picker.addEventListener("change", function () {
-    load(picker.value);
+  // A shared link can name a style, as ?style=diablo. Following it counts
+  // as picking that style, so it's saved and stays on as the reader moves
+  // between pages; a name that isn't in the menu is ignored
+  // (ADR 2026-10-22-style-share-links).
+  var linked = new URLSearchParams(location.search).get("style");
+  if (linked && pick(linked)) {
+    save(linked);
+  } else {
+    var saved = null;
     try {
-      localStorage.setItem("style", picker.value);
+      saved = localStorage.getItem("style");
     } catch (e) {
       // As above.
     }
+    pick(saved || season());
+  }
+
+  picker.addEventListener("change", function () {
+    load(picker.value);
+    save(picker.value);
   });
 })();

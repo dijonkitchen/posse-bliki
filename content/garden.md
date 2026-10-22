@@ -18,6 +18,10 @@ so the others cost nothing, and remember it as you move between pages;
 without it, every style loads and the next page starts in the house style
 again. View the source, copy a file, and make your own.
 
+To share a style, add `?style=` and its name to the end of any address,
+like `?style=diablo`. Whoever follows the link gets that style until
+they pick another.
+
 Auto follows your device's light or dark setting. Light and Dark pin one.
 If you've never picked a style, the bridge lights up for Star Trek Day on
 8 September, Diablo haunts the site for Halloween week, the TARDIS lands

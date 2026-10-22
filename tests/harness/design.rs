@@ -490,6 +490,21 @@ fn seasonal_styles_exist() {
     );
 }
 
+#[test]
+fn styles_can_be_shared_by_link() {
+    // ?style=<name> picks and saves a style from the menu, and a name that
+    // isn't in it is ignored (ADR 2026-10-22-style-share-links).
+    let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
+    assert!(
+        js.contains("new URLSearchParams(location.search).get(\"style\")"),
+        "script doesn't read ?style="
+    );
+    assert!(
+        js.contains("if (linked && pick(linked)) {\n    save(linked);"),
+        "a linked style should be saved only when it's in the menu"
+    );
+}
+
 /// Relative luminance of a `#rrggbb` colour, per WCAG 2.
 fn luminance(hex: &str) -> f64 {
     let channel = |i: usize| {

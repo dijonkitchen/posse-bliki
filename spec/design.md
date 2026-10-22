@@ -27,6 +27,11 @@ Each item is enforced by `tests/harness/design.rs`.
   sit inside `:root:has(#style [value="<style>"]:checked)`, it loads
   nothing itself, ships as written, and its text and link tokens meet AAA
   7:1 on every surface (ADR 2026-10-18-style-picker).
+- **Share links.** A link ending `?style=<style>` opens the page in that
+  style and saves it as the reader's pick, as if chosen from the menu, so
+  it stays on across pages until they pick another. A name not in the menu
+  is ignored. It needs the script; without it the page shows the reader's
+  usual style (ADR 2026-10-22-style-share-links).
 - **Seasonal styles.** A reader who has never picked a style gets Star
   Trek on 8 September, Diablo from 24 to 31 October, Doctor Who on 23
   November, Holiday from 1 to 26 December, and on 1 April any style in the
