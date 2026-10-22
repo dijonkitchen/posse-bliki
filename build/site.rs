@@ -20,7 +20,8 @@ const STYLE_CSS: &str = include_str!("static/style.css");
 /// The styles in every page's style picker besides Auto, Light and Dark:
 /// (slug, name, menu group, stylesheet), in menu order. See ADR
 /// 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles, ADR
-/// 2026-10-21-doctor-who-style and ADR 2026-10-22-star-trek-style.
+/// 2026-10-21-doctor-who-style, ADR 2026-10-22-star-trek-style and ADR
+/// 2026-10-22-ft-solarized-and-editor-styles.
 const THEMES: &[(&str, &str, &str, &str)] = &[
     (
         "terminal",
@@ -33,6 +34,18 @@ const THEMES: &[(&str, &str, &str, &str)] = &[
         "Broadsheet",
         "Originals",
         include_str!("static/themes/broadsheet.css"),
+    ),
+    (
+        "solarized-light",
+        "Solarized Light",
+        "Editors",
+        include_str!("static/themes/solarized-light.css"),
+    ),
+    (
+        "editor-dark",
+        "Editor Dark",
+        "Editors",
+        include_str!("static/themes/editor-dark.css"),
     ),
     (
         "tranquille",

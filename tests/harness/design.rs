@@ -460,8 +460,8 @@ fn styles_load_only_when_picked() {
 
 #[test]
 fn seasonal_styles_exist() {
-    // style-picker.js picks Star Trek, Diablo, Doctor Who, Holiday or a
-    // throwback by date for readers who never picked a style (ADR
+    // style-picker.js picks Star Trek, Diablo, Doctor Who, Holiday or, on
+    // April Fools' Day, any style by date for readers who never picked one (ADR
     // 2026-10-20-zen-garden-styles, ADR 2026-10-21-doctor-who-style, ADR
     // 2026-10-22-star-trek-style).
     let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
@@ -473,24 +473,36 @@ fn seasonal_styles_exist() {
         );
         assert!(slugs.iter().any(|s| s == seasonal), "no themes/{seasonal}.css");
     }
-    // On April Fools' Day it picks from the menu's Throwbacks, all of them.
-    let (_, html) = html_files().first().expect("a page");
-    let group = &html[html
-        .find("<optgroup label=\"Throwbacks\">")
-        .expect("no Throwbacks group")..];
-    let group = &group[..group.find("</optgroup>").unwrap()];
-    let menu: Vec<String> = group
-        .match_indices("<option ")
-        .filter_map(|(i, _)| attr(&group[i..], "value"))
-        .map(|v| format!("\"{v}\""))
-        .collect();
-    let line = js
-        .lines()
-        .find(|l| l.contains("var throwbacks = ["))
-        .expect("no throwbacks list");
-    let list = &line[line.find('[').unwrap() + 1..line.find(']').unwrap()];
-    let script: Vec<String> = list.split(", ").map(String::from).collect();
-    assert_eq!(script, menu, "style-picker.js throwbacks differ from the menu");
+    // On April Fools' Day it picks any style from the menu itself, so a new
+    // style joins in without touching the script
+    // (ADR 2026-10-22-ft-solarized-and-editor-styles).
+    assert!(
+        js.contains("if (month === 4 && day === 1) return anyStyle();"),
+        "script lost April Fools' Day"
+    );
+    assert!(
+        js.contains("picker.options"),
+        "April Fools' Day should draw from the menu"
+    );
+    assert!(
+        !js.contains("var throwbacks"),
+        "April Fools' Day should not keep its own list"
+    );
+}
+
+#[test]
+fn styles_can_be_shared_by_link() {
+    // ?style=<name> picks and saves a style from the menu, and a name that
+    // isn't in it is ignored (ADR 2026-10-22-style-share-links).
+    let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
+    assert!(
+        js.contains("new URLSearchParams(location.search).get(\"style\")"),
+        "script doesn't read ?style="
+    );
+    assert!(
+        js.contains("if (linked && pick(linked)) {\n    save(linked);"),
+        "a linked style should be saved only when it's in the menu"
+    );
 }
 
 /// Relative luminance of a `#rrggbb` colour, per WCAG 2.

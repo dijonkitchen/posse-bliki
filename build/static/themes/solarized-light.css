@@ -1,0 +1,49 @@
+/*
+ * Solarized Light: a style for the style picker, after Ethan Schoonover's
+ * Solarized palette (2011) as it looks in an editor: warm base3 paper,
+ * blue links, magenta on hover, headings in the accent colours, all set
+ * in JetBrains Mono, the site's own code face. Solarized's text greys and
+ * accents sit under WCAG AAA 7:1 on its paper, so each is darkened here
+ * along its own hue (ADR 2026-10-22-ft-solarized-and-editor-styles).
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Solarized Light: they all sit inside one :has()
+ * selector, nested. Copy it, change it, make your own
+ * (ADR 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles).
+ */
+:root:has(#style [value="solarized-light"]:checked) {
+  /* base3 paper, always light. */
+  color-scheme: light;
+  --text-1: #073642;
+  --text-2: #3a4a50;
+  --text-link: #174c74;
+  --text-link-hover: #7d1d4e;
+  --surface-page: #fdf6e3;
+  --surface-card: #fffbf0;
+  --surface-sunken: #eee8d5;
+  --surface-selected: #e4dcc4;
+  --border-strong: #3a4a50;
+  --border-subtle: #d3cbb4;
+  --focus-halo: #b58900;
+  --focus-ring: #073642;
+  --badge-neutral-bg: #eee8d5;
+  --badge-neutral-border: #d3cbb4;
+  --font-sans: var(--font-code);
+  --measure: 66ch; /* sized by this style's own font */
+  --radius-sm: 2px;
+  --radius-md: 2px;
+
+  & body { font-size: var(--size-sm); }
+  & :is(h1, h2, h3, h4, .site-title) { font-weight: var(--weight-bold); letter-spacing: 0; }
+  /* Headings take Solarized's accents, deepened for AAA: orange, green,
+     cyan. */
+  & main h1 { color: #8a3a0b; }
+  & main h2 { color: #3d4a00; }
+  & main h3 { color: #1d5a55; }
+  & main :is(h2, h3)::before { content: "# "; content: "# " / ""; opacity: .7; }
+
+  & :not(pre) > code { color: #3d4a00; }
+  & blockquote { border-inline-start: 3px solid #b58900; font-style: italic; }
+  & hr { border: 0; border-block-start: 1px dashed var(--border-subtle); }
+  & ::selection { background: var(--surface-selected); }
+}

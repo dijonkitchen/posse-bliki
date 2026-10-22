@@ -29,21 +29,40 @@
       if (picker.options[i].value === name) {
         picker.value = name;
         load(name);
+        return true;
       }
+    }
+    return false;
+  }
+
+  function save(name) {
+    try {
+      localStorage.setItem("style", name);
+    } catch (e) {
+      // Storage blocked: the picker still works for this page.
     }
   }
 
   // Readers who never picked a style get Star Trek on Star Trek Day,
   // Diablo for Halloween week, Doctor Who on its birthday (ADR
   // 2026-10-21-doctor-who-style, ADR 2026-10-22-star-trek-style), Holiday
-  // for December, and a random throwback on each page on April Fools' Day,
-  // without any of it being saved.
-  var throwbacks = ["geocities", "angelfire", "xanga", "jekyll", "facebook"];
+  // for December, and on April Fools' Day any style in the menu at random,
+  // drawn again on each page (ADR
+  // 2026-10-22-ft-solarized-and-editor-styles), without any of it being
+  // saved.
+  function anyStyle() {
+    var styles = [];
+    for (var i = 0; i < picker.options.length; i++) {
+      var value = picker.options[i].value;
+      if (!/^(auto|light|dark)$/.test(value)) styles.push(value);
+    }
+    return styles[Math.floor(Math.random() * styles.length)];
+  }
   function season() {
     var now = new Date();
     var month = now.getMonth() + 1;
     var day = now.getDate();
-    if (month === 4 && day === 1) return throwbacks[Math.floor(Math.random() * throwbacks.length)];
+    if (month === 4 && day === 1) return anyStyle();
     if (month === 9 && day === 8) return "star-trek";
     if (month === 10 && day >= 24) return "diablo";
     if (month === 11 && day === 23) return "doctor-who";
@@ -51,20 +70,25 @@
     return null;
   }
 
-  var saved = null;
-  try {
-    saved = localStorage.getItem("style");
-  } catch (e) {
-    // Storage blocked: the picker still works for this page.
-  }
-  pick(saved || season());
-
-  picker.addEventListener("change", function () {
-    load(picker.value);
+  // A shared link can name a style, as ?style=diablo. Following it counts
+  // as picking that style, so it's saved and stays on as the reader moves
+  // between pages; a name that isn't in the menu is ignored
+  // (ADR 2026-10-22-style-share-links).
+  var linked = new URLSearchParams(location.search).get("style");
+  if (linked && pick(linked)) {
+    save(linked);
+  } else {
+    var saved = null;
     try {
-      localStorage.setItem("style", picker.value);
+      saved = localStorage.getItem("style");
     } catch (e) {
       // As above.
     }
+    pick(saved || season());
+  }
+
+  picker.addEventListener("change", function () {
+    load(picker.value);
+    save(picker.value);
   });
 })();
