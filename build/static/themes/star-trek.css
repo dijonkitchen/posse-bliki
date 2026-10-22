@@ -1,0 +1,117 @@
+/*
+ * Star Trek: a style for the style picker, after the ship's computer
+ * screens of The Next Generation: black glass, rounded bars in orange,
+ * lavender and periwinkle bent into elbows round the header and footer,
+ * links as pill buttons, tall narrow capitals, and space outside the
+ * window. Written from scratch here, with no logos, insignia or fonts;
+ * Star Trek belongs to Paramount.
+ *
+ * It also turns itself on for Star Trek Day: style-picker.js picks it for
+ * readers on Auto on 8 September, the day the show first aired in 1966
+ * (ADR 2026-10-22-star-trek-style).
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Star Trek: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="star-trek"]:checked) {
+  /* The bridge at night, always dark. */
+  color-scheme: dark;
+  --text-1: #ffe2c4;
+  --text-2: #d9c6e6;
+  --text-link: #a6b8ff;
+  --text-link-hover: #ffcc66;
+  --surface-page: #000000;
+  --surface-card: #0d0d14;
+  --surface-sunken: #14141f;
+  --surface-selected: #3a2a4a;
+  --border-strong: #ff9966;
+  --border-subtle: #6b5a8c;
+  --focus-halo: #ffcc66;
+  --focus-ring: #000000;
+  --badge-neutral-bg: #14141f;
+  --badge-neutral-border: #6b5a8c;
+  --radius-sm: .4rem;
+  --radius-md: 1rem;
+  --radius-pill: 999px;
+  --lcars-orange: #ff9966;
+  --lcars-lavender: #cc99cc;
+  --lcars-blue: #9999ff;
+  --lcars-type: "Helvetica Neue Condensed", "Arial Narrow", "Roboto Condensed", "Liberation Sans Narrow",
+    "Franklin Gothic Medium", sans-serif;
+
+  /* Stars past the viewport, kept off the text: the column is solid black. */
+  & body {
+    background-image:
+      radial-gradient(circle, #fff 0 1px, transparent 1.5px),
+      radial-gradient(circle, #c9d4ff 0 1px, transparent 1.5px),
+      radial-gradient(circle, #ffe2c4 0 .5px, transparent 1px);
+    background-size: 9rem 9rem, 6.5rem 6.5rem, 3.7rem 3.7rem;
+    background-position: 0 0, 2.3rem 3.9rem, 1.1rem 1.7rem;
+  }
+  & :is(.site-header, main, .site-footer) { background-color: var(--surface-page); }
+
+  /* The elbows: one bar down the side and along the top of the header,
+     bent round a curve, and its twin closing off the footer. */
+  & .site-header {
+    margin-block-end: 0;
+    border-inline-start: 1.5rem solid var(--lcars-orange);
+    border-block-start: 1rem solid var(--lcars-orange);
+    border-start-start-radius: 3rem;
+  }
+  & main { padding-block-start: var(--space-5); }
+  & .site-footer {
+    border-inline-start: 1.5rem solid var(--lcars-lavender);
+    border-block-end: 1rem solid var(--lcars-lavender);
+    border-end-start-radius: 3rem;
+  }
+
+  & :is(h1, h2, h3, h4, .site-title, .site-header nav, .style-picker) {
+    font-family: var(--lcars-type);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  & :is(h1, h2, h3, h4) { color: var(--lcars-orange); font-weight: var(--weight-bold); }
+  & .site-title, & .site-title a { color: var(--lcars-orange); }
+
+  /* Links in the header are buttons on the panel: black on colour. */
+  & .site-header nav a {
+    padding-inline: var(--space-4);
+    border-radius: var(--radius-pill);
+    background: var(--lcars-blue);
+    color: #000000;
+    font-weight: var(--weight-bold);
+    text-decoration: none;
+  }
+  & .site-header nav a:nth-child(3n + 2) { background: var(--lcars-lavender); }
+  & .site-header nav a:nth-child(3n) { background: var(--lcars-orange); }
+  & .site-header nav a:hover { background: #ffcc66; }
+  & .style-picker select { border-radius: var(--radius-pill); border-color: var(--lcars-lavender); }
+
+  /* A section heading runs into a bar to the edge of the column. */
+  & main h2 { display: flex; align-items: center; gap: var(--space-3); }
+  & main h2::after {
+    content: "";
+    flex: 1 0 2rem;
+    height: .6rem;
+    border-radius: var(--radius-pill);
+    background: var(--lcars-lavender);
+  }
+  & blockquote {
+    border-inline-start: 1rem solid var(--lcars-blue);
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    padding-inline-start: var(--space-4);
+  }
+  /* A rule in segments, like a panel's readout. */
+  & hr {
+    border: 0;
+    height: .6rem;
+    background: linear-gradient(90deg,
+      var(--lcars-orange) 0 30%, transparent 30% 32%,
+      var(--lcars-lavender) 32% 70%, transparent 70% 72%,
+      var(--lcars-blue) 72%);
+    border-radius: var(--radius-pill);
+  }
+  & ::selection { background: var(--lcars-orange); color: #000000; }
+}

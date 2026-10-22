@@ -1,7 +1,8 @@
 # 2026-10-21 — Doctor Who replaces Under the Sea
 
 - Date: 2026-10-21
-- Status: Accepted
+- Status: Accepted; Blueprint and Garments removed too by
+  [ADR 2026-10-22-star-trek-style](2026-10-22-star-trek-style.md)
 - Decided by: JC, asking that if any of the styles overlap, one of them
   become Doctor Who.
 

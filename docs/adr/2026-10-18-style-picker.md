@@ -1,7 +1,8 @@
 # 2026-10-18 — A style picker on every page, with one small script
 
 - Date: 2026-10-18
-- Status: Accepted; how styles load superseded by [2026-10-20-zen-garden-styles](2026-10-20-zen-garden-styles.md)
+- Status: Accepted; how styles load superseded by [2026-10-20-zen-garden-styles](2026-10-20-zen-garden-styles.md);
+  Blueprint removed by [2026-10-22-star-trek-style](2026-10-22-star-trek-style.md)
 - Decided by: JC, asking for a CSS Zen Garden style theme selector, then
   for it to be a dropdown like a light and dark mode picker, with minimal
   JavaScript so the choice works across pages, and without needing
