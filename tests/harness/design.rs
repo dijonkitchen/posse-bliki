@@ -632,6 +632,42 @@ fn styles_are_self_contained_and_readable() {
     }
 }
 
+/// `:is(h1, h2, h3, h4, .site-title)` is as specific as a class, so it
+/// beats a later `main h1`: a style that sets a property in both never
+/// shows the second, as Angelfire's yellow page title once didn't.
+#[test]
+fn heading_rules_are_not_outranked() {
+    let block = |css: &str, at: usize| -> Vec<String> {
+        let open = at + css[at..].find('{').unwrap() + 1;
+        let close = open + css[open..].find('}').unwrap();
+        css[open..close]
+            .split(';')
+            .filter_map(|d| d.split_once(':'))
+            .map(|(p, _)| p.trim().to_string())
+            .filter(|p| !p.is_empty() && !p.contains(' '))
+            .collect()
+    };
+    for (slug, css) in themes() {
+        let Some(group) = css.find("& :is(h1, h2, h3, h4, .site-title)") else {
+            continue;
+        };
+        let shared = block(&css, group);
+        for (at, _) in css.match_indices("& main h") {
+            let rule = &css[at..at + css[at..].find('{').unwrap()];
+            if rule.contains("::") {
+                continue;
+            }
+            for prop in block(&css, at) {
+                assert!(
+                    !shared.contains(&prop),
+                    "{slug}.css: `{prop}` in `{}` is outranked by the :is() heading rule",
+                    rule.trim()
+                );
+            }
+        }
+    }
+}
+
 /// A style that sets notes on a panel, clear of its background, does the
 /// same for lists of notes (the home page, /notes/, tags), whose <main>
 /// holds a section.h-feed rather than an article.
