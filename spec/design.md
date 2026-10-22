@@ -44,6 +44,9 @@ Each item is enforced by `tests/harness/design.rs`.
   Zen Garden ones, Diablo, Doctor Who, Star Trek, Broadsheet's FT, the
   editor themes) are written from scratch: no stylesheets, images or fonts
   from the originals, and each file credits the design it's after.
+- **Round shapes stay round.** A circle drawn with `radial-gradient` gives
+  its stops in lengths or is sized `closest-side`, so its tile never cuts
+  it square.
 - **No third-party requests.** Pages and the stylesheet load nothing from
   another origin: no web-font CDNs, no `@import`. Fonts are self-hosted
   under `/fonts/`, with their SIL OFL licences beside them.
