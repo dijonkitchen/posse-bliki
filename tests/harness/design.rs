@@ -632,6 +632,19 @@ fn styles_are_self_contained_and_readable() {
     }
 }
 
+/// A style that sets notes on a panel, clear of its background, does the
+/// same for lists of notes (the home page, /notes/, tags), whose <main>
+/// holds a section.h-feed rather than an article.
+#[test]
+fn styles_panel_lists_like_notes() {
+    for (slug, css) in themes() {
+        assert!(
+            !css.contains("main > article"),
+            "{slug}.css panels notes but not lists: use main > :is(article, .h-feed)"
+        );
+    }
+}
+
 /// A `radial-gradient(circle ...)` with no size reaches to the farthest
 /// corner of its tile, so stops in percent can run past the tile's edges
 /// and get cut square, as Diablo's life and mana orbs once were. Round
