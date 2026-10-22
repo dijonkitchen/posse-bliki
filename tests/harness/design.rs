@@ -632,6 +632,39 @@ fn styles_are_self_contained_and_readable() {
     }
 }
 
+/// A `radial-gradient(circle ...)` with no size reaches to the farthest
+/// corner of its tile, so stops in percent can run past the tile's edges
+/// and get cut square, as Diablo's life and mana orbs once were. Round
+/// shapes give their stops in lengths or size the circle `closest-side`.
+#[test]
+fn round_gradients_stay_round() {
+    for (slug, css) in themes() {
+        for (at, _) in css.match_indices("radial-gradient(circle") {
+            let mut depth = 0;
+            let mut end = at;
+            for (i, c) in css[at..].char_indices() {
+                match c {
+                    '(' => depth += 1,
+                    ')' => {
+                        depth -= 1;
+                        if depth == 0 {
+                            end = at + i;
+                            break;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            let gradient = &css[at..end];
+            let stops = gradient.split_once(',').map_or("", |(_, s)| s);
+            assert!(
+                gradient.contains("closest-side") || !stops.contains('%'),
+                "{slug}.css: {gradient}) can be cut square by its tile"
+            );
+        }
+    }
+}
+
 #[test]
 fn pinned_dark_matches_the_dark_scheme() {
     let css = css();
