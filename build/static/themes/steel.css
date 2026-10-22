@@ -46,7 +46,7 @@
   }
 
   /* The header and the article are plates, riveted at the corners. */
-  & :is(.site-header, main > article) {
+  & :is(.site-header, main > :is(article, .h-feed)) {
     --rivet: radial-gradient(circle, #8a929a 0 3px, #5b636b 3.5px 4px, transparent 4.5px);
     padding: var(--space-4);
     border: 1px solid var(--border-strong);
@@ -58,6 +58,7 @@
       var(--rivet) right 4px bottom 4px / 12px 12px no-repeat,
       linear-gradient(var(--surface-card), var(--surface-sunken));
     box-shadow: inset 0 1px 0 rgb(255 255 255 / .8), 0 2px 4px rgb(0 0 0 / .25);
+    & > :first-child { margin-block-start: 0; }
   }
   & .site-header { margin-block-end: var(--space-6); }
 
