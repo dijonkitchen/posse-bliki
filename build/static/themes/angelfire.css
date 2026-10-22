@@ -43,7 +43,8 @@
   }
   & main { padding-block-end: 4rem; }
 
-  & :is(h1, h2, h3, h4, .site-title) {
+  /* :where, so the flame-yellow page title below outranks it. */
+  & :where(h1, h2, h3, h4, .site-title) {
     font-weight: var(--weight-bold);
     color: #ff8cff;
     text-shadow: 0 0 .4em #ff00ff;
@@ -54,6 +55,8 @@
     text-shadow: 0 0 .3em #ff6600, 0 0 .8em #ff0000;
   }
   & a { text-decoration: underline wavy; }
+  /* The wave under the site name would run into the line below it. */
+  & .site-title a { text-decoration: none; }
   /* Text sits on a dark panel, clear of the stars. */
   & :is(.site-header, .site-footer) { background-color: var(--surface-page); }
   & main > article {
