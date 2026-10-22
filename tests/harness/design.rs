@@ -632,6 +632,19 @@ fn styles_are_self_contained_and_readable() {
     }
 }
 
+/// A style that sets notes on a panel, clear of its background, does the
+/// same for lists of notes (the home page, /notes/, tags), whose <main>
+/// holds a section.h-feed rather than an article.
+#[test]
+fn styles_panel_lists_like_notes() {
+    for (slug, css) in themes() {
+        assert!(
+            !css.contains("main > article"),
+            "{slug}.css panels notes but not lists: use main > :is(article, .h-feed)"
+        );
+    }
+}
+
 #[test]
 fn pinned_dark_matches_the_dark_scheme() {
     let css = css();

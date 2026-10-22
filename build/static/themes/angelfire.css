@@ -56,10 +56,11 @@
   & a { text-decoration: underline wavy; }
   /* Text sits on a dark panel, clear of the stars. */
   & :is(.site-header, .site-footer) { background-color: var(--surface-page); }
-  & main > article {
+  & main > :is(article, .h-feed) {
     border: 4px ridge var(--border-strong);
     padding: var(--space-4);
     background: var(--surface-card);
+    & > :first-child { margin-block-start: 0; }
   }
   & hr {
     border: 0;

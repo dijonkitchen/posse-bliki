@@ -50,10 +50,11 @@
   & .site-title { font-family: "Comic Sans MS", "Comic Sans", "Chalkboard SE", cursive; }
 
   /* Content sits in a white table cell with a 3D border. */
-  & main > article {
+  & main > :is(article, .h-feed) {
     padding: var(--space-4);
     background: var(--surface-card);
     border: 3px outset #c0c0c0;
+    & > :first-child { margin-block-start: 0; }
   }
   & main h1 {
     text-align: center;

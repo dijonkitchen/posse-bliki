@@ -39,10 +39,11 @@
   }
 
   /* Every box: white, with a dotted pink border. */
-  & :is(.site-header, main > article, .site-footer) {
+  & :is(.site-header, main > :is(article, .h-feed), .site-footer) {
     padding: var(--space-3) var(--space-4);
     background: var(--surface-card);
     border: 1px dotted var(--border-strong);
+    & > :first-child { margin-block-start: 0; }
   }
   & .site-header { margin-block-end: var(--space-4); }
   & .site-footer { margin-block-start: var(--space-4); }
