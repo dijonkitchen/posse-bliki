@@ -19,7 +19,8 @@ const STYLE_CSS: &str = include_str!("static/style.css");
 
 /// The styles in every page's style picker besides Auto, Light and Dark:
 /// (slug, name, menu group, stylesheet), in menu order. See ADR
-/// 2026-10-18-style-picker and ADR 2026-10-20-zen-garden-styles.
+/// 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles, ADR
+/// 2026-10-21-doctor-who-style and ADR 2026-10-22-star-trek-style.
 const THEMES: &[(&str, &str, &str, &str)] = &[
     (
         "terminal",
@@ -32,12 +33,6 @@ const THEMES: &[(&str, &str, &str, &str)] = &[
         "Broadsheet",
         "Originals",
         include_str!("static/themes/broadsheet.css"),
-    ),
-    (
-        "blueprint",
-        "Blueprint",
-        "Originals",
-        include_str!("static/themes/blueprint.css"),
     ),
     (
         "tranquille",
@@ -63,24 +58,24 @@ const THEMES: &[(&str, &str, &str, &str)] = &[
         "CSS Zen Garden",
         include_str!("static/themes/apothecary.css"),
     ),
-    (
-        "under-the-sea",
-        "Under the Sea",
-        "CSS Zen Garden",
-        include_str!("static/themes/under-the-sea.css"),
-    ),
-    (
-        "garments",
-        "Garments",
-        "CSS Zen Garden",
-        include_str!("static/themes/garments.css"),
-    ),
     ("diablo", "Diablo", "Seasonal", include_str!("static/themes/diablo.css")),
     (
         "holiday",
         "Holiday",
         "Seasonal",
         include_str!("static/themes/holiday.css"),
+    ),
+    (
+        "doctor-who",
+        "Doctor Who",
+        "Seasonal",
+        include_str!("static/themes/doctor-who.css"),
+    ),
+    (
+        "star-trek",
+        "Star Trek",
+        "Seasonal",
+        include_str!("static/themes/star-trek.css"),
     ),
     (
         "geocities",

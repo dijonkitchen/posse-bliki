@@ -33,16 +33,20 @@
     }
   }
 
-  // Readers who never picked a style get Diablo for Halloween week,
-  // Holiday for December, and a random throwback on each page on April
-  // Fools' Day, without any of it being saved.
+  // Readers who never picked a style get Star Trek on Star Trek Day,
+  // Diablo for Halloween week, Doctor Who on its birthday (ADR
+  // 2026-10-21-doctor-who-style, ADR 2026-10-22-star-trek-style), Holiday
+  // for December, and a random throwback on each page on April Fools' Day,
+  // without any of it being saved.
   var throwbacks = ["geocities", "angelfire", "xanga", "jekyll", "facebook"];
   function season() {
     var now = new Date();
     var month = now.getMonth() + 1;
     var day = now.getDate();
     if (month === 4 && day === 1) return throwbacks[Math.floor(Math.random() * throwbacks.length)];
+    if (month === 9 && day === 8) return "star-trek";
     if (month === 10 && day >= 24) return "diablo";
+    if (month === 11 && day === 23) return "doctor-who";
     if (month === 12 && day <= 26) return "holiday";
     return null;
   }

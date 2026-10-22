@@ -1,0 +1,121 @@
+/*
+ * Doctor Who: a style for the style picker, after the TARDIS: police-box
+ * blue across the top, the title on the black sign above its doors with the
+ * lamp lit on the roof, and the text on the cream roundel wall of the
+ * classic console room. Written from scratch here, with no logos, images
+ * or fonts; Doctor Who and the TARDIS belong to the BBC.
+ *
+ * It also turns itself on for the show's birthday: style-picker.js picks it
+ * for readers on Auto on 23 November, the day it first aired in 1963
+ * (ADR 2026-10-21-doctor-who-style).
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Doctor Who: they all sit inside one :has() selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
+ */
+:root:has(#style [value="doctor-who"]:checked) {
+  /* The console room, always light. */
+  color-scheme: light;
+  --text-1: #12161d;
+  --text-2: #363f4c;
+  --text-link: #003b6f;
+  --text-link-hover: #00203f;
+  --surface-page: #f3efe4;
+  --surface-card: #fbf9f3;
+  --surface-sunken: #e7e1d1;
+  --surface-selected: #d3e2f1;
+  --border-strong: #003b6f;
+  --border-subtle: #c8c0aa;
+  --focus-halo: #ffd23f;
+  --focus-ring: #12161d;
+  --badge-neutral-bg: #e7e1d1;
+  --badge-neutral-border: #c8c0aa;
+  --font-sans: "Gill Sans", "Gill Sans MT", Seravek, Calibri, "Trebuchet MS", sans-serif;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-pill: 0;
+
+  /* The roundel wall: rows of shallow round recesses. The text column sits
+     on plain wall, so they only show in the margins. */
+  & body {
+    background-color: var(--surface-page);
+    background-image:
+      radial-gradient(circle, #e9e3d3 0 2.1rem, #d9d1bb 2.1rem 2.3rem, transparent 2.35rem);
+    background-size: 6rem 6rem;
+  }
+  & :is(main, .site-footer) { background-color: var(--surface-page); }
+  & main { padding-block-start: var(--space-5); }
+
+  /* Police-box blue, run out to both edges of the window with a spread
+     shadow, as Facebook's bar does. */
+  & .site-header {
+    --text-1: #ffffff;
+    --text-2: #e6eef7;
+    --text-link: #ffffff;
+    --text-link-hover: #ffffff;
+    margin-block-end: 0;
+    background: #003b6f;
+    color: #ffffff;
+    box-shadow: 0 0 0 100vmax #003b6f;
+    clip-path: inset(0 -100vmax);
+  }
+  & .style-picker select {
+    background: #ffffff;
+    color: #12161d;
+    border-color: #ffffff;
+  }
+
+  /* The sign above the doors: white capitals on black, in a blue frame,
+     with the lamp on the roof above it. */
+  & .site-title {
+    position: relative;
+    display: inline-block;
+    margin-block-start: var(--space-4);
+    padding: var(--space-1) var(--space-3);
+    background: #0a0a0a;
+    outline: 4px solid #0b4c88;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  & .site-title::before {
+    content: "";
+    position: absolute;
+    inset-block-end: calc(100% + 4px);
+    inset-inline-start: 50%;
+    width: .9rem;
+    height: 1rem;
+    margin-inline-start: -.45rem;
+    border-radius: .3rem .3rem 0 0;
+    background: #fff6cf;
+    box-shadow: 0 0 .6rem .2rem rgb(255 236 150 / .7);
+    animation: tardis-lamp 2.4s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    & .site-title::before { animation: none; }
+  }
+  & .site-tagline { margin-block-start: var(--space-2); }
+
+  & :is(h1, h2, h3, h4) { font-weight: var(--weight-bold); letter-spacing: .02em; }
+  & main h1 { color: var(--text-link); }
+  /* Panel lines, like the box's doors. */
+  & main h2 {
+    padding-block-end: var(--space-1);
+    border-block-end: 3px double var(--border-strong);
+  }
+  & blockquote {
+    border-inline-start: 6px solid var(--border-strong);
+    background: var(--surface-card);
+    padding: var(--space-3) var(--space-4);
+  }
+  /* The time vortex, in a single rule. */
+  & hr {
+    border: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #003b6f, #3d7cc9, #f2a33a, #3d7cc9, #003b6f);
+  }
+  & ::selection { background: #003b6f; color: #ffffff; }
+}
+@keyframes tardis-lamp {
+  50% { opacity: .55; box-shadow: 0 0 .2rem 0 rgb(255 236 150 / .4); }
+}

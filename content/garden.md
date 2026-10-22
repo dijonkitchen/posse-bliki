@@ -19,9 +19,11 @@ without it, every style loads and the next page starts in the house style
 again. View the source, copy a file, and make your own.
 
 Auto follows your device's light or dark setting. Light and Dark pin one.
-If you've never picked a style, Diablo haunts the site for Halloween week,
-Holiday decks the halls in December, and on April Fools' Day every page
-comes up in a random throwback.
+If you've never picked a style, the bridge lights up for Star Trek Day on
+8 September, Diablo haunts the site for Halloween week, the TARDIS lands
+on 23 November for Doctor Who's birthday, Holiday decks the halls in
+December, and on April Fools' Day every page comes up in a random
+throwback.
 
 The CSS Zen Garden styles are new stylesheets written in tribute to famous
 designs from the Garden, not copies: no images or fonts, every shape drawn
@@ -43,14 +45,13 @@ Every style has to cope with the same things a note does:
 | Auto, Light, Dark | calm and readable, the house style |
 | Terminal | green phosphor at 2 a.m. |
 | Broadsheet | the morning paper |
-| Blueprint | drafting table |
 | Tranquille | Dave Shea's first Zen Garden design: mist and moss |
 | Mid Century | after Andrew Lohman's Mid Century Modern: 1958 living room |
 | Steel | after Steffen Knoeller's Steel: riveted plate |
 | Apothecary | after Trent Walton's Apothecary: an old chemist's label |
-| Under the Sea | after Eric Stoltz's Under the Sea!: deep water |
-| Garments | after Dan Mall's Garments: denim and top-stitching |
 | Diablo | Tristram, 1996; turns itself on for Halloween week |
+| Doctor Who | the TARDIS in the console room; turns itself on for the show's birthday |
+| Star Trek | the ship's computer, with space outside; turns itself on for Star Trek Day |
 | Holiday | pine, cranberry and snow; turns itself on in December |
 | GeoCities | a 1997 home page, under construction |
 | Angelfire | neon in space, with flames |

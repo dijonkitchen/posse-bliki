@@ -1,7 +1,9 @@
 # 2026-10-20 — Zen Garden, seasonal and throwback styles, loaded only when picked
 
 - Date: 2026-10-20
-- Status: Accepted
+- Status: Accepted; Under the Sea replaced by Doctor Who in
+  [ADR 2026-10-21-doctor-who-style](2026-10-21-doctor-who-style.md), and
+  Garments removed by [ADR 2026-10-22-star-trek-style](2026-10-22-star-trek-style.md)
 - Decided by: JC, asking to "have some fun and duplicate the same styles as
   CSS Zen Garden" without affecting page performance, then for a Diablo I
   style that turns on for Halloween, a holiday style for Christmas time,

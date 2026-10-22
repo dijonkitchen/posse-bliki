@@ -460,11 +460,13 @@ fn styles_load_only_when_picked() {
 
 #[test]
 fn seasonal_styles_exist() {
-    // style-picker.js picks Diablo, Holiday or a throwback by date for
-    // readers who never picked a style (ADR 2026-10-20-zen-garden-styles).
+    // style-picker.js picks Star Trek, Diablo, Doctor Who, Holiday or a
+    // throwback by date for readers who never picked a style (ADR
+    // 2026-10-20-zen-garden-styles, ADR 2026-10-21-doctor-who-style, ADR
+    // 2026-10-22-star-trek-style).
     let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
     let slugs: Vec<String> = themes().into_iter().map(|(s, _)| s).collect();
-    for seasonal in ["diablo", "holiday"] {
+    for seasonal in ["star-trek", "diablo", "doctor-who", "holiday"] {
         assert!(
             js.contains(&format!("return \"{seasonal}\"")),
             "script lost the {seasonal} season"

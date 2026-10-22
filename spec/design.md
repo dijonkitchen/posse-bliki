@@ -27,15 +27,17 @@ Each item is enforced by `tests/harness/design.rs`.
   `:root:has(#style [value="<style>"]:checked)`, it loads nothing itself,
   ships as written, and its text and link tokens meet AAA 7:1 on every
   surface (ADR 2026-10-18-style-picker).
-- **Seasonal styles.** A reader who has never picked a style gets Diablo
-  from 24 to 31 October, Holiday from 1 to 26 December, and on 1 April a
-  random style from the Throwbacks group on each page, by their own
-  clock. It isn't saved, and picking anything, Auto included, overrides it
-  (ADR 2026-10-20-zen-garden-styles).
+- **Seasonal styles.** A reader who has never picked a style gets Star
+  Trek on 8 September, Diablo from 24 to 31 October, Doctor Who on 23
+  November, Holiday from 1 to 26 December, and on 1 April a random style
+  from the Throwbacks group on each page, by their own clock. It isn't
+  saved, and picking anything, Auto included, overrides it (ADR
+  2026-10-20-zen-garden-styles, ADR 2026-10-21-doctor-who-style, ADR
+  2026-10-22-star-trek-style).
 - **Tributes, not copies.** Styles after other people's designs (the CSS
-  Zen Garden ones, Diablo) are written from scratch: no stylesheets, images
-  or fonts from the originals, and each file credits the design it's
-  after.
+  Zen Garden ones, Diablo, Doctor Who, Star Trek) are written from
+  scratch: no stylesheets, images or fonts from the originals, and each
+  file credits the design it's after.
 - **No third-party requests.** Pages and the stylesheet load nothing from
   another origin: no web-font CDNs, no `@import`. Fonts are self-hosted
   under `/fonts/`, with their SIL OFL licences beside them.
