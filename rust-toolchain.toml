@@ -2,6 +2,6 @@
 # rustup reads this file and installs the exact version on first use, so
 # `make ci` behaves the same everywhere (spec/build-invariants.md).
 [toolchain]
-channel = "1.97.0"
+channel = "1.99.1"
 components = ["rustfmt", "clippy"]
 profile = "minimal"
