@@ -2,6 +2,7 @@
 //! and the test harness in `tests/` reuses its JSON and front-matter parsers.
 //! Rust std only, no crates (docs/adr/2026-10-06-rust-build-zero-dependencies.md).
 
+pub mod blogroll;
 pub mod date;
 pub mod entities;
 pub mod frontmatter;

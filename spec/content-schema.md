@@ -11,6 +11,7 @@ The machine-readable schema lives at [`content-schema.json`](content-schema.json
 |---|---|---|---|
 | `content/index.md` | home | `home.html` | no (h-card instead) |
 | `content/<page>.md` | page | `page.html` | no |
+| `content/blogroll.md` | page, also `/blogroll.opml` | `page.html` | no (see [feeds.md](feeds.md)) |
 | `content/notes/**/*.md` | post | `post.html` | yes |
 
 Images go in `content/images/` and are linked as `/images/<file>`

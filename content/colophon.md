@@ -15,6 +15,7 @@ This site is built on a deliberately small stack chosen for longevity:
 | Hosting | GitHub Pages |
 | CI/CD | GitHub Actions |
 | Syndication | RSS at `/index.xml`, JSON Feed at `/feed.json` |
+| Blogroll | The sites I read on the [blogroll](blogroll.md), also as OPML for feed readers |
 | Webmentions | [webmention.io](https://webmention.io) to receive, [Bridgy](https://brid.gy) and [Bridgy Fed](https://fed.brid.gy) to syndicate |
 
 The architecture is **spec + harness + replaceable build**. The build
