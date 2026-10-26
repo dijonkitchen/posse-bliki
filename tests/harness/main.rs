@@ -9,6 +9,7 @@ mod support;
 
 mod aliases;
 mod base_path;
+mod blogroll;
 mod dates;
 mod design;
 mod drafts;
