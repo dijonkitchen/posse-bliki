@@ -9,6 +9,8 @@ $TTL 600
 ; included. Porkbun's forwarding creates these records itself and serves
 ; the redirect from uixie.porkbun.com; another DNS host would need its own
 ; redirect service in their place.
+; Porkbun also publishes _acme-challenge TXT tokens for the forwarding's
+; Let's Encrypt certificates. They change at every renewal, so they're left out.
 @       A       207.207.210.23
 @       A       207.207.210.36
 @       A       207.207.210.50
