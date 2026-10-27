@@ -33,3 +33,5 @@ _dmarc                  TXT     "v=DMARC1; p=none; rua=mailto:dmarc@dijonkitchen
 ; Ownership checks.
 @                                       TXT     "google-site-verification=bitAFl3JsXWi27bpiFdEpNB-F0-tQkO0DhK_Yy25z8M"
 _github-pages-challenge-dijonkitchen    TXT     "cd9449927f0827e1600e45c2fd5907"
+; Bluesky handle @dijonkitchen.org.
+_atproto                                TXT     "did=did:plc:e7pggp5deprxbwszlv254vmv"
