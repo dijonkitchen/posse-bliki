@@ -31,7 +31,7 @@ the realistic threat is account takeover, not a flaw in a DNS server.
 - **dijonkitchen.com and .net** are Porkbun URL forwards (301, path kept,
   www included) to https://www.dijonkitchen.org, with no-mail records
   (null MX, `v=spf1 -all`, DMARC `p=reject`) so nobody can send mail as
-  them.
+  them. Their zones are in `docs/dns/` too.
 - **No DNSSEC.** Fastmail doesn't support it on custom domains
   (https://www.fastmail.help/hc/en-us/articles/7882212586511-DNSSEC).
   DKIM, SPF, DMARC and CAA cover the risks that matter here.
