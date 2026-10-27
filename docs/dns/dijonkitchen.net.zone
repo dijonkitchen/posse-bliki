@@ -11,6 +11,8 @@ $TTL 600
 ; redirect service in their place.
 ; Porkbun also publishes _acme-challenge TXT tokens for the forwarding's
 ; Let's Encrypt certificates. They change at every renewal, so they're left out.
+; Porkbun stores the apex as ALIAS -> uixie.porkbun.com, which isn't a
+; standard record type; these are the A records it resolves to.
 @       A       207.207.210.23
 @       A       207.207.210.36
 @       A       207.207.210.50
