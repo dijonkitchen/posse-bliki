@@ -13,6 +13,8 @@ This site is built on a deliberately small stack chosen for longevity:
 | Toolchain | [Rust](https://www.rust-lang.org) only, pinned in `rust-toolchain.toml`: the build, the test harness and the tools |
 | Design | Atkinson Hyperlegible Next and JetBrains Mono, self-hosted; colours checked for AAA contrast in light and dark |
 | Hosting | GitHub Pages |
+| Domain & DNS | [Porkbun](https://porkbun.com), registrar and nameservers; the zone file is in the repo |
+| Email | [Fastmail](https://www.fastmail.com), on the domain |
 | CI/CD | GitHub Actions |
 | Syndication | RSS at `/index.xml`, JSON Feed at `/feed.json` |
 | Blogroll | The sites I read on the [blogroll](blogroll.md), also as OPML for feed readers |
