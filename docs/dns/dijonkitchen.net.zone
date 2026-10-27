@@ -1,0 +1,23 @@
+; dijonkitchen.net: the records served by Porkbun's nameservers.
+; Only redirects, no site or mail (ADR 2026-10-21-porkbun-registrar-and-dns).
+; Porkbun is the source of truth; update this file in the same change as
+; any edit made there. SOA and NS records are managed by the DNS host.
+$ORIGIN dijonkitchen.net.
+$TTL 600
+
+; URL forwarding: 301 to https://www.dijonkitchen.org, path kept, www
+; included. Porkbun's forwarding creates these records itself and serves
+; the redirect from uixie.porkbun.com; another DNS host would need its own
+; redirect service in their place.
+@       A       207.207.210.23
+@       A       207.207.210.36
+@       A       207.207.210.50
+*       CNAME   uixie.porkbun.com.
+
+; Only Let's Encrypt may issue certificates.
+@       CAA     0 issue "letsencrypt.org"
+
+; No mail is sent or received on this domain.
+@       MX      0 .
+@       TXT     "v=spf1 -all"
+_dmarc  TXT     "v=DMARC1; p=reject;"
