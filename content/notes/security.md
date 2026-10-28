@@ -24,7 +24,7 @@ For example:
 
 Basically, longer is better because it's harder for computers to figure out what it is. Adding different cases, numbers, and symbols is even better, but it can make things hard to remember unless you use Snowden's example of 'MargaretThatcheris110%SEXY!'
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/yzGzB-yYKcc" frameborder="0" allowfullscreen></iframe>
+Watch Snowden explain it: [Edward Snowden on Passwords](https://www.youtube.com/watch?v=yzGzB-yYKcc) (Last Week Tonight, YouTube).
 
 How you create these passphrases is an even deeper issue. People are notoriously bad at this; they create easily guessed things. One way to make this easier is to use [Diceware](https://en.wikipedia.org/wiki/Diceware). This kind of software utilizing very good randomization, the kind that's just random weather data to generate words from a dictionary. Why the weather? Because people are also really bad at forecasting that too! So if someone solves that problem, it'll actually be better for the world. But wouldn't a dictionary make it so you can look up words? Yes, but the key is running the diceware a few times so that you generate a few words for a longer passphrase. The idea is that the number of words in this dictionary is much higher than the number of letters or numbers there are so the mathematical combinations are higher! After you generate these words into a passphrase, you'll need to string them together into a story you can remember, like the example above.
 
