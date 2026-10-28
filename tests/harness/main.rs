@@ -23,6 +23,7 @@ mod microformats;
 mod performance;
 mod rss;
 mod scheduled;
+mod security_txt;
 mod supply_chain;
 mod url_policy;
 mod webmentions;

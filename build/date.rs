@@ -62,7 +62,7 @@ impl Date {
     }
 
     /// Days since 1970-01-01 (Howard Hinnant's days_from_civil).
-    fn days_from_epoch(&self) -> i64 {
+    pub fn days_from_epoch(&self) -> i64 {
         let y = self.year as i64 - if self.month <= 2 { 1 } else { 0 };
         let era = if y >= 0 { y } else { y - 399 } / 400;
         let yoe = y - era * 400;
