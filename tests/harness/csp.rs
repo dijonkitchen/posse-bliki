@@ -19,7 +19,7 @@ fn same_origin(url: &str) -> bool {
 fn every_page_sets_the_policy_first() {
     // A policy only covers what comes after it, so it sits right after the
     // charset, ahead of every stylesheet, font and script.
-    let first = format!("<head>\n<meta charset=\"utf-8\">\n{CSP}\n");
+    let first = format!("<head>\n  <meta charset=\"utf-8\">\n  {CSP}\n");
     for (p, text) in html_files() {
         assert!(
             text.contains(&first),

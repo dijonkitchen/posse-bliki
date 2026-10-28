@@ -575,7 +575,7 @@ fn every_page_has_the_style_picker() {
             "{}: Auto not the default",
             p.display()
         );
-        let script = "</select>\n</label>\n<script src=\"/style-picker.js\"></script>";
+        let script = "</select>\n    </label>\n    <script src=\"/style-picker.js\"></script>";
         assert!(
             html.contains(script),
             "{}: script not right after the picker",
