@@ -49,11 +49,18 @@ jobs:
       - name: Validate the built site (mirrors `make validate` locally)
         run: make validate
 
-  lighthouse:
+  lighthouse-page:
     # Lighthouse budget on the built pages (ADR 2026-10-14-mobile-first, spec/performance.md).
     # CI-only: it needs Node and Chrome, so it stays out of `make ci` and
-    # the build. The runner image ships Chrome.
+    # the build. The runner image ships Chrome. One job per page, run side by
+    # side, since the audits are most of CI's time (ADR 2026-10-27-parallel-lighthouse).
+    # Keep this list in step with PAGES in scripts/lighthouse.sh.
+    name: lighthouse ${{ matrix.page }}
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        page: [/, /notes/data/, /notes/governance/, /notes/security/, /notes/, /about/]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -67,10 +74,26 @@ jobs:
           node-version: "22"
 
       - name: Lighthouse budget (mirrors `make lighthouse` locally)
+        env:
+          PAGES: ${{ matrix.page }}
         run: make lighthouse
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
-          name: lighthouse-reports
+          name: lighthouse-reports-${{ strategy.job-index }}
           path: _lighthouse/*.json
+
+  lighthouse:
+    # One stable check for branch protection, whatever pages the matrix audits.
+    # Runs when a page fails too, but not when a newer push cancels the run,
+    # so a superseded run doesn't post a red check.
+    needs: lighthouse-page
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    permissions: {}
+    steps:
+      - name: Every page met the budget
+        env:
+          RESULT: ${{ needs.lighthouse-page.result }}
+        run: test "$RESULT" = success
