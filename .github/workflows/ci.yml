@@ -86,8 +86,10 @@ jobs:
 
   lighthouse:
     # One stable check for branch protection, whatever pages the matrix audits.
+    # Runs when a page fails too, but not when a newer push cancels the run,
+    # so a superseded run doesn't post a red check.
     needs: lighthouse-page
-    if: always()
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     permissions: {}
     steps:
