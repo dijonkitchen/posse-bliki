@@ -760,7 +760,7 @@ const THEME_COLOR: &str = "<meta name=\"theme-color\" media=\"(prefers-color-sch
 /// Pages load only the site's own files, so the policy allows nothing else.
 /// A `<meta>` because GitHub Pages can't send headers (ADR 2026-10-28-csp-meta-tag).
 const CSP: &str = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; \
-script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; \
+script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'self'; \
 base-uri 'none'; form-action 'none'\">\n";
 
 /// The author as readers see it, "JC", with the full name kept for mf2

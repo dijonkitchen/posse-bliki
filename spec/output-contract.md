@@ -16,8 +16,8 @@ in `tests/`.
 - `<meta charset="utf-8">`.
 - `<meta name="viewport" content="width=device-width, initial-scale=1">`.
 - `<meta http-equiv="Content-Security-Policy">` right after the charset,
-  allowing only the site's own scripts, styles, images, fonts and manifest
-  (`default-src 'none'`, `base-uri 'none'`, `form-action 'none'`). Pages
+  allowing only the site's own scripts, styles, images, fonts, manifest and
+  fetches (`default-src 'none'`, `base-uri 'none'`, `form-action 'none'`). Pages
   load nothing the policy would block: no inline styles, `<style>`, event
   handler attributes, embeds, or files from other hosts
   (ADR 2026-10-28-csp-meta-tag).

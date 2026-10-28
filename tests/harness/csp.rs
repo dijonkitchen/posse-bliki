@@ -7,7 +7,7 @@ use std::fs;
 use crate::support::{files_with_ext, html, html_files, rel, site};
 
 const CSP: &str = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; \
-script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; \
+script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'self'; \
 base-uri 'none'; form-action 'none'\">";
 
 /// A path on this site, which `'self'` allows: `/x`, never `//host/x`.
