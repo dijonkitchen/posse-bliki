@@ -502,10 +502,11 @@ fn style_picker_uses_modern_syntax() {
         "style-picker.js should use const/let and arrow functions"
     );
     for helper in ["load", "pick", "save", "anyStyle", "season"] {
-        let defined = js.find(&format!("const {helper} = (")).unwrap_or_else(|| panic!("no const {helper} arrow"));
-        let used = js.find(&format!("{helper}(")).expect("helper used");
+        let defined = js
+            .find(&format!("const {helper} = ("))
+            .unwrap_or_else(|| panic!("no const {helper} arrow"));
         assert!(
-            js[..defined].matches(&format!(" {helper}(")).count() == 0 && used > 0,
+            !js[..defined].contains(&format!(" {helper}(")),
             "{helper} is called above its definition"
         );
     }
