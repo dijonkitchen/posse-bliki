@@ -17,7 +17,9 @@ budget, which `scripts/lighthouse.sh` checks in CI.
 - **Readable output, never minified.** `style.css` ships byte for byte as
   written in `build/static/`, comments included, with no line over 200
   characters. HTML keeps one `<head>` element per line, as the templates
-  write it. The reason is Stallman's: what the site sends is its source,
+  write it, indented two spaces per level of nesting with no blank lines;
+  `<pre>`, `<textarea>`, `<script>` and `<style>` contents ship byte for
+  byte (ADR 2026-10-28-indented-html). The reason is Stallman's: what the site sends is its source,
   so anyone can audit it and remix it from "view source" alone. Speed
   gives no reason to give that up: GitHub Pages compresses everything
   over the wire, so a minifier would save almost nothing.

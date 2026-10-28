@@ -10,6 +10,7 @@ use crate::blogroll;
 use crate::date::{self, Date};
 use crate::frontmatter::{self, FrontMatter, LoadError, Value};
 use crate::image;
+use crate::indent;
 use crate::json::{self, Json};
 use crate::markdown;
 use crate::text;
@@ -570,7 +571,7 @@ fn page(
         theme_options.push_str(&format!("<option value=\"{slug}\">{name}</option>\n"));
     }
     theme_options.push_str("</optgroup>\n");
-    format!(
+    let html = format!(
         "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n{THEME_COLOR}<title>{title}</title>\n{meta}\n{canon}\n\
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
@@ -593,7 +594,8 @@ fn page(
         tagline = e(site.tagline),
         wm = e(site.webmention_endpoint),
         pb = e(site.pingback),
-    )
+    );
+    indent::indent(&html)
 }
 
 fn description_meta(text: &str) -> String {

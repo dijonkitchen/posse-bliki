@@ -5,7 +5,9 @@ use std::fs;
 
 use posse_bliki_build::image;
 
-use crate::support::{build, content_dir, html_files, repo, site, temp_dir};
+use posse_bliki_build::util::escape_html;
+
+use crate::support::{build, content_dir, files_with_ext, html_files, repo, site, temp_dir};
 
 /// Image budget (spec/performance.md): the build ships images as they are,
 /// so a heavy one has to be caught before it is committed.
@@ -98,12 +100,105 @@ fn html_is_not_minified() {
     // Each <head> element sits on its own line, as the templates write it.
     for (p, html) in html_files() {
         assert!(
-            html.contains("<head>\n<meta charset=\"utf-8\">\n"),
+            html.contains("<head>\n  <meta charset=\"utf-8\">\n"),
             "{}: head is not one element per line",
             p.display()
         );
         assert!(html.matches('\n').count() >= 20, "{}: looks minified", p.display());
     }
+}
+
+/// Lines outside `<pre>` blocks, which keep their own whitespace.
+fn lines_outside_pre(html: &str) -> Vec<&str> {
+    let mut lines = Vec::new();
+    let mut in_pre = false;
+    for line in html.lines() {
+        if !in_pre {
+            lines.push(line);
+        }
+        if line.contains("<pre") {
+            in_pre = true;
+        }
+        if line.contains("</pre>") {
+            in_pre = false;
+        }
+    }
+    lines
+}
+
+#[test]
+fn html_is_indented_by_nesting() {
+    // Two spaces per open element, <html> adding none (ADR 2026-10-28-indented-html).
+    // Every page ending with <main> and </main> at one level proves that
+    // whatever the note's text opens, it closes.
+    let flush = ["<head>", "</head>", "<body>", "</body>", "</html>"];
+    for (p, html) in html_files() {
+        let lines = lines_outside_pre(html);
+        for tag in flush {
+            assert!(lines.contains(&tag), "{}: {tag} not flush left", p.display());
+        }
+        if !html.contains("http-equiv=\"refresh\"") {
+            assert!(
+                lines.contains(&"  <main id=\"main\">"),
+                "{}: <main> not one level in",
+                p.display()
+            );
+            assert!(
+                lines.contains(&"  </main>"),
+                "{}: </main> not one level in",
+                p.display()
+            );
+        }
+        for line in &lines {
+            assert!(!line.trim().is_empty(), "{}: blank line", p.display());
+            let spaces = line.len() - line.trim_start_matches(' ').len();
+            assert!(spaces % 2 == 0, "{}: odd indent on {line:?}", p.display());
+        }
+    }
+}
+
+/// Indenting never touches a code block: each fenced block in a note ships
+/// exactly as written, every line where the author put it.
+#[test]
+fn code_blocks_keep_their_whitespace() {
+    let mut checked = 0;
+    for p in files_with_ext(&content_dir(), "md") {
+        let md = fs::read_to_string(&p).expect("read note");
+        let mut blocks = Vec::new();
+        let mut open: Option<String> = None;
+        for line in md.lines() {
+            match open.as_mut() {
+                None if line.starts_with("```") => open = Some(String::new()),
+                Some(code) if line.starts_with("```") => {
+                    blocks.push(std::mem::take(code));
+                    open = None;
+                }
+                Some(code) => {
+                    code.push_str(line);
+                    code.push('\n');
+                }
+                None => {}
+            }
+        }
+        if blocks.is_empty() {
+            continue;
+        }
+        let rel = p.strip_prefix(content_dir()).unwrap().with_extension("");
+        let page = html_files()
+            .iter()
+            .find(|(out, _)| out.parent().is_some_and(|d| d.ends_with(&rel)))
+            .unwrap_or_else(|| panic!("{}: no page", p.display()));
+        for code in blocks {
+            let escaped = escape_html(&code);
+            assert!(
+                page.1.contains(&format!(">{escaped}</code></pre>")),
+                "{}: code block changed:\n{code}",
+                p.display()
+            );
+            checked += 1;
+        }
+    }
+    assert!(checked > 0, "no fenced code blocks in the vault to check");
 }
 
 // --- Lighthouse basics ---
