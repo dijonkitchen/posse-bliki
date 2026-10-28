@@ -15,6 +15,12 @@ in `tests/`.
 - `<!DOCTYPE html>` first, `<html lang="en">`.
 - `<meta charset="utf-8">`.
 - `<meta name="viewport" content="width=device-width, initial-scale=1">`.
+- `<meta http-equiv="Content-Security-Policy">` right after the charset,
+  allowing only the site's own scripts, styles, images, fonts and manifest
+  (`default-src 'none'`, `base-uri 'none'`, `form-action 'none'`). Pages
+  load nothing the policy would block: no inline styles, `<style>`, event
+  handler attributes, embeds, or files from other hosts
+  (ADR 2026-10-28-csp-meta-tag).
 - `<title>` is present and non-empty.
 - `<link rel="canonical">` matches the page's canonical URL on `site.base_url`.
 - `<link rel="alternate" type="application/rss+xml" href="/index.xml">`.
