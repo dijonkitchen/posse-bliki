@@ -496,6 +496,12 @@ fn apply_base_path(dir: &Path, prefix: &str) -> Result<(), String> {
 
 // --- templates ---
 
+/// Where to report a security problem: GitHub's private vulnerability
+/// reporting for this repository (ADR 2026-10-28-security-txt).
+const SECURITY_CONTACT: &str = "https://github.com/dijonkitchen/posse-bliki/security/advisories/new";
+/// How far ahead security.txt expires; RFC 9116 asks for under a year.
+const SECURITY_TXT_DAYS: i64 = 180;
+
 /// `content/blogroll.md`, whose list also ships as OPML (ADR 2026-10-25-blogroll).
 const BLOGROLL: &str = "blogroll";
 const BLOGROLL_OPML: &str = "/blogroll.opml";
@@ -1192,6 +1198,18 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     write(
         &out.join("robots.txt"),
         &format!("User-agent: *\nAllow: /\n\nSitemap: {}/sitemap.xml\n", base_url),
+    )?;
+
+    // security.txt (RFC 9116), dated off the build's today so the daily
+    // rebuild keeps Expires ahead (ADR 2026-10-28-security-txt).
+    let expires = Date::from_days_since_epoch(site.today.days_from_epoch() + SECURITY_TXT_DAYS);
+    write(
+        &out.join(".well-known").join("security.txt"),
+        &format!(
+            "Contact: {SECURITY_CONTACT}\nExpires: {}T00:00:00Z\nPreferred-Languages: en\nCanonical: {}/.well-known/security.txt\n",
+            expires.iso(),
+            base_url
+        ),
     )?;
 
     // static assets
