@@ -44,3 +44,13 @@ fn expires_moves_with_the_build_date() {
     // The daily rebuild keeps Expires under a year ahead, as RFC 9116 asks.
     assert!(security_txt("2027-01-01").contains("Expires: 2027-06-30T00:00:00Z\n"));
 }
+
+#[test]
+fn deploy_ships_the_well_known_directory() {
+    // upload-pages-artifact skips dot-directories unless told otherwise.
+    let deploy = read(&crate::support::repo().join(".github/workflows/deploy.yml"));
+    assert!(
+        deploy.contains("include-hidden-files: true"),
+        "deploy.yml must upload /.well-known/ (include-hidden-files: true)"
+    );
+}
