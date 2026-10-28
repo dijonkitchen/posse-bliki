@@ -10,6 +10,7 @@ mod support;
 mod aliases;
 mod base_path;
 mod blogroll;
+mod csp;
 mod dates;
 mod design;
 mod drafts;

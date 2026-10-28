@@ -61,7 +61,8 @@ and runs Lighthouse's default mobile audit on the home page, a post with
 code, a post with a large photo, a post with a video embed, `/notes/` and
 `/about/`. Each page is audited three times and each category is scored by
 the median run (ADR 2026-10-16-lighthouse-median-of-three). It fails if any
-page's median scores below:
+page's median scores below. CI audits each page in its own job, all at
+once (ADR 2026-10-27-parallel-lighthouse):
 
 | Category | Minimum |
 |---|---|

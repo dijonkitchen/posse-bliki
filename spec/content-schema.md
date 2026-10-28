@@ -49,6 +49,13 @@ Always `YYYY-MM-DD` (or full ISO-8601 with time). Obsidian's daily-note format
 is fine. Strings only — no implicit YAML date types, since their stringification
 varies by parser.
 
+## No raw HTML
+
+The build escapes HTML in notes, so a tag like `<iframe>` shows as text.
+Notes are Markdown only, and a raw tag in a note's prose (outside code) fails
+the harness. Videos are links to the video's page, not embeds
+(ADR 2026-10-28-videos-as-links).
+
 ## Links between notes
 
 Notes link with standard Markdown links to the file, relative to the linking

@@ -28,8 +28,10 @@ BUDGET_SEO=100
 RUNS="${RUNS:-3}"
 
 # Home, a post with code, a post with a large photo, a post with a video
-# embed, the longest list page, and a plain page.
-PAGES="/ /notes/data/ /notes/governance/ /notes/security/ /notes/ /about/"
+# embed, the longest list page, and a plain page. CI audits one page per job,
+# in parallel, by setting PAGES (ADR 2026-10-27-parallel-lighthouse); keep the
+# matrix in .github/workflows/ci.yml in step with this list.
+PAGES="${PAGES:-/ /notes/data/ /notes/governance/ /notes/security/ /notes/ /about/}"
 
 mkdir -p "$REPORTS"
 npm ci --prefix "$TOOLS" --ignore-scripts --no-audit --no-fund
