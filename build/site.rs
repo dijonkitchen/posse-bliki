@@ -571,7 +571,7 @@ fn page(
     }
     theme_options.push_str("</optgroup>\n");
     format!(
-        "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
+        "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n{CSP}\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n{THEME_COLOR}<title>{title}</title>\n{meta}\n{canon}\n\
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
@@ -756,6 +756,12 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
 /// --surface-page as hex, since theme-color takes no CSS variables.
 const THEME_COLOR: &str = "<meta name=\"theme-color\" media=\"(prefers-color-scheme: light)\" content=\"#fbfaf7\">\n\
 <meta name=\"theme-color\" media=\"(prefers-color-scheme: dark)\" content=\"#15171b\">\n";
+
+/// Pages load only the site's own files, so the policy allows nothing else.
+/// A `<meta>` because GitHub Pages can't send headers (ADR 2026-10-28-csp-meta-tag).
+const CSP: &str = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; \
+script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'self'; \
+base-uri 'none'; form-action 'none'\">\n";
 
 /// The author as readers see it, "JC", with the full name kept for mf2
 /// parsers as `p-name` (ADR 2026-10-16-site-title-heads-home).
