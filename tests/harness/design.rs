@@ -491,6 +491,28 @@ fn seasonal_styles_exist() {
 }
 
 #[test]
+fn style_picker_uses_modern_syntax() {
+    // Every browser with :has() runs ES2015+, so the script reads as modern
+    // JS in view-source: no `var`, helpers as `const` arrows defined before
+    // their first use (ADR 2026-10-28-modern-js-style-picker).
+    let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
+    let code: Vec<&str> = js.lines().filter(|l| !l.trim_start().starts_with("//")).collect();
+    assert!(
+        !code.iter().any(|l| l.contains("var ") || l.contains("function")),
+        "style-picker.js should use const/let and arrow functions"
+    );
+    for helper in ["load", "pick", "save", "anyStyle", "season"] {
+        let defined = js
+            .find(&format!("const {helper} = ("))
+            .unwrap_or_else(|| panic!("no const {helper} arrow"));
+        assert!(
+            !js[..defined].contains(&format!(" {helper}(")),
+            "{helper} is called above its definition"
+        );
+    }
+}
+
+#[test]
 fn styles_can_be_shared_by_link() {
     // ?style=<name> picks and saves a style from the menu, and a name that
     // isn't in it is ignored (ADR 2026-10-22-style-share-links).
