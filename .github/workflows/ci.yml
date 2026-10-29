@@ -49,18 +49,43 @@ jobs:
       - name: Validate the built site (mirrors `make validate` locally)
         run: make validate
 
+  lighthouse-pages:
+    # The fixed pages, plus on a PR the pages whose built HTML differs from
+    # the base branch (ADR 2026-10-29-lighthouse-changed-pages).
+    runs-on: ubuntu-24.04
+    outputs:
+      pages: ${{ steps.pages.outputs.pages }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Install the pinned Rust toolchain
+        run: make setup
+
+      - name: List the pages to audit
+        id: pages
+        shell: bash
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          pages=$(scripts/lighthouse-pages.sh $BASE | jq -R -s -c 'split("\n") | map(select(length > 0))')
+          echo "pages=$pages" >> "$GITHUB_OUTPUT"
+          echo "Auditing: $pages"
+
   lighthouse-page:
     # Lighthouse budget on the built pages (ADR 2026-10-14-mobile-first, spec/performance.md).
     # CI-only: it needs Node and Chrome, so it stays out of `make ci` and
     # the build. The runner image ships Chrome. One job per page, run side by
     # side, since the audits are most of CI's time (ADR 2026-10-27-parallel-lighthouse).
-    # Keep this list in step with PAGES in scripts/lighthouse.sh.
     name: lighthouse ${{ matrix.page }}
+    needs: lighthouse-pages
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        page: [/, /notes/data/, /notes/governance/, /notes/security/, /notes/, /about/]
+        page: ${{ fromJSON(needs.lighthouse-pages.outputs.pages) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -88,7 +113,7 @@ jobs:
     # One stable check for branch protection, whatever pages the matrix audits.
     # Runs when a page fails too, but not when a newer push cancels the run,
     # so a superseded run doesn't post a red check.
-    needs: lighthouse-page
+    needs: [lighthouse-pages, lighthouse-page]
     if: ${{ !cancelled() }}
     runs-on: ubuntu-24.04
     permissions: {}

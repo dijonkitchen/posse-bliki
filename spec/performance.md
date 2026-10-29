@@ -64,7 +64,10 @@ code, a post with a large photo, a post with a video embed, `/notes/` and
 `/about/`. Each page is audited three times and each category is scored by
 the median run (ADR 2026-10-16-lighthouse-median-of-three). It fails if any
 page's median scores below. CI audits each page in its own job, all at
-once (ADR 2026-10-27-parallel-lighthouse):
+once (ADR 2026-10-27-parallel-lighthouse). On a pull request it also audits
+up to 10 more pages whose built HTML differs from the base branch, so new
+and edited posts are checked; a change to more pages than that is
+site-wide, and gets only the fixed pages (ADR 2026-10-29-lighthouse-changed-pages):
 
 | Category | Minimum |
 |---|---|
