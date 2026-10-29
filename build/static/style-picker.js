@@ -8,6 +8,20 @@
 // defined above its first use (ADR 2026-10-28-modern-js-style-picker).
 (() => {
   "use strict";
+
+  // Also starts the worker that keeps pages for reading offline, once the
+  // page has loaded so it never competes with drawing it
+  // (ADR 2026-10-29-offline-reading). Resolved against this script's own
+  // URL so it works under a sub-path.
+  const worker = new URL("sw.js", document.currentScript.src);
+  if ("serviceWorker" in navigator) {
+    addEventListener("load", () => {
+      navigator.serviceWorker.register(worker).catch(() => {
+        // No worker (private window, storage blocked): pages still load.
+      });
+    });
+  }
+
   const picker = document.getElementById("style");
   if (!picker) return;
   const house = document.querySelector('link[rel="stylesheet"][href$="style.css"]');

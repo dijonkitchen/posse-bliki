@@ -36,8 +36,9 @@ fn universal_invariants() {
     ];
     for (p, text) in html_files() {
         for needle in needles {
-            if p.ends_with("404.html") && needle.starts_with("<link rel=\"canonical\"") {
-                continue; // 404s don't get a canonical
+            let error_page = p.ends_with("404.html") || p.ends_with("offline.html");
+            if error_page && needle.starts_with("<link rel=\"canonical\"") {
+                continue; // 404 and offline pages don't get a canonical
             }
             assert!(text.contains(needle), "{}: missing {needle:?}", rel(p, site()));
         }

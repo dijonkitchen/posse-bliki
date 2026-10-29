@@ -90,10 +90,13 @@ maps onto a static, script-free site:
   third-party requests to set up.
 - **Render** the initial route as soon as possible: every page is complete
   HTML from the server, with no client rendering.
-- **Pre-cache** remaining routes: not done. It needs a service worker,
-  which is JavaScript, and the site has none
-  ([output-contract](output-contract.md)). The browser's HTTP cache keeps
-  the stylesheet and fonts between pages.
+- **Pre-cache** remaining routes: only the shell. `/sw.js`, a service
+  worker that `/style-picker.js` starts once a page has loaded, keeps the
+  home page, the offline page, `style.css`, the script, the body font and
+  the tab icon on install, then each page, image and style as it is read,
+  for reading offline. Online it always asks the network first, so it
+  never serves a stale page or slows a first visit
+  (ADR 2026-10-29-offline-reading).
 - **Lazy-load** everything else: images after the first, embeds, and the
   style picker's styles, which load only once picked, so adding a style
   adds nothing to a page that doesn't use it
