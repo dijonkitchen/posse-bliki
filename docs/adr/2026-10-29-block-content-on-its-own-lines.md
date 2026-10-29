@@ -62,14 +62,14 @@ renders as nothing.
   elements, or makes one `display: inline`, would show the new spaces.
   Style a heading, or wrap the text in an inline element, instead. The
   screenshot comparison in the PR is the way to check.
-- More lines per page, but the bytes added are newlines and indentation,
-  which gzip compresses to almost nothing.
+- More lines per page, but only about 9 bytes more per page after gzip:
+  the added bytes are newlines and indentation.
 
 ## Alternatives considered
 
 - **Every tag's content on its own line.** It would add visible spaces
   inside links and between inline elements (JC chose against it).
 - **Include headings and change the styles** so their `::before` and
-  `::after` are positioned rather than inline. That is a redesign of five
+  `::after` are positioned rather than inline. That is a redesign of nine
   styles for a view-source nicety, and every new style would have to know
   about it.
