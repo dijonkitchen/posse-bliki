@@ -36,10 +36,10 @@ fn shell_files_exist() {
             !path.starts_with('/'),
             "{path}: shell paths stay relative for sub-paths"
         );
-        let file = if path == "./" {
-            "index.html".to_string()
-        } else {
-            path.clone()
+        let file = match path.as_str() {
+            "./" => "index.html".to_string(),
+            dir if dir.ends_with('/') => format!("{dir}index.html"),
+            file => file.to_string(),
         };
         assert!(
             site().join(&file).is_file(),

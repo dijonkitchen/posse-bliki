@@ -4,7 +4,7 @@
 - Status: Accepted
 - Decided by: JC, asking whether the site should become a PWA for offline
   reading, then choosing "Yes, cache as you read" over precaching the
-  whole site.
+  whole site, and asking to precache the main pages but not every note.
 
 ## Context
 
@@ -44,9 +44,11 @@ The whole site is about 1 MB, more than half of it images.
   preload starts the page request while the worker boots, so it adds no
   wait online.
 - **Cache as you read.** On install the worker keeps only a small shell:
-  the home page, `/offline.html`, `style.css`, `style-picker.js`, the body
-  font and the tab icon (about 150 KB). Every other page, image, font and
-  picked style is kept the first time it's read.
+  the pages in the header (home, `/notes/`, `/about/`, `/colophon/`, so
+  the notes index is there to pick from), `/offline.html`, `style.css`,
+  `style-picker.js`, the body font and the tab icon (about 55 KB over the
+  wire, most of it the font). Every other page, image, font and picked
+  style is kept the first time it's read.
 - **`/offline.html`**, a normal site page saying the page isn't saved yet,
   shown for an unread page while offline. It's `noindex`, has no canonical
   and isn't in the sitemap.

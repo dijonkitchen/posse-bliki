@@ -92,7 +92,7 @@ maps onto a static, script-free site:
   HTML from the server, with no client rendering.
 - **Pre-cache** remaining routes: only the shell. `/sw.js`, a service
   worker that `/style-picker.js` starts once a page has loaded, keeps the
-  home page, the offline page, `style.css`, the script, the body font and
+  pages in the header (home, notes index, about, colophon), the offline page, `style.css`, the script, the body font and
   the tab icon on install, then each page, image and style as it is read,
   for reading offline. Online it always asks the network first, so it
   never serves a stale page or slows a first visit

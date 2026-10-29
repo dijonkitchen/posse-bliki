@@ -7,12 +7,16 @@
 
 const CACHE = "pages";
 
-// Kept on install: what the home page and the offline page need to draw in
-// the house style. Everything else, the picked style included, is kept as
-// you read it. Paths are relative to this file, so they work under a
+// Kept on install: the pages in the header, so the notes index is there to
+// pick from, and what they and the offline page need to draw in the house
+// style. Everything else, the notes and the picked style included, is kept
+// as you read it. Paths are relative to this file, so they work under a
 // sub-path.
 const SHELL = [
   "./",
+  "notes/",
+  "about/",
+  "colophon/",
   "offline.html",
   "style.css",
   "style-picker.js",
