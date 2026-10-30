@@ -122,6 +122,9 @@ const THEMES: &[(&str, &str, &str, &str)] = &[
 /// without it on the current page (ADR 2026-10-18-style-picker,
 /// ADR 2026-10-20-zen-garden-styles).
 const STYLE_PICKER_JS: &str = include_str!("static/style-picker.js");
+/// Keeps pages as they're read for reading offline; style-picker.js starts
+/// it (ADR 2026-10-29-offline-reading).
+const SERVICE_WORKER_JS: &str = include_str!("static/sw.js");
 /// Site icons, after the spork on JC's Substack (spec/performance.md):
 /// `favicon.ico` (32px) for old browsers and clients that request it
 /// unprompted, `icon.svg` for the tab (redrawn solid so it reads at 16px,
@@ -923,6 +926,20 @@ fn render_404(site: &Config, blogroll: bool) -> String {
     )
 }
 
+/// What the service worker shows for a page that wasn't kept, when the
+/// reader is offline (ADR 2026-10-29-offline-reading).
+fn render_offline(site: &Config, blogroll: bool) -> String {
+    let content = "\n<article>\n<h1>You're offline</h1>\n<p>This page isn't saved on this device yet. Pages you've read here are, so try the <a href=\"/\">home page</a> or go back.</p>\n</article>\n";
+    base(
+        site,
+        blogroll,
+        &format!("Offline \u{2014} {}", e(site.title)),
+        "\n<meta name=\"robots\" content=\"noindex\">\n",
+        None,
+        content,
+    )
+}
+
 // --- main entry point ---
 
 pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), String> {
@@ -1077,6 +1094,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // 404
     write(&out.join("404.html"), &render_404(site, has_blogroll(&notes)))?;
+    write(&out.join("offline.html"), &render_offline(site, has_blogroll(&notes)))?;
 
     // spec/feeds.md: the blogroll's sites as OPML (ADR 2026-10-25-blogroll).
     if let Some(n) = notes.iter().find(|n| n.slug == BLOGROLL && n.kind == Kind::Page) {
@@ -1220,6 +1238,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         write(&out.join("themes").join(format!("{slug}.css")), css)?;
     }
     write(&out.join("style-picker.js"), STYLE_PICKER_JS)?;
+    write(&out.join("sw.js"), SERVICE_WORKER_JS)?;
     for (name, bytes) in ICONS {
         write_bytes(&out.join(name), bytes)?;
     }
