@@ -29,8 +29,9 @@ in `tests/`.
 - All internal links resolve to a real emitted file.
 - No `<script>` except `<script src="/style-picker.js"></script>`, right
   after the style picker. The site is fully functional with JS off; the
-  script only loads and remembers the picked style
-  (ADR 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles).
+  script only loads and remembers the picked style, and starts `/sw.js`
+  for offline reading (ADR 2026-10-18-style-picker,
+  ADR 2026-10-20-zen-garden-styles, ADR 2026-10-29-offline-reading).
 - Styling follows [design.md](design.md).
 - Loading follows [performance.md](performance.md).
 
@@ -80,6 +81,10 @@ In addition to the universal invariants, every post page must:
 ## Error pages
 
 - `/404.html` exists and is valid HTML5.
+- `/offline.html` exists, is valid HTML5 and `noindex`, and is left out of
+  the sitemap. The service worker shows it for a page that wasn't kept
+  when the reader is offline. Like the 404, it has no canonical.
+  Enforced by `tests/harness/offline.rs` (ADR 2026-10-29-offline-reading).
 
 ## Serving under a sub-path
 
