@@ -27,8 +27,9 @@ in `tests/`.
 - `<link rel="alternate" type="application/feed+json" href="/feed.json">`.
 - `<link rel="webmention">` and `<link rel="pingback">` (configured target).
 - All internal links resolve to a real emitted file.
-- No `<script>` except `<script src="/style-picker.js"></script>`, right
-  after the style picker. The site is fully functional with JS off; the
+- No `<script>` except `<script src="/style-picker.js"
+  data-styles="…">`, last in `<head>`, where `data-styles` lists the
+  picker's styles (ADR 2026-10-30-style-before-first-paint). The site is fully functional with JS off; the
   script only loads and remembers the picked style, and starts `/sw.js`
   for offline reading (ADR 2026-10-18-style-picker,
   ADR 2026-10-20-zen-garden-styles, ADR 2026-10-29-offline-reading).

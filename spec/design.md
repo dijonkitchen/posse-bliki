@@ -24,9 +24,13 @@ Each item is enforced by `tests/harness/design.rs`.
   restyles the page through CSS `:has()`, with no JavaScript;
   `/style-picker.js` loads the picked style's sheet and remembers the pick
   across pages. Auto follows `prefers-color-scheme`. A theme's rules all
-  sit inside `:root:has(#style [value="<style>"]:checked)`, it loads
-  nothing itself, ships as written, and its text and link tokens meet AAA
-  7:1 on every surface (ADR 2026-10-18-style-picker).
+  sit inside `:root:is([data-style="<style>"], :has(#style
+  [value="<style>"]:checked))`, it loads nothing itself, ships as written,
+  and its text and link tokens meet AAA 7:1 on every surface
+  (ADR 2026-10-18-style-picker). The script runs in `<head>` and sets
+  `<html data-style>` before first paint, so a picked or seasonal style
+  never shifts the page as it arrives
+  (ADR 2026-10-30-style-before-first-paint).
 - **Share links.** A link ending `?style=<style>` opens the page in that
   style and saves it as the reader's pick, as if chosen from the menu, so
   it stays on across pages until they pick another. A name not in the menu

@@ -11,11 +11,11 @@
  * (ADR 2026-10-22-star-trek-style).
  *
  * It loads only when picked, and its rules only apply while the picker in
- * the header says Star Trek: they all sit inside one :has() selector,
+ * the header says Star Trek: they all sit inside one selector,
  * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
  * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
  */
-:root:has(#style [value="star-trek"]:checked) {
+:root:is([data-style="star-trek"], :has(#style [value="star-trek"]:checked)) {
   /* The bridge at night, always dark. */
   color-scheme: dark;
   --text-1: #ffe2c4;

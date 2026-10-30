@@ -3,7 +3,8 @@
 - Date: 2026-10-18
 - Status: Accepted; how styles load superseded by [2026-10-20-zen-garden-styles](2026-10-20-zen-garden-styles.md);
   Blueprint removed by [2026-10-22-star-trek-style](2026-10-22-star-trek-style.md);
-  Broadsheet restyled after the FT by [2026-10-22-ft-solarized-and-editor-styles](2026-10-22-ft-solarized-and-editor-styles.md)
+  Broadsheet restyled after the FT by [2026-10-22-ft-solarized-and-editor-styles](2026-10-22-ft-solarized-and-editor-styles.md);
+  script moved into `<head>` by [2026-10-30-style-before-first-paint](2026-10-30-style-before-first-paint.md)
 - Decided by: JC, asking for a CSS Zen Garden style theme selector, then
   for it to be a dropdown like a light and dark mode picker, with minimal
   JavaScript so the choice works across pages, and without needing

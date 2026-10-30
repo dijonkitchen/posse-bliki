@@ -569,6 +569,9 @@ fn page(
     } else {
         ""
     };
+    // style-picker.js runs in <head>, before the picker exists, so it gets
+    // the menu's styles from its own tag (ADR 2026-10-30-style-before-first-paint).
+    let theme_slugs = THEMES.iter().map(|(slug, ..)| *slug).collect::<Vec<_>>().join(" ");
     let mut theme_options = String::new();
     for (i, (slug, name, group, _)) in THEMES.iter().enumerate() {
         if i == 0 || THEMES[i - 1].2 != *group {
@@ -591,12 +594,12 @@ fn page(
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
 <link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
-<link rel=\"stylesheet\" href=\"/style.css\">\n<noscript>\n{theme_links}</noscript>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
+<link rel=\"stylesheet\" href=\"/style.css\">\n<noscript>\n{theme_links}</noscript>\n\
+<script src=\"/style-picker.js\" data-styles=\"{theme_slugs}\"></script>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
 </nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
-<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n\
-<script src=\"/style-picker.js\"></script>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
+<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n{blogroll}<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
