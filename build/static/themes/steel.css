@@ -5,11 +5,11 @@
  * of images; the original's art belongs to its author.
  *
  * It loads only when picked, and its rules only apply while the picker in
- * the header says Steel: they all sit inside one :has() selector, nested.
+ * the header says Steel: they all sit inside one selector, nested.
  * Copy it, change it, make your own (ADR 2026-10-18-style-picker,
  * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
  */
-:root:has(#style [value="steel"]:checked) {
+:root:is([data-style="steel"], :has(#style [value="steel"]:checked)) {
   /* Brushed steel, always light. */
   color-scheme: light;
   --text-1: #15181b;

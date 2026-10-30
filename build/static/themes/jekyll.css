@@ -6,11 +6,11 @@
  * little here to keep WCAG AAA 7:1.
  *
  * It loads only when picked, and its rules only apply while the picker in
- * the header says Jekyll: they all sit inside one :has() selector, nested.
+ * the header says Jekyll: they all sit inside one selector, nested.
  * Copy it, change it, make your own (ADR 2026-10-18-style-picker,
  * ADR 2026-10-20-zen-garden-styles).
  */
-:root:has(#style [value="jekyll"]:checked) {
+:root:is([data-style="jekyll"], :has(#style [value="jekyll"]:checked)) {
   /* The 2015 default, always light. */
   color-scheme: light;
   --text-1: #111111;

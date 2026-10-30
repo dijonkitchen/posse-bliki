@@ -6,11 +6,11 @@
  * readers on Auto from 1 to 26 December (ADR 2026-10-20-zen-garden-styles).
  *
  * It loads only when picked, and its rules only apply while the picker in
- * the header says Holiday: they all sit inside one :has() selector, nested.
+ * the header says Holiday: they all sit inside one selector, nested.
  * Copy it, change it, make your own (ADR 2026-10-18-style-picker).
  * Text pairs still meet WCAG AAA 7:1.
  */
-:root:has(#style [value="holiday"]:checked) {
+:root:is([data-style="holiday"], :has(#style [value="holiday"]:checked)) {
   /* A pine forest at night, always dark. */
   color-scheme: dark;
   --text-1: #fbf6ea;

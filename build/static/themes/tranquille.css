@@ -5,11 +5,11 @@
  * fonts; the original's art belongs to its author.
  *
  * It loads only when picked, and its rules only apply while the picker in
- * the header says Tranquille: they all sit inside one :has() selector,
+ * the header says Tranquille: they all sit inside one selector,
  * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
  * ADR 2026-10-20-zen-garden-styles). Text pairs still meet WCAG AAA 7:1.
  */
-:root:has(#style [value="tranquille"]:checked) {
+:root:is([data-style="tranquille"], :has(#style [value="tranquille"]:checked)) {
   /* Rice paper and moss, always light. */
   color-scheme: light;
   --text-1: #263022;

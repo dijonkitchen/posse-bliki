@@ -122,6 +122,9 @@ const THEMES: &[(&str, &str, &str, &str)] = &[
 /// without it on the current page (ADR 2026-10-18-style-picker,
 /// ADR 2026-10-20-zen-garden-styles).
 const STYLE_PICKER_JS: &str = include_str!("static/style-picker.js");
+/// Keeps pages as they're read for reading offline; style-picker.js starts
+/// it (ADR 2026-10-29-offline-reading).
+const SERVICE_WORKER_JS: &str = include_str!("static/sw.js");
 /// Site icons, after the spork on JC's Substack (spec/performance.md):
 /// `favicon.ico` (32px) for old browsers and clients that request it
 /// unprompted, `icon.svg` for the tab (redrawn solid so it reads at 16px,
@@ -566,6 +569,9 @@ fn page(
     } else {
         ""
     };
+    // style-picker.js runs in <head>, before the picker exists, so it gets
+    // the menu's styles from its own tag (ADR 2026-10-30-style-before-first-paint).
+    let theme_slugs = THEMES.iter().map(|(slug, ..)| *slug).collect::<Vec<_>>().join(" ");
     let mut theme_options = String::new();
     for (i, (slug, name, group, _)) in THEMES.iter().enumerate() {
         if i == 0 || THEMES[i - 1].2 != *group {
@@ -588,12 +594,12 @@ fn page(
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
 <link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
-<link rel=\"stylesheet\" href=\"/style.css\">\n<noscript>\n{theme_links}</noscript>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
+<link rel=\"stylesheet\" href=\"/style.css\">\n<noscript>\n{theme_links}</noscript>\n\
+<script src=\"/style-picker.js\" data-styles=\"{theme_slugs}\"></script>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
 </nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
-<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n\
-<script src=\"/style-picker.js\"></script>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
+<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n{blogroll}<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
@@ -923,6 +929,20 @@ fn render_404(site: &Config, blogroll: bool) -> String {
     )
 }
 
+/// What the service worker shows for a page that wasn't kept, when the
+/// reader is offline (ADR 2026-10-29-offline-reading).
+fn render_offline(site: &Config, blogroll: bool) -> String {
+    let content = "\n<article>\n<h1>You're offline</h1>\n<p>This page isn't saved on this device yet. Pages you've read here are, so try the <a href=\"/\">home page</a> or go back.</p>\n</article>\n";
+    base(
+        site,
+        blogroll,
+        &format!("Offline \u{2014} {}", e(site.title)),
+        "\n<meta name=\"robots\" content=\"noindex\">\n",
+        None,
+        content,
+    )
+}
+
 // --- main entry point ---
 
 pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), String> {
@@ -1077,6 +1097,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // 404
     write(&out.join("404.html"), &render_404(site, has_blogroll(&notes)))?;
+    write(&out.join("offline.html"), &render_offline(site, has_blogroll(&notes)))?;
 
     // spec/feeds.md: the blogroll's sites as OPML (ADR 2026-10-25-blogroll).
     if let Some(n) = notes.iter().find(|n| n.slug == BLOGROLL && n.kind == Kind::Page) {
@@ -1220,6 +1241,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         write(&out.join("themes").join(format!("{slug}.css")), css)?;
     }
     write(&out.join("style-picker.js"), STYLE_PICKER_JS)?;
+    write(&out.join("sw.js"), SERVICE_WORKER_JS)?;
     for (name, bytes) in ICONS {
         write_bytes(&out.join(name), bytes)?;
     }

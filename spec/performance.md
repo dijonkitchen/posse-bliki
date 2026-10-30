@@ -19,7 +19,12 @@ budget, which `scripts/lighthouse.sh` checks in CI.
   characters. HTML keeps one `<head>` element per line, as the templates
   write it, indented two spaces per level of nesting with no blank lines;
   `<pre>`, `<textarea>`, `<script>` and `<style>` contents ship byte for
-  byte (ADR 2026-10-28-indented-html). The reason is Stallman's: what the site sends is its source,
+  byte (ADR 2026-10-28-indented-html). A tag with two or more attributes
+  puts each attribute on its own line, one level deeper than the line the
+  tag starts on (ADR 2026-10-28-one-attribute-per-line). A block element's
+  content (`<li>`, `<p>`, `<div>` and the like, not headings) starts on the
+  line after its start tag, and its end tag gets a line of its own
+  (ADR 2026-10-29-block-content-on-its-own-lines). The reason is Stallman's: what the site sends is its source,
   so anyone can audit it and remix it from "view source" alone. Speed
   gives no reason to give that up: GitHub Pages compresses everything
   over the wire, so a minifier would save almost nothing.
@@ -90,10 +95,13 @@ maps onto a static, script-free site:
   third-party requests to set up.
 - **Render** the initial route as soon as possible: every page is complete
   HTML from the server, with no client rendering.
-- **Pre-cache** remaining routes: not done. It needs a service worker,
-  which is JavaScript, and the site has none
-  ([output-contract](output-contract.md)). The browser's HTTP cache keeps
-  the stylesheet and fonts between pages.
+- **Pre-cache** remaining routes: only the shell. `/sw.js`, a service
+  worker that `/style-picker.js` starts once a page has loaded, keeps the
+  pages in the header (home, notes index, about, colophon), the offline page, `style.css`, the script, the body font and
+  the tab icon on install, then each page, image and style as it is read,
+  for reading offline. Online it always asks the network first, so it
+  never serves a stale page or slows a first visit
+  (ADR 2026-10-29-offline-reading).
 - **Lazy-load** everything else: images after the first, embeds, and the
   style picker's styles, which load only once picked, so adding a style
   adds nothing to a page that doesn't use it
