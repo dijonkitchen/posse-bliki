@@ -2,16 +2,36 @@
 // the site (ADR 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles).
 // Without it the picker still restyles the page you're on, through CSS
 // :has() and the stylesheets in <noscript>; it just forgets.
-// It runs where it sits, right after the picker, so a remembered style is
-// in place before the page below it is drawn. Modern syntax, since every
+// It runs in <head>, before the page is drawn: there it can mark <html>
+// with the style and add its stylesheet render-blocking, so the first
+// paint is already in that style. From inside <body> a browser ignores
+// blocking="render", and the page jumped when the style arrived
+// (ADR 2026-10-30-style-before-first-paint). Modern syntax, since every
 // browser that has :has() has it; helpers are arrows, so each one must be
 // defined above its first use (ADR 2026-10-28-modern-js-style-picker).
 (() => {
   "use strict";
-  const picker = document.getElementById("style");
-  if (!picker) return;
+  const script = document.currentScript;
+
+  // Also starts the worker that keeps pages for reading offline, once the
+  // page has loaded so it never competes with drawing it
+  // (ADR 2026-10-29-offline-reading). Resolved against this script's own
+  // URL so it works under a sub-path.
+  const worker = new URL("sw.js", document.currentScript.src);
+  if ("serviceWorker" in navigator) {
+    addEventListener("load", () => {
+      navigator.serviceWorker.register(worker).catch(() => {
+        // No worker (private window, storage blocked): pages still load.
+      });
+    });
+  }
+
+  // The picker isn't parsed yet, so the menu's styles come with the script
+  // tag, as data-styles.
+  const root = document.documentElement;
   const house = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
-  const values = [...picker.options].map((option) => option.value);
+  const styles = (script.dataset.styles || "").split(" ").filter(Boolean);
+  const values = ["auto", "light", "dark", ...styles];
 
   // A style's stylesheet, added the first time it's picked. Auto, Light and
   // Dark live in style.css. Render-blocking, so the page doesn't flash the
@@ -28,10 +48,15 @@
     document.head.appendChild(link);
   };
 
+  // Every style's rules match <html data-style> as well as the picker.
+  const show = (name) => {
+    root.dataset.style = name;
+    load(name);
+  };
+
   const pick = (name) => {
     if (!values.includes(name)) return false;
-    picker.value = name;
-    load(name);
+    show(name);
     return true;
   };
 
@@ -50,10 +75,7 @@
   // drawn again on each page (ADR
   // 2026-10-22-ft-solarized-and-editor-styles), without any of it being
   // saved.
-  const anyStyle = () => {
-    const styles = values.filter((value) => !/^(auto|light|dark)$/.test(value));
-    return styles[Math.floor(Math.random() * styles.length)];
-  };
+  const anyStyle = () => styles[Math.floor(Math.random() * styles.length)];
   const season = () => {
     const now = new Date();
     const month = now.getMonth() + 1;
@@ -83,8 +105,15 @@
     pick(saved || season());
   }
 
-  picker.addEventListener("change", () => {
-    load(picker.value);
-    save(picker.value);
+  // Once the header is parsed, the picker shows the style in use and
+  // remembers a new pick.
+  addEventListener("DOMContentLoaded", () => {
+    const picker = document.getElementById("style");
+    if (!picker) return;
+    if (root.dataset.style) picker.value = root.dataset.style;
+    picker.addEventListener("change", () => {
+      show(picker.value);
+      save(picker.value);
+    });
   });
 })();

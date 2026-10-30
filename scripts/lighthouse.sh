@@ -27,6 +27,11 @@ BUDGET_SEO=100
 # slow moment on a shared runner can't fail the budget (ADR 2026-10-16-lighthouse-median-of-three).
 RUNS="${RUNS:-3}"
 
+# Tries per run. On a busy runner Chrome sometimes starts too slowly for
+# Lighthouse to find its debugging port, and the run errors before auditing
+# anything (ADR 2026-10-29-lighthouse-chrome-retry).
+TRIES="${TRIES:-3}"
+
 # The fixed representative pages by default. CI audits one page per job, in
 # parallel, by setting PAGES (ADR 2026-10-27-parallel-lighthouse), and on a PR
 # adds the pages it changes (ADR 2026-10-29-lighthouse-changed-pages).
@@ -55,10 +60,15 @@ for page in $PAGES; do
   i=1
   while [ "$i" -le "$RUNS" ]; do
     report="$REPORTS/report$name-$i.json"
-    "$LIGHTHOUSE" "http://127.0.0.1:$PORT$page" \
+    try=1
+    until "$LIGHTHOUSE" "http://127.0.0.1:$PORT$page" \
       --quiet \
       --chrome-flags="--headless=new --no-sandbox" \
-      --output=json --output-path="$report"
+      --output=json --output-path="$report"; do
+      [ "$try" -lt "$TRIES" ] || exit 1
+      echo "::warning::$page: Lighthouse run $i errored, trying again"
+      try=$((try + 1))
+    done
     reports="$reports $report"
     i=$((i + 1))
   done

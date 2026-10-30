@@ -481,8 +481,8 @@ fn seasonal_styles_exist() {
         "script lost April Fools' Day"
     );
     assert!(
-        js.contains("picker.options"),
-        "April Fools' Day should draw from the menu"
+        js.contains("script.dataset.styles"),
+        "April Fools' Day should draw from the menu's styles"
     );
     assert!(
         !js.contains("var throwbacks"),
@@ -597,10 +597,16 @@ fn every_page_has_the_style_picker() {
             "{}: Auto not the default",
             p.display()
         );
-        let script = "</select>\n    </label>\n    <script src=\"/style-picker.js\"></script>";
+        // The script runs in <head>, before the picker exists, and gets the
+        // menu's styles from its tag (ADR 2026-10-30-style-before-first-paint).
+        let head = &html[..html.find("</head>").expect("no </head>")];
+        let script = format!(
+            "<script src=\"/style-picker.js\" data-styles=\"{}\"></script>",
+            values[3..].join(" ")
+        );
         assert!(
-            html.contains(script),
-            "{}: script not right after the picker",
+            head.contains(&script),
+            "{}: script not in <head> with the menu's styles",
             p.display()
         );
     }
@@ -609,7 +615,7 @@ fn every_page_has_the_style_picker() {
 #[test]
 fn styles_apply_only_while_picked() {
     for (slug, css) in themes() {
-        let scope = format!(":root:has(#style [value=\"{slug}\"]:checked) {{");
+        let scope = format!(":root:is([data-style=\"{slug}\"], :has(#style [value=\"{slug}\"]:checked)) {{");
         let body = css.find(&scope).unwrap_or_else(|| panic!("{slug}.css: no {scope}"));
         // Everything after the opening comment is the scoped block, plus
         // @keyframes, which can't be nested.
@@ -740,7 +746,12 @@ fn round_gradients_stay_round() {
 fn pinned_dark_matches_the_dark_scheme() {
     let css = css();
     let (_, dark) = light_and_dark(&css);
-    let pinned = rule_after(&css, 0, ":root:has(#style [value=\"dark\"]:checked)").expect("no pinned dark rule");
+    let pinned = rule_after(
+        &css,
+        0,
+        ":root:is([data-style=\"dark\"], :has(#style [value=\"dark\"]:checked))",
+    )
+    .expect("no pinned dark rule");
     let tokens = |block: &str| -> Vec<String> {
         block
             .lines()

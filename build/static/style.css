@@ -136,7 +136,7 @@
 /* Dark follows the operating system, unless the style picker says Light.
    Accents at L 0.795, tints at L 0.28. */
 @media (prefers-color-scheme: dark) {
-  :root:not(:has(#style [value="light"]:checked)) {
+  :root:not([data-style="light"], :has(#style [value="light"]:checked)) {
     --text-1: oklch(0.943 0.007 88.6);
     --text-2: oklch(0.808 0.009 91.5);
     --text-link: oklch(0.795 0.104 253.8);
@@ -155,9 +155,11 @@
 }
 /* The style picker (ADR 2026-10-18-style-picker): Light and Dark override the
    operating system. Dark repeats the tokens above; a harness test keeps the
-   two in step. */
-:root:has(#style [value="light"]:checked) { color-scheme: light; }
-:root:has(#style [value="dark"]:checked) {
+   two in step. Every style also matches <html data-style>, which
+   style-picker.js sets from <head> before the picker exists, so a picked
+   style is in place at first paint (ADR 2026-10-30-style-before-first-paint). */
+:root:is([data-style="light"], :has(#style [value="light"]:checked)) { color-scheme: light; }
+:root:is([data-style="dark"], :has(#style [value="dark"]:checked)) {
   color-scheme: dark;
   --text-1: oklch(0.943 0.007 88.6);
   --text-2: oklch(0.808 0.009 91.5);

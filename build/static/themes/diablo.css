@@ -9,11 +9,11 @@
  * readers on Auto from 24 to 31 October (ADR 2026-10-20-zen-garden-styles).
  *
  * It loads only when picked, and its rules only apply while the picker in
- * the header says Diablo: they all sit inside one :has() selector, nested.
+ * the header says Diablo: they all sit inside one selector, nested.
  * Copy it, change it, make your own (ADR 2026-10-18-style-picker).
  * Text pairs still meet WCAG AAA 7:1.
  */
-:root:has(#style [value="diablo"]:checked) {
+:root:is([data-style="diablo"], :has(#style [value="diablo"]:checked)) {
   /* Stay a while and listen. Always dark. */
   color-scheme: dark;
   --text-1: #e2d6bc;
