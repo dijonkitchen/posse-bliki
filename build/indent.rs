@@ -18,6 +18,42 @@ const RAW: &[&str] = &["pre", "textarea", "script", "style"];
 
 const STEP: &str = "  ";
 
+/// Block elements, whose content goes on its own lines between the start and
+/// end tags (docs/adr/2026-10-29-block-content-on-its-own-lines.md). A block
+/// drops whitespace at the start and end of its lines, so this renders the
+/// same; inline elements (`<a>`, `<span>`, `<time>`) keep their text against
+/// the tag, since whitespace there would show.
+pub const BLOCK: &[&str] = &[
+    "address",
+    "article",
+    "aside",
+    "blockquote",
+    "dd",
+    "div",
+    "dl",
+    "dt",
+    "fieldset",
+    "figcaption",
+    "figure",
+    "footer",
+    "form",
+    "header",
+    "li",
+    "main",
+    "nav",
+    "ol",
+    "p",
+    "section",
+    "table",
+    "tbody",
+    "td",
+    "tfoot",
+    "th",
+    "thead",
+    "tr",
+    "ul",
+];
+
 /// `html` with blank lines dropped and every line indented two spaces per
 /// open element. `<html>` adds no level, so `<head>` and `<body>` stay flush
 /// left; a line that opens with an end tag lines up with its start tag.
@@ -26,6 +62,8 @@ pub fn indent(html: &str) -> String {
     let mut depth = 0usize;
     let mut rest = html;
     let mut line_start = true;
+    // Set right after an empty block's start tag, so its end tag stays put.
+    let mut empty_block = false;
     while !rest.is_empty() {
         if line_start {
             line_start = false;
@@ -82,6 +120,16 @@ pub fn indent(html: &str) -> String {
         let name = rest[name_start..name_start + name_len].to_ascii_lowercase();
         let end = tag_end(rest);
         let tag = &rest[..end];
+        let block = BLOCK.contains(&name.as_str());
+        let was_empty = std::mem::take(&mut empty_block);
+        if closing && block && !was_empty && !current_line(&out).trim().is_empty() {
+            // Content before a block's end tag: the end tag gets its own line.
+            out.truncate(out.trim_end_matches([' ', '\t']).len());
+            out.push('\n');
+            for _ in 0..depth.saturating_sub(1) {
+                out.push_str(STEP);
+            }
+        }
         push_tag(&mut out, tag);
         rest = &rest[end..];
         if name == "html" || VOID.contains(&name.as_str()) {
@@ -95,6 +143,19 @@ pub fn indent(html: &str) -> String {
             continue;
         }
         depth += 1;
+        if block {
+            let next = rest.trim_start_matches([' ', '\t']);
+            let empty = next.len() > name.len() + 2
+                && next.starts_with("</")
+                && next[2..2 + name.len()].eq_ignore_ascii_case(&name);
+            empty_block = empty;
+            if !next.starts_with('\n') && !next.is_empty() && !empty {
+                // Content after a block's start tag: it starts a new line.
+                out.push('\n');
+                line_start = true;
+            }
+            continue;
+        }
         if RAW.contains(&name.as_str()) {
             let close = format!("</{name}");
             let j = find_ascii_ci(rest, &close).unwrap_or(rest.len());
@@ -119,7 +180,7 @@ fn push_tag(out: &mut String, tag: &str) {
         out.push_str(tag);
         return;
     }
-    let line = &out[out.rfind('\n').map_or(0, |i| i + 1)..];
+    let line = current_line(out);
     let indent = format!("{}{STEP}", &line[..line.len() - line.trim_start_matches(' ').len()]);
     let mut words = words.into_iter();
     out.push_str(words.next().unwrap_or_default());
@@ -165,6 +226,11 @@ fn tag_words(tag: &str) -> Vec<&str> {
     words
 }
 
+/// The last, unfinished line of `out`.
+fn current_line(out: &str) -> &str {
+    &out[out.rfind('\n').map_or(0, |i| i + 1)..]
+}
+
 /// Length of the tag at the start of `s`, through its `>`, skipping any `>`
 /// inside a quoted attribute value.
 fn tag_end(s: &str) -> usize {
@@ -192,19 +258,22 @@ mod tests {
     #[test]
     fn indents_by_nesting() {
         let html = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n</head>\n<body>\n<main>\n<ul>\n<li><a href=\"/\">x</a></li>\n</ul>\n</main>\n</body>\n</html>\n";
-        let want = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n</head>\n<body>\n  <main>\n    <ul>\n      <li><a href=\"/\">x</a></li>\n    </ul>\n  </main>\n</body>\n</html>\n";
+        let want = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n</head>\n<body>\n  <main>\n    <ul>\n      <li>\n        <a href=\"/\">x</a>\n      </li>\n    </ul>\n  </main>\n</body>\n</html>\n";
         assert_eq!(indent(html), want);
     }
 
     #[test]
     fn drops_blank_lines() {
-        assert_eq!(indent("<ul>\n\n<li>a</li>\n  \n</ul>\n"), "<ul>\n  <li>a</li>\n</ul>\n");
+        assert_eq!(
+            indent("<ul>\n\n<li>a</li>\n  \n</ul>\n"),
+            "<ul>\n  <li>\n    a\n  </li>\n</ul>\n"
+        );
     }
 
     #[test]
     fn leaves_preformatted_text_alone() {
         let html = "<div>\n<pre><code>def f\n\n  x\nend\n</code></pre>\n<p>after</p>\n</div>\n";
-        let want = "<div>\n  <pre><code>def f\n\n  x\nend\n</code></pre>\n  <p>after</p>\n</div>\n";
+        let want = "<div>\n  <pre><code>def f\n\n  x\nend\n</code></pre>\n  <p>\n    after\n  </p>\n</div>\n";
         assert_eq!(indent(html), want);
         let html = "<div>\n<script>\nif (a < b) {}\n</script>\n</div>\n";
         assert_eq!(indent(html), "<div>\n  <script>\nif (a < b) {}\n</script>\n</div>\n");
@@ -213,27 +282,30 @@ mod tests {
     #[test]
     fn multi_line_paragraphs_indent_as_one_level() {
         let html = "<p>one\n<em>two</em>\nthree</p>\n<p>next</p>\n";
-        assert_eq!(indent(html), "<p>one\n  <em>two</em>\n  three</p>\n<p>next</p>\n");
+        assert_eq!(
+            indent(html),
+            "<p>\n  one\n  <em>two</em>\n  three\n</p>\n<p>\n  next\n</p>\n"
+        );
     }
 
     #[test]
     fn quoted_angle_brackets_stay_in_the_tag() {
         let html = "<div title=\"a > b\">\n<p>x</p>\n</div>\n";
-        assert_eq!(indent(html), "<div title=\"a > b\">\n  <p>x</p>\n</div>\n");
+        assert_eq!(indent(html), "<div title=\"a > b\">\n  <p>\n    x\n  </p>\n</div>\n");
     }
 
     #[test]
     fn attributes_get_a_line_each() {
         let html = "<ul>\n<li class=\"h-entry\"><a class=\"u-url p-name\" href=\"/w/\">wonder</a></li>\n</ul>\n";
         let want =
-            "<ul>\n  <li class=\"h-entry\"><a\n    class=\"u-url p-name\"\n    href=\"/w/\">wonder</a></li>\n</ul>\n";
+            "<ul>\n  <li class=\"h-entry\">\n    <a\n      class=\"u-url p-name\"\n      href=\"/w/\">wonder</a>\n  </li>\n</ul>\n";
         assert_eq!(indent(html), want);
     }
 
     #[test]
     fn one_attribute_stays_on_the_line() {
-        let html = "<nav aria-label=\"Site\">\n<a href=\"/\">Home</a>\n<p hidden>x</p>\n</nav>\n";
-        let want = "<nav aria-label=\"Site\">\n  <a href=\"/\">Home</a>\n  <p hidden>x</p>\n</nav>\n";
+        let html = "<nav aria-label=\"Site\">\n<a href=\"/\">Home</a>\n<span hidden>x</span>\n</nav>\n";
+        let want = "<nav aria-label=\"Site\">\n  <a href=\"/\">Home</a>\n  <span hidden>x</span>\n</nav>\n";
         assert_eq!(indent(html), want);
     }
 
@@ -249,6 +321,13 @@ mod tests {
     fn a_tag_opening_on_an_attribute_line_nests_under_it() {
         let html = "<p>\n<a class=\"u\" href=\"/\"><data class=\"n\" value=\"J\"></data></a>\n</p>\n";
         let want = "<p>\n  <a\n    class=\"u\"\n    href=\"/\"><data\n      class=\"n\"\n      value=\"J\"></data></a>\n</p>\n";
+        assert_eq!(indent(html), want);
+    }
+
+    #[test]
+    fn block_content_gets_its_own_lines() {
+        let html = "<ul>\n<li>one <a href=\"/\">two</a></li>\n<li></li>\n</ul>\n<h1>Title</h1>\n";
+        let want = "<ul>\n  <li>\n    one <a href=\"/\">two</a>\n  </li>\n  <li></li>\n</ul>\n<h1>Title</h1>\n";
         assert_eq!(indent(html), want);
     }
 
