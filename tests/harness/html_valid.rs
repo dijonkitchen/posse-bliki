@@ -49,7 +49,7 @@ fn universal_invariants() {
 fn only_the_style_picker_script() {
     // The site must work with JS off; the one script only remembers the
     // picked style (ADR 2026-10-18-style-picker).
-    let allowed = "<script src=\"/style-picker.js\"></script>";
+    let allowed = "<script src=\"/style-picker.js\" data-styles=\"";
     for (p, text) in html_files() {
         let lower = text.to_lowercase();
         let scripts = lower.matches("<script").count();
