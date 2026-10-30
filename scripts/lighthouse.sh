@@ -32,11 +32,10 @@ RUNS="${RUNS:-3}"
 # anything (ADR 2026-10-29-lighthouse-chrome-retry).
 TRIES="${TRIES:-3}"
 
-# Home, a post with code, a post with a large photo, a post with a video
-# embed, the longest list page, and a plain page. CI audits one page per job,
-# in parallel, by setting PAGES (ADR 2026-10-27-parallel-lighthouse); keep the
-# matrix in .github/workflows/ci.yml in step with this list.
-PAGES="${PAGES:-/ /notes/data/ /notes/governance/ /notes/security/ /notes/ /about/}"
+# The fixed representative pages by default. CI audits one page per job, in
+# parallel, by setting PAGES (ADR 2026-10-27-parallel-lighthouse), and on a PR
+# adds the pages it changes (ADR 2026-10-29-lighthouse-changed-pages).
+PAGES="${PAGES:-$(scripts/lighthouse-pages.sh)}"
 
 mkdir -p "$REPORTS"
 npm ci --prefix "$TOOLS" --ignore-scripts --no-audit --no-fund
