@@ -510,19 +510,33 @@ const SECURITY_TXT_DAYS: i64 = 180;
 const BLOGROLL: &str = "blogroll";
 const BLOGROLL_OPML: &str = "/blogroll.opml";
 
-fn has_blogroll(notes: &[Note]) -> bool {
-    notes.iter().any(|n| n.slug == BLOGROLL && n.kind == Kind::Page)
+/// `content/now.md`, a now page after Derek Sivers's (ADR 2026-11-01-now-page).
+const NOW: &str = "now";
+
+/// The optional pages every footer links to, when the vault has them.
+#[derive(Clone, Copy)]
+struct FooterLinks {
+    blogroll: bool,
+    now: bool,
 }
 
-fn base(site: &Config, blogroll: bool, title: &str, meta: &str, canonical: Option<&str>, content: &str) -> String {
-    page(site, blogroll, title, meta, canonical, content, false)
+fn footer_links(notes: &[Note]) -> FooterLinks {
+    let has = |slug: &str| notes.iter().any(|n| n.slug == slug && n.kind == Kind::Page);
+    FooterLinks {
+        blogroll: has(BLOGROLL),
+        now: has(NOW),
+    }
+}
+
+fn base(site: &Config, links: FooterLinks, title: &str, meta: &str, canonical: Option<&str>, content: &str) -> String {
+    page(site, links, title, meta, canonical, content, false)
 }
 
 /// `home` makes the site title the page's `<h1>` (ADR 2026-10-16-site-title-heads-home).
-/// `blogroll` links the footer to `/blogroll/` when the vault has one.
+/// `links` adds the footer links to `/now/` and `/blogroll/` when the vault has them.
 fn page(
     site: &Config,
-    blogroll: bool,
+    links: FooterLinks,
     title: &str,
     meta: &str,
     canonical: Option<&str>,
@@ -564,7 +578,12 @@ fn page(
         .iter()
         .map(|(slug, ..)| format!("<link rel=\"stylesheet\" href=\"/themes/{slug}.css\">\n"))
         .collect();
-    let blogroll = if blogroll {
+    let now = if links.now {
+        "<a href=\"/now/\">Now</a> \u{b7}\n"
+    } else {
+        ""
+    };
+    let blogroll = if links.blogroll {
         "<a href=\"/blogroll/\">Blogroll</a> \u{b7}\n"
     } else {
         ""
@@ -599,7 +618,7 @@ fn page(
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
 </nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
-<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
+<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}{now}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n{blogroll}<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
@@ -695,7 +714,7 @@ fn backlinks_block(notes: &[Note], n: &Note) -> String {
 }
 
 fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Result<String, String> {
-    let blogroll = has_blogroll(notes);
+    let links = footer_links(notes);
     let d = n.post_date()?;
     let updated = n
         .updated
@@ -757,7 +776,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     );
     Ok(base(
         site,
-        blogroll,
+        links,
         &format!("{} \u{2014} {}", e(n.title()), e(site.title)),
         &summary_meta(site, n),
         Some(canonical),
@@ -787,7 +806,7 @@ fn author_label(site: &Config) -> String {
     )
 }
 
-fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> String {
+fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Result<String, String> {
     let (opml, mut meta) = if n.slug == BLOGROLL {
         (
             format!(
@@ -802,20 +821,34 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Stri
         (String::new(), String::new())
     };
     meta.push_str(&summary_meta(site, n));
+    // A now page is only as good as its date, so it must have one
+    // (ADR 2026-11-01-now-page).
+    let updated = if n.slug == NOW {
+        let u = n
+            .updated
+            .ok_or("now.md: a now page needs an `updated` date, so readers know how current it is")?;
+        format!(
+            "<p class=\"now-updated\">Updated <time datetime=\"{}\">{}</time></p>\n",
+            u.iso(),
+            u.human()
+        )
+    } else {
+        String::new()
+    };
     let content = format!(
-        "\n<article>\n<h1>{}</h1>\n{}\n{opml}</article>\n{}\n",
+        "\n<article>\n<h1>{}</h1>\n{updated}{}\n{opml}</article>\n{}\n",
         e(n.title()),
         n.content_html,
         backlinks_block(notes, n)
     );
-    base(
+    Ok(base(
         site,
-        has_blogroll(notes),
+        footer_links(notes),
         &format!("{} \u{2014} {}", e(n.title()), e(site.title)),
         &meta,
         Some(canonical),
         &content,
-    )
+    ))
 }
 
 fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonical: &str) -> Result<String, String> {
@@ -858,7 +891,7 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
     };
     Ok(page(
         site,
-        has_blogroll(notes),
+        footer_links(notes),
         &e(site.title),
         &meta,
         Some(canonical),
@@ -899,7 +932,7 @@ fn render_list(
     );
     Ok(base(
         site,
-        has_blogroll(notes),
+        footer_links(notes),
         &format!("{} \u{2014} {}", e(list_title), e(site.title)),
         &description_meta(description),
         Some(canonical),
@@ -907,21 +940,21 @@ fn render_list(
     ))
 }
 
-fn render_redirect(site: &Config, blogroll: bool, target: &str, canonical: &str) -> String {
+fn render_redirect(site: &Config, links: FooterLinks, target: &str, canonical: &str) -> String {
     let t = e(target);
     let meta = format!(
         "\n<meta http-equiv=\"refresh\" content=\"0; url={}\">\n<meta name=\"robots\" content=\"noindex\">\n",
         t
     );
     let content = format!("\n<p>This page has moved to <a href=\"{}\">{}</a>.</p>\n", t, t);
-    base(site, blogroll, "Redirecting\u{2026}", &meta, Some(canonical), &content)
+    base(site, links, "Redirecting\u{2026}", &meta, Some(canonical), &content)
 }
 
-fn render_404(site: &Config, blogroll: bool) -> String {
+fn render_404(site: &Config, links: FooterLinks) -> String {
     let content = "\n<article>\n<h1>Not found</h1>\n<p>That page isn't here. Try the <a href=\"/\">home page</a> or the <a href=\"/notes/\">notes index</a>.</p>\n</article>\n";
     base(
         site,
-        blogroll,
+        links,
         &format!("Not found \u{2014} {}", e(site.title)),
         &description_meta(site.tagline),
         None,
@@ -931,11 +964,11 @@ fn render_404(site: &Config, blogroll: bool) -> String {
 
 /// What the service worker shows for a page that wasn't kept, when the
 /// reader is offline (ADR 2026-10-29-offline-reading).
-fn render_offline(site: &Config, blogroll: bool) -> String {
+fn render_offline(site: &Config, links: FooterLinks) -> String {
     let content = "\n<article>\n<h1>You're offline</h1>\n<p>This page isn't saved on this device yet. Pages you've read here are, so try the <a href=\"/\">home page</a> or go back.</p>\n</article>\n";
     base(
         site,
-        blogroll,
+        links,
         &format!("Offline \u{2014} {}", e(site.title)),
         "\n<meta name=\"robots\" content=\"noindex\">\n",
         None,
@@ -1032,7 +1065,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         let html = match n.kind {
             Kind::Home => render_home(site, &notes, n, &posts, &c)?,
             Kind::Post => render_post(site, &notes, n, &c)?,
-            Kind::Page => render_page(site, &notes, n, &c),
+            Kind::Page => render_page(site, &notes, n, &c)?,
         };
         write(&n.out_path, &html)?;
     }
@@ -1085,19 +1118,19 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
             };
             write(
                 &p,
-                &render_redirect(site, has_blogroll(&notes), &n.url, &canonical(&n.url)),
+                &render_redirect(site, footer_links(&notes), &n.url, &canonical(&n.url)),
             )?;
         }
     }
 
     // spec/url-policy.md: the Jekyll site's A-to-Z post list (ADR 2026-10-16-old-all-page).
-    let notes_index = render_redirect(site, has_blogroll(&notes), "/notes/", &canonical("/notes/"));
+    let notes_index = render_redirect(site, footer_links(&notes), "/notes/", &canonical("/notes/"));
     write(&out.join("all/index.html"), &notes_index)?;
     write(&out.join("all.html"), &notes_index)?;
 
     // 404
-    write(&out.join("404.html"), &render_404(site, has_blogroll(&notes)))?;
-    write(&out.join("offline.html"), &render_offline(site, has_blogroll(&notes)))?;
+    write(&out.join("404.html"), &render_404(site, footer_links(&notes)))?;
+    write(&out.join("offline.html"), &render_offline(site, footer_links(&notes)))?;
 
     // spec/feeds.md: the blogroll's sites as OPML (ADR 2026-10-25-blogroll).
     if let Some(n) = notes.iter().find(|n| n.slug == BLOGROLL && n.kind == Kind::Page) {

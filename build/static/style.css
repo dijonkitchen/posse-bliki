@@ -437,8 +437,8 @@ main { padding-block-end: var(--space-7); }
 
 /* --- notes (h-entry) --- */
 .h-entry > header { margin-bottom: var(--space-6); }
-.meta, .p-summary { color: var(--text-2); }
-.meta { font-size: var(--size-sm); }
+.meta, .p-summary, .now-updated { color: var(--text-2); }
+.meta, .now-updated { font-size: var(--size-sm); }
 .meta a { color: inherit; }
 .h-entry > header .p-summary { font-size: var(--size-lg); }
 .e-content > :first-child { margin-top: 0; }

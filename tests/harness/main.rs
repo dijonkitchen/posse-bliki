@@ -21,6 +21,7 @@ mod indieweb_links;
 mod jsonfeed;
 mod links;
 mod microformats;
+mod now;
 mod offline;
 mod performance;
 mod rss;
