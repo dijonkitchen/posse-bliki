@@ -70,6 +70,26 @@ stays one Markdown file that reads the same on GitHub and in Obsidian.
   `blogroll.md` there is no OPML file and no footer link.
 - Tested in `tests/harness/blogroll.rs`.
 
+## Follow page — `/follow/`
+
+When the vault has `content/follow.md`, it is an ordinary page that tells
+readers the best way to follow the site: subscribe to the RSS feed in a
+feed reader, such as FeedFlow, and import the blogroll's OPML to follow
+the sites JC reads too (ADR 2026-11-05-follow-with-a-feed-reader). Why:
+a feed is the one way to follow that needs no platform, account or
+algorithm, and the bare feed link opens as raw XML in a browser, which
+tells a newcomer nothing.
+
+- Under the page's text the build lists the full address of `/index.xml`
+  and, when there is a blogroll, of `/blogroll.opml`, from the site's
+  base URL, to copy into a reader. The build writes them because content
+  can't link a site URL (ADR 2026-10-16-relative-markdown-links).
+- Every page's footer links `/follow/` first, before the feeds. Without
+  `follow.md` there is no footer link.
+- `/subscribe/`, the sign-up page when this domain served the Substack,
+  redirects to `/follow/` (an alias in `follow.md`).
+- Tested in `tests/harness/follow.rs`.
+
 ## Sitemap — `/sitemap.xml`
 
 - `urlset` per <https://www.sitemaps.org/protocol.html>.

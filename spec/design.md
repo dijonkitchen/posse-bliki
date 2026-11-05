@@ -70,8 +70,9 @@ Each item is enforced by `tests/harness/design.rs`.
   plus ink ring (`--focus-outline`), with a real outline in forced colours.
 - **Header.** Every page's header shows the site title, linking home, with
   the tagline under it (ADR 2026-10-14-site-and-author-naming). Its nav is
-  Notes, Now (when the now page is published) and About; the colophon,
-  feeds and blogroll are in the footer (ADR 2026-11-05-now-in-the-header).
+  Notes, Now (when the now page is published) and About; the follow page,
+  feeds, blogroll and colophon are in the footer (ADR 2026-11-05-now-in-the-header,
+  ADR 2026-11-05-follow-with-a-feed-reader).
 - **Skip link.** The first element in `<body>` is a link to `#main`
   ("Skip to content"), and `<main id="main">` exists on every page.
 - **Readable type.** Atkinson Hyperlegible Next for text, JetBrains Mono for

@@ -513,11 +513,16 @@ const BLOGROLL_OPML: &str = "/blogroll.opml";
 /// `content/now.md`, a now page after Derek Sivers's (ADR 2026-11-01-now-page).
 const NOW: &str = "now";
 
+/// `content/follow.md`, how to follow the site in a feed reader
+/// (ADR 2026-11-05-follow-with-a-feed-reader).
+const FOLLOW: &str = "follow";
+
 /// The optional pages every page links to, when the vault has them.
 #[derive(Clone, Copy)]
 struct FooterLinks {
     blogroll: bool,
     now: bool,
+    follow: bool,
 }
 
 fn footer_links(notes: &[Note]) -> FooterLinks {
@@ -525,6 +530,7 @@ fn footer_links(notes: &[Note]) -> FooterLinks {
     FooterLinks {
         blogroll: has(BLOGROLL),
         now: has(NOW),
+        follow: has(FOLLOW),
     }
 }
 
@@ -533,8 +539,9 @@ fn base(site: &Config, links: FooterLinks, title: &str, meta: &str, canonical: O
 }
 
 /// `home` makes the site title the page's `<h1>` (ADR 2026-10-16-site-title-heads-home).
-/// `links` adds the header link to `/now/` and the footer link to `/blogroll/`
-/// when the vault has them (ADR 2026-11-05-now-in-the-header).
+/// `links` adds the header link to `/now/` and the footer links to `/follow/`
+/// and `/blogroll/` when the vault has them (ADR 2026-11-05-now-in-the-header,
+/// ADR 2026-11-05-follow-with-a-feed-reader).
 fn page(
     site: &Config,
     links: FooterLinks,
@@ -580,6 +587,11 @@ fn page(
         .map(|(slug, ..)| format!("<link rel=\"stylesheet\" href=\"/themes/{slug}.css\">\n"))
         .collect();
     let now = if links.now { "<a href=\"/now/\">Now</a>\n" } else { "" };
+    let follow = if links.follow {
+        "<a href=\"/follow/\">Follow</a> \u{b7}\n"
+    } else {
+        ""
+    };
     let blogroll = if links.blogroll {
         "<a href=\"/blogroll/\">Blogroll</a> \u{b7}\n"
     } else {
@@ -615,7 +627,7 @@ fn page(
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n{now}<a href=\"/about/\">About</a>\n\
 </nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
-<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
+<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}{follow}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n{blogroll}<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
@@ -803,8 +815,26 @@ fn author_label(site: &Config) -> String {
     )
 }
 
+/// The follow page's addresses to paste into a feed reader, written out in
+/// full since that's what a reader asks for. The build adds them because
+/// content can't link a site URL (ADR 2026-11-05-follow-with-a-feed-reader).
+/// `<wbr>` lets a phone wrap before the file name rather than inside it.
+fn follow_feeds(site: &Config, links: FooterLinks) -> String {
+    let item = |label: &str, path: &str, kind: &str| {
+        format!(
+            "<li>{label}: <a href=\"{path}\" type=\"{kind}\">{}<wbr>{path}</a></li>\n",
+            e(site.base_url)
+        )
+    };
+    let mut list = item("This bliki's feed", "/index.xml", "application/rss+xml");
+    if links.blogroll {
+        list.push_str(&item("The blogroll, as OPML", BLOGROLL_OPML, "text/x-opml"));
+    }
+    format!("<ul class=\"follow-feeds\">\n{list}</ul>\n")
+}
+
 fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Result<String, String> {
-    let (opml, mut meta) = if n.slug == BLOGROLL {
+    let (after, mut meta) = if n.slug == BLOGROLL {
         (
             format!(
                 "<p class=\"blogroll-opml\">All of these as one <a href=\"{BLOGROLL_OPML}\" type=\"text/x-opml\">OPML file</a> to import into your feed reader.</p>\n"
@@ -814,6 +844,8 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
                 e(site.title)
             ),
         )
+    } else if n.slug == FOLLOW {
+        (follow_feeds(site, footer_links(notes)), String::new())
     } else {
         (String::new(), String::new())
     };
@@ -833,7 +865,7 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         String::new()
     };
     let content = format!(
-        "\n<article>\n<h1>{}</h1>\n{updated}{}\n{opml}</article>\n{}\n",
+        "\n<article>\n<h1>{}</h1>\n{updated}{}\n{after}</article>\n{}\n",
         e(n.title()),
         n.content_html,
         backlinks_block(notes, n)

@@ -25,6 +25,7 @@ Some pages here are short and unfinished. That's the point of a
 [bliki](https://martinfowler.com/bliki/WhatIsaBliki.html): notes evolve.
 
 - [How to use this bliki](notes/how-this-bliki-works.md)
+- [How to follow it](follow.md)
 - [How this site is built](colophon.md)
 
 ## Why
