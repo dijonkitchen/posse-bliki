@@ -9,6 +9,8 @@ aliases:
 ---
 
 This is a long-lived home for my notes, writing, and half-formed ideas.
+Looking to work together? My [bio](bio.md) has my experience and how to
+reach me.
 
 The canonical version of every post lives **here**. Copies may appear on
 Mastodon, Bluesky, or elsewhere, but those are syndicated — see the
@@ -59,13 +61,9 @@ The internet is be dark and full of terrors. Companies struggling to survive are
 
 This bliki shows the interconnected network of philosophy, business, life, technology and much more. We all share these wonders and connections with each other.
 
-## Work
-
-Looking to work together? My [bio](bio.md) has my experience and how to reach me.
-
 ## Feedback
 
-I'd love to hear any interesting thoughts of your own. Contact me at `${my-initials}` [at] [MY_DOMAIN_NAME](https://en.wikipedia.org/wiki/Domain_name).
+I'd love to hear any interesting thoughts of your own. Email me at `jc` [at] dijonkitchen.org.
 
 ## Support
 

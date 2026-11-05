@@ -17,6 +17,12 @@ may want the history behind it.
 - The two stay separate pages, since they change at different rates.
 - The now page's Work section and the About page link to the bio, and
   the bio's "More about me" section links to the now page.
+- On About the link is in the opening paragraph, since visitors often
+  expect "About" to be about the person, and here it's about the site
+  (JC agreed 2026-11-05).
+- About writes the email the same way as the bio, `jc` [at]
+  dijonkitchen.org, instead of the `${my-initials}` puzzle, so the two
+  pages don't seem to give different addresses.
 
 ## Consequences
 
