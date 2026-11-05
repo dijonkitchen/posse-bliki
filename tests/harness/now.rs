@@ -44,6 +44,15 @@ fn now_page_credits_derek_sivers_and_nownownow() {
 }
 
 #[test]
+fn now_page_nods_to_the_long_now() {
+    let md = read(&content_dir().join("now.md"));
+    assert!(
+        md.contains("(https://longnow.org)"),
+        "now.md doesn't link the Long Now Foundation"
+    );
+}
+
+#[test]
 fn now_page_says_when_it_was_updated() {
     let html = read(&published_now().join("now/index.html"));
     let p = html

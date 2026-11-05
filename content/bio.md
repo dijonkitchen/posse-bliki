@@ -28,7 +28,8 @@ life, and rolling around hugging people in jiu-jitsu.
 **Looking for:** software engineering, blending product and engineering
 vision, at a business that's profitable, remote and helping people.
 
-**Get in touch:** email `jc` [at] dijonkitchen.org. Code lives on
+**Get in touch:** contact me at `${my-initials}` [at]
+[MY_DOMAIN_NAME](https://en.wikipedia.org/wiki/Domain_name). Code lives on
 [GitHub](https://github.com/dijonkitchen), including
 [the source of this site](https://github.com/dijonkitchen/posse-bliki).
 

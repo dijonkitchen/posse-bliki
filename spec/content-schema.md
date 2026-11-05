@@ -13,6 +13,7 @@ The machine-readable schema lives at [`content-schema.json`](content-schema.json
 | `content/<page>.md` | page | `page.html` | no |
 | `content/blogroll.md` | page, also `/blogroll.opml` | `page.html` | no (see [feeds.md](feeds.md)) |
 | `content/now.md` | page, a [now page](https://nownownow.com/about) | `page.html` | no (see below) |
+| `content/follow.md` | page, how to follow in a feed reader | `page.html` | no (see [feeds.md](feeds.md)) |
 | `content/notes/**/*.md` | post | `post.html` | yes |
 
 Images go in `content/images/` and are linked as `/images/<file>`
@@ -21,7 +22,8 @@ Images go in `content/images/` and are linked as `/images/<file>`
 The directory determines the kind. No `type:` field needed in front-matter.
 
 `content/now.md`, when published, is linked from every page's header, and
-`content/blogroll.md` from every page's footer (ADR 2026-11-05-now-in-the-header). The now page must have `updated` (the build fails
+`content/follow.md` and `content/blogroll.md` from every page's footer
+(ADR 2026-11-05-now-in-the-header, ADR 2026-11-05-follow-with-a-feed-reader). The now page must have `updated` (the build fails
 without it), shown under its title as "Updated <date>", since a now page
 is only as good as its date (ADR 2026-11-01-now-page).
 

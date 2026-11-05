@@ -14,6 +14,7 @@ mod csp;
 mod dates;
 mod design;
 mod drafts;
+mod follow;
 mod frontmatter_schema;
 mod html_valid;
 mod idempotent;
