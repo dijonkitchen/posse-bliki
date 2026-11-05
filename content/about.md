@@ -61,7 +61,7 @@ This bliki shows the interconnected network of philosophy, business, life, techn
 
 ## Work
 
-Looking to work together? My [résumé](resume.md) has my experience and how to reach me.
+Looking to work together? My [bio](bio.md) has my experience and how to reach me.
 
 ## Feedback
 
