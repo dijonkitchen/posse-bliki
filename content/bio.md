@@ -6,13 +6,27 @@ aliases:
   - /cv/
 ---
 
-I'm JC, a software engineer who has worked across the stack, from
-databases and serverless event processing to React front ends, at
-startups in healthcare, lending and enterprise SaaS. I've worked on
-distributed teams since 2020, and I live in the SF Bay Area. Before that
-I co-founded a startup consultancy in New York.
+I'm JC, a full-stack, entrepreneurial engineer that has built
+businesses from zero to one, scaled up new product lines to millions of dollars,
+grown existing ones 412%, and improved profit margins by 507% in 12
+months.
 
-**Looking for:** software engineering roles.
+Using my background in investments and entrepreneurship, I'm improving
+product-market-founder fit, challenging assumptions, and having fun
+making dreams into reality with software at scale.
+
+I'm always seeking trustworthy teammates focused on taking action
+delighting people before technical details. Let me know if you're eager
+and optimistic to cooperate for a blend of product and engineering
+vision at scale. I'm happy at a business that's profitable, remote, and
+helping people, but always have an open ear.
+
+When I'm not crafting code, my focus off screens is spent fixing my
+kids' toys, hiking new neighborhoods, wondering about the meaning of
+life, and rolling around hugging people in jiu-jitsu.
+
+**Looking for:** software engineering, blending product and engineering
+vision, at a business that's profitable, remote and helping people.
 
 **Get in touch:** email `jc` [at] dijonkitchen.org. Code lives on
 [GitHub](https://github.com/dijonkitchen), including
@@ -25,13 +39,18 @@ I'll send one.
 
 ### Senior Software Engineer, Spring Health
 
-2024 to present
+2024 to present · Customer growth, insights and intelligence data
 
-- Helping people with the deeper causes of their problems.
+- Leading and executing on software engineering for a $2.5B mental
+  wellness startup on a mission to eliminate every barrier to mental
+  health.
 
 ### Software Engineer, Robin Healthcare
 
 2020 to 2023 · Remote
+
+Making healthcare more personable, efficient, and value-based with
+video, transcripts, and AI.
 
 - Improved profit margins 507% in 12 months with LangChain generative AI
   for composing medical notes on Azure.
@@ -49,9 +68,11 @@ I'll send one.
   from production with real data.
 - Interviewed 12% of new candidates and sat on the hiring committee.
 
-### Software Engineer, Dividend Finance
+### Full Stack Software Developer, Dividend Finance
 
-2018 to 2020 · San Francisco, CA
+2018 to 2020 · San Francisco Bay Area
+
+Increasing the adoption of sustainable energy for homeowners.
 
 - Expanded the business with a web app for the new Home Improvement
   division, built from Reagent (ClojureScript) components on an
@@ -70,9 +91,11 @@ I'll send one.
   architecture decision records and adding linters, unit tests and
   end-to-end smoke tests to continuous integration.
 
-### Software Engineer, Lanetix
+### Software Developer, Lanetix
 
 2017 to 2018 · San Francisco, CA
+
+Streamlining collaboration and communication in logistics.
 
 - Launched cross-browser features, including global chat and emoji
   reactions, through the full stack: PostgreSQL, a Node.js Express
@@ -86,9 +109,11 @@ I'll send one.
 - Managed a remote team building a React Native app integrated with
   Auth0 and the back-end web API.
 
-### Co-founder and Software Engineer, Cortlandt Labs
+### Co-founder and Product Engineer, Cortlandt Labs
 
 2016 to 2017 · New York, NY
+
+Turning founders' dreams into reality.
 
 - Advised startup founders on business strategy and technology, such as
   cloud-native MVPs on Amazon Web Services and Heroku.
@@ -99,6 +124,15 @@ I'll send one.
 - Optimized photo uploads with resizing and compression.
 - Ran the business and the software with tight feedback loops: stand-ups,
   user stories and sprints.
+
+### Before software
+
+- **VP, Alternative Investments, Credit Suisse**, 2010 to 2015, New York:
+  evaluating the valuation and risk of business investments.
+- **Associate, Deloitte**, 2008 to 2009, New York: pre-merger strategy
+  and healthcare acquisition analysis.
+- **Investment Analyst, Mde Group**, 2007 to 2008, Morristown, NJ: hedge
+  fund and investment research.
 
 ## Skills
 
@@ -113,8 +147,10 @@ I'll send one.
 
 ## Education
 
-- Philosophy and finance.
-- Dev Bootcamp.
+- **Rutgers Business School**: BSc, BA, Finance and Philosophy.
+- **Dev Bootcamp**: Web Development Intensive.
+- **Bradfield School of Computer Science**: Computer Science.
+- Chartered Financial Analyst (CFA) Level 1 candidate.
 
 ## More about me
 
