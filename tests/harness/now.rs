@@ -103,6 +103,14 @@ fn every_page_footer_links_the_colophon() {
 fn no_now_page_means_no_now_link() {
     let vault = vault_copy("no-now");
     fs::remove_file(vault.join("now.md")).unwrap();
+    // Pages that link the now page (the résumé, ADR 2026-11-05-resume-and-now-cross-link)
+    // would otherwise fail the build with a broken link.
+    for page in files_with_ext(&vault, "md") {
+        let text = read(&page);
+        if text.contains("](now.md)") {
+            fs::write(&page, text.replace("](now.md)", "](about.md)")).unwrap();
+        }
+    }
     let out = temp_dir("no-now-out");
     build(&vault, &out, &[]).expect("build without a now page");
     let home = read(&out.join("index.html"));

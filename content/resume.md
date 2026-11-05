@@ -114,6 +114,7 @@ I co-founded a startup consultancy in New York.
 
 ## More about me
 
-How I think and write lives in the [notes](about.md). My first month as
+What I'm focused on lately, at work and outside it, is on my
+[now page](now.md). How I think and write lives in the [notes](about.md). My first month as
 an engineer in San Francisco is in [work](notes/work.md), and the long
 way I came to software is in [me](notes/me.md).
