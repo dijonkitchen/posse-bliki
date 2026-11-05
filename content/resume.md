@@ -17,6 +17,9 @@ I co-founded a startup consultancy in New York.
 [GitHub](https://github.com/dijonkitchen), including
 [the source of this site](https://github.com/dijonkitchen/posse-bliki).
 
+This page is a summary. For a full résumé or a PDF copy, email me and
+I'll send one.
+
 ## Experience
 
 ### Senior Software Engineer, Spring Health
