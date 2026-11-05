@@ -1,7 +1,8 @@
 ---
-title: Résumé
+title: Bio
 summary: JC's work history as a software engineer, and how to get in touch about work.
 aliases:
+  - /resume/
   - /cv/
 ---
 
