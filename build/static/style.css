@@ -440,6 +440,9 @@ main { padding-block-end: var(--space-7); }
 .meta, .p-summary, .now-updated { color: var(--text-2); }
 .meta, .now-updated { font-size: var(--size-sm); }
 .meta a { color: inherit; }
+/* Feed addresses are written out in full to copy into a reader; let them
+   break anywhere rather than push a phone screen sideways. */
+.follow-feeds a { overflow-wrap: anywhere; }
 .h-entry > header .p-summary { font-size: var(--size-lg); }
 .e-content > :first-child { margin-top: 0; }
 .e-content h1 { font-size: var(--size-2xl); margin-top: var(--space-6); }
