@@ -12,12 +12,21 @@ The machine-readable schema lives at [`content-schema.json`](content-schema.json
 | `content/index.md` | home | `home.html` | no (h-card instead) |
 | `content/<page>.md` | page | `page.html` | no |
 | `content/blogroll.md` | page, also `/blogroll.opml` | `page.html` | no (see [feeds.md](feeds.md)) |
+| `content/now.md` | page, a [now page](https://nownownow.com/about) | `page.html` | no (see below) |
 | `content/notes/**/*.md` | post | `post.html` | yes |
 
 Images go in `content/images/` and are linked as `/images/<file>`
 (see [performance.md](performance.md)).
 
 The directory determines the kind. No `type:` field needed in front-matter.
+
+`content/blogroll.md` and `content/now.md`, when published, are linked from
+every page's footer. The now page must have `updated` (the build fails
+without it), shown under its title as "Updated <date>", since a now page
+is only as good as its date (ADR 2026-11-01-now-page).
+
+`TODO(JC)` marks a placeholder still to fill in. No published page may
+contain one; keep the note `draft: true` until it's filled in.
 
 ## Front-matter fields
 
