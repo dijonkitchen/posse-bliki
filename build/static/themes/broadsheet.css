@@ -8,11 +8,11 @@
  * (ADR 2026-10-22-ft-solarized-and-editor-styles).
  *
  * It loads only when picked, and its rules only apply while the picker in
- * the header says Broadsheet: they all sit inside one :has() selector,
+ * the header says Broadsheet: they all sit inside one selector,
  * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
  * ADR 2026-10-20-zen-garden-styles).
  */
-:root:has(#style [value="broadsheet"]:checked) {
+:root:is([data-style="broadsheet"], :has(#style [value="broadsheet"]:checked)) {
   /* Salmon paper, always light. */
   color-scheme: light;
   --text-1: #33302e;

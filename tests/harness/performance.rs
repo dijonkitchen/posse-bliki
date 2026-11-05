@@ -4,8 +4,11 @@
 use std::fs;
 
 use posse_bliki_build::image;
+use posse_bliki_build::indent::BLOCK;
 
-use crate::support::{build, content_dir, html_files, repo, site, temp_dir};
+use posse_bliki_build::util::escape_html;
+
+use crate::support::{build, content_dir, files_with_ext, html_files, read_as_built, repo, site, temp_dir};
 
 /// Image budget (spec/performance.md): the build ships images as they are,
 /// so a heavy one has to be caught before it is committed.
@@ -98,12 +101,205 @@ fn html_is_not_minified() {
     // Each <head> element sits on its own line, as the templates write it.
     for (p, html) in html_files() {
         assert!(
-            html.contains("<head>\n<meta charset=\"utf-8\">\n"),
+            html.contains("<head>\n  <meta charset=\"utf-8\">\n"),
             "{}: head is not one element per line",
             p.display()
         );
         assert!(html.matches('\n').count() >= 20, "{}: looks minified", p.display());
     }
+}
+
+/// Lines outside `<pre>` blocks, which keep their own whitespace.
+fn lines_outside_pre(html: &str) -> Vec<&str> {
+    let mut lines = Vec::new();
+    let mut in_pre = false;
+    for line in html.lines() {
+        if !in_pre {
+            lines.push(line);
+        }
+        if line.contains("<pre") {
+            in_pre = true;
+        }
+        if line.contains("</pre>") {
+            in_pre = false;
+        }
+    }
+    lines
+}
+
+#[test]
+fn html_is_indented_by_nesting() {
+    // Two spaces per open element, <html> adding none (ADR 2026-10-28-indented-html).
+    // Every page ending with <main> and </main> at one level proves that
+    // whatever the note's text opens, it closes.
+    let flush = ["<head>", "</head>", "<body>", "</body>", "</html>"];
+    for p in files_with_ext(site(), "html") {
+        let html = &read_as_built(&p);
+        let lines = lines_outside_pre(html);
+        for tag in flush {
+            assert!(lines.contains(&tag), "{}: {tag} not flush left", p.display());
+        }
+        if !html.contains("http-equiv=\"refresh\"") {
+            assert!(
+                lines.contains(&"  <main id=\"main\">"),
+                "{}: <main> not one level in",
+                p.display()
+            );
+            assert!(
+                lines.contains(&"  </main>"),
+                "{}: </main> not one level in",
+                p.display()
+            );
+        }
+        for line in &lines {
+            assert!(!line.trim().is_empty(), "{}: blank line", p.display());
+            let spaces = line.len() - line.trim_start_matches(' ').len();
+            assert!(spaces % 2 == 0, "{}: odd indent on {line:?}", p.display());
+        }
+    }
+}
+
+/// A tag with two or more attributes opens alone on its line, each attribute
+/// below it one level deeper (ADR 2026-10-28-one-attribute-per-line).
+#[test]
+fn each_attribute_on_its_own_line() {
+    let mut split = 0;
+    for p in files_with_ext(site(), "html") {
+        let html = read_as_built(&p);
+        let lines = lines_outside_pre(&html);
+        for (n, line) in lines.iter().enumerate() {
+            for (i, _) in line.match_indices('<') {
+                let tag = &line[i + 1..];
+                if !tag.starts_with(|c: char| c.is_ascii_alphabetic()) {
+                    continue;
+                }
+                let (words, closed) = tag_words_on_line(tag);
+                assert!(words <= 2, "{}:{}: attributes share a line: {line}", p.display(), n + 1);
+                if words == 1 && !closed {
+                    let indent = |l: &str| l.len() - l.trim_start_matches(' ').len();
+                    let next = lines[n + 1];
+                    assert_eq!(
+                        indent(next),
+                        indent(line) + 2,
+                        "{}:{}: attribute not one level in: {next}",
+                        p.display(),
+                        n + 2
+                    );
+                    split += 1;
+                }
+            }
+        }
+    }
+    assert!(split > 100, "expected many split tags, found {split}");
+}
+
+/// Words (name, then attributes) of the tag starting at `tag` up to its `>`
+/// or the end of the line, and whether the `>` is on this line.
+fn tag_words_on_line(tag: &str) -> (usize, bool) {
+    let mut words = 0;
+    let mut in_word = false;
+    let mut quote = None;
+    for c in tag.chars() {
+        match (quote, c) {
+            (None, '>') => return (words, true),
+            (None, c) if c.is_ascii_whitespace() => in_word = false,
+            (None, '/') if !in_word => {}
+            (None, _) | (Some(_), _) => {
+                if quote.is_none() && matches!(c, '"' | '\'') {
+                    quote = Some(c);
+                } else if quote == Some(c) {
+                    quote = None;
+                }
+                if !in_word {
+                    words += 1;
+                    in_word = true;
+                }
+            }
+        }
+    }
+    (words, false)
+}
+
+/// A block's content starts on the line after its start tag and its end tag
+/// gets a line of its own (ADR 2026-10-29-block-content-on-its-own-lines).
+#[test]
+fn block_content_on_its_own_lines() {
+    let mut checked = 0;
+    for p in files_with_ext(site(), "html") {
+        let html = read_as_built(&p);
+        for (n, line) in lines_outside_pre(&html).iter().enumerate() {
+            let line = line.trim();
+            for name in BLOCK {
+                let open = format!("<{name}");
+                let close = format!("</{name}>");
+                if let Some(rest) = line.strip_prefix(open.as_str()) {
+                    if rest.starts_with([' ', '>']) && rest.ends_with('>') && !rest.ends_with(close.as_str()) {
+                        checked += 1;
+                    }
+                }
+                let empty = format!("<{name}></{name}>");
+                if line.ends_with(close.as_str()) && line != close && !line.ends_with(empty.as_str()) {
+                    panic!("{}:{}: content before {close} on one line: {line}", p.display(), n + 1);
+                }
+                if let Some(at) = line.find(open.as_str()) {
+                    let after = &line[at + open.len()..];
+                    let tag_closed = after.starts_with([' ', '>']) && after.contains('>');
+                    let tail = after.split_once('>').map_or("", |(_, t)| t);
+                    assert!(
+                        !tag_closed || tail.is_empty() || tail.starts_with(close.as_str()),
+                        "{}:{}: content after <{name}> on one line: {line}",
+                        p.display(),
+                        n + 1
+                    );
+                }
+            }
+        }
+    }
+    assert!(checked > 100, "expected many block start tags, found {checked}");
+}
+
+/// Indenting never touches a code block: each fenced block in a note ships
+/// exactly as written, every line where the author put it.
+#[test]
+fn code_blocks_keep_their_whitespace() {
+    let mut checked = 0;
+    for p in files_with_ext(&content_dir(), "md") {
+        let md = fs::read_to_string(&p).expect("read note");
+        let mut blocks = Vec::new();
+        let mut open: Option<String> = None;
+        for line in md.lines() {
+            match open.as_mut() {
+                None if line.starts_with("```") => open = Some(String::new()),
+                Some(code) if line.starts_with("```") => {
+                    blocks.push(std::mem::take(code));
+                    open = None;
+                }
+                Some(code) => {
+                    code.push_str(line);
+                    code.push('\n');
+                }
+                None => {}
+            }
+        }
+        if blocks.is_empty() {
+            continue;
+        }
+        let rel = p.strip_prefix(content_dir()).unwrap().with_extension("");
+        let page = html_files()
+            .iter()
+            .find(|(out, _)| out.parent().is_some_and(|d| d.ends_with(&rel)))
+            .unwrap_or_else(|| panic!("{}: no page", p.display()));
+        for code in blocks {
+            let escaped = escape_html(&code);
+            assert!(
+                page.1.contains(&format!(">{escaped}</code></pre>")),
+                "{}: code block changed:\n{code}",
+                p.display()
+            );
+            checked += 1;
+        }
+    }
+    assert!(checked > 0, "no fenced code blocks in the vault to check");
 }
 
 // --- Lighthouse basics ---

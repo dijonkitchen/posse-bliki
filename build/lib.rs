@@ -7,6 +7,7 @@ pub mod date;
 pub mod entities;
 pub mod frontmatter;
 pub mod image;
+pub mod indent;
 pub mod json;
 pub mod markdown;
 pub mod mdurl;

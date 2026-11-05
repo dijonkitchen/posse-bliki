@@ -14,6 +14,7 @@ fn content_type(p: &Path) -> &'static str {
     match p.extension().and_then(|e| e.to_str()).unwrap_or("") {
         "html" => "text/html; charset=utf-8",
         "css" => "text/css; charset=utf-8",
+        "js" => "text/javascript; charset=utf-8",
         "xml" => "application/xml; charset=utf-8",
         "json" => "application/json; charset=utf-8",
         "txt" => "text/plain; charset=utf-8",
@@ -176,5 +177,17 @@ pub fn serve(out: &Path, port: u16, content: &Path, cfg: &Config) {
                 Err(msg) => eprintln!("build error: {}", msg),
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn scripts_are_javascript() {
+        // Browsers refuse to register a service worker served as anything
+        // else (ADR 2026-10-29-offline-reading).
+        assert_eq!(content_type(Path::new("sw.js")), "text/javascript; charset=utf-8");
     }
 }

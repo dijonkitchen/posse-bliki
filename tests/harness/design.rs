@@ -481,13 +481,35 @@ fn seasonal_styles_exist() {
         "script lost April Fools' Day"
     );
     assert!(
-        js.contains("picker.options"),
-        "April Fools' Day should draw from the menu"
+        js.contains("script.dataset.styles"),
+        "April Fools' Day should draw from the menu's styles"
     );
     assert!(
         !js.contains("var throwbacks"),
         "April Fools' Day should not keep its own list"
     );
+}
+
+#[test]
+fn style_picker_uses_modern_syntax() {
+    // Every browser with :has() runs ES2015+, so the script reads as modern
+    // JS in view-source: no `var`, helpers as `const` arrows defined before
+    // their first use (ADR 2026-10-28-modern-js-style-picker).
+    let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
+    let code: Vec<&str> = js.lines().filter(|l| !l.trim_start().starts_with("//")).collect();
+    assert!(
+        !code.iter().any(|l| l.contains("var ") || l.contains("function")),
+        "style-picker.js should use const/let and arrow functions"
+    );
+    for helper in ["load", "pick", "save", "anyStyle", "season"] {
+        let defined = js
+            .find(&format!("const {helper} = ("))
+            .unwrap_or_else(|| panic!("no const {helper} arrow"));
+        assert!(
+            !js[..defined].contains(&format!(" {helper}(")),
+            "{helper} is called above its definition"
+        );
+    }
 }
 
 #[test]
@@ -575,10 +597,16 @@ fn every_page_has_the_style_picker() {
             "{}: Auto not the default",
             p.display()
         );
-        let script = "</select>\n</label>\n<script src=\"/style-picker.js\"></script>";
+        // The script runs in <head>, before the picker exists, and gets the
+        // menu's styles from its tag (ADR 2026-10-30-style-before-first-paint).
+        let head = &html[..html.find("</head>").expect("no </head>")];
+        let script = format!(
+            "<script src=\"/style-picker.js\" data-styles=\"{}\"></script>",
+            values[3..].join(" ")
+        );
         assert!(
-            html.contains(script),
-            "{}: script not right after the picker",
+            head.contains(&script),
+            "{}: script not in <head> with the menu's styles",
             p.display()
         );
     }
@@ -587,7 +615,7 @@ fn every_page_has_the_style_picker() {
 #[test]
 fn styles_apply_only_while_picked() {
     for (slug, css) in themes() {
-        let scope = format!(":root:has(#style [value=\"{slug}\"]:checked) {{");
+        let scope = format!(":root:is([data-style=\"{slug}\"], :has(#style [value=\"{slug}\"]:checked)) {{");
         let body = css.find(&scope).unwrap_or_else(|| panic!("{slug}.css: no {scope}"));
         // Everything after the opening comment is the scoped block, plus
         // @keyframes, which can't be nested.
@@ -718,7 +746,12 @@ fn round_gradients_stay_round() {
 fn pinned_dark_matches_the_dark_scheme() {
     let css = css();
     let (_, dark) = light_and_dark(&css);
-    let pinned = rule_after(&css, 0, ":root:has(#style [value=\"dark\"]:checked)").expect("no pinned dark rule");
+    let pinned = rule_after(
+        &css,
+        0,
+        ":root:is([data-style=\"dark\"], :has(#style [value=\"dark\"]:checked))",
+    )
+    .expect("no pinned dark rule");
     let tokens = |block: &str| -> Vec<String> {
         block
             .lines()
