@@ -4,7 +4,7 @@ summary: Sites I read and keep coming back to, with their feeds, and all of them
 ---
 
 Sites I read and keep coming back to. Most have a feed, so you can follow
-them the same way you can follow [this one](colophon.md).
+them in a feed reader, the same way you can [follow this one](follow.md).
 
 - [Martin Fowler](https://martinfowler.com/) ([feed](https://martinfowler.com/feed.atom)): software design, and where the word "bliki" comes from.
 - [Dan Luu](https://danluu.com/) ([feed](https://danluu.com/atom.xml)): long, careful looks at how software and the tech industry really work.

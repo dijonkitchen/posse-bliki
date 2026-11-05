@@ -77,6 +77,8 @@ fn no_blogroll_page_means_no_opml_and_no_link() {
         .map(String::from)
         .collect();
     fs::write(&colophon, kept.join("\n")).unwrap();
+    let follow = vault.join("follow.md");
+    fs::write(&follow, read(&follow).replace("[blogroll](blogroll.md)", "blogroll")).unwrap();
     let out = temp_dir("no-blogroll-out");
     build(&vault, &out, &[]).expect("build without a blogroll");
     assert!(
