@@ -1,7 +1,8 @@
 # 2026-10-11 — Rust-only toolchain: harness, tables and a pinned compiler
 
 - Date: 2026-10-11
-- Status: Accepted
+- Status: Accepted; Nix reconsidered and still declined in
+  [2026-11-05-nix-still-not-worth-it](2026-11-05-nix-still-not-worth-it.md)
 - Decided by: JC, asking for "a full refactor to Rust, along with env
   consistency and setup" after the build moved to Rust (ADR 2026-10-06-rust-build-zero-dependencies).
 - Supersedes: [2026-05-10-uv-for-python-toolchain](2026-05-10-uv-for-python-toolchain.md) (uv for Python), and
