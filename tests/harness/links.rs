@@ -75,6 +75,21 @@ fn prose(md: &str) -> String {
     out
 }
 
+/// Raw HTML tags in `text`, like `<iframe` or `</div`. Autolinks
+/// (`<https://...>`) aren't tags.
+fn html_tags(text: &str) -> Vec<&str> {
+    text.match_indices('<')
+        .filter_map(|(i, _)| {
+            let rest = text[i + 1..].strip_prefix('/').unwrap_or(&text[i + 1..]);
+            let end = rest.find(|c: char| !c.is_ascii_alphanumeric()).unwrap_or(rest.len());
+            let name = &rest[..end];
+            let next = rest[end..].chars().next();
+            (name.starts_with(|c: char| c.is_ascii_alphabetic()) && matches!(next, Some(' ' | '>' | '/' | '\n')))
+                .then_some(name)
+        })
+        .collect()
+}
+
 /// Inline Markdown link targets in `text`: the `x` of `](x)`.
 fn link_targets(text: &str) -> Vec<&str> {
     text.match_indices("](")
@@ -95,6 +110,11 @@ fn content_links_are_relative_markdown_paths() {
         let name = rel(&p, &content);
         if md.contains("[[") {
             failures.push(format!("{name}: uses [[wikilinks]]; write [text](note.md)"));
+        }
+        // The build escapes raw HTML, so a tag shows up as literal text on
+        // the page (ADR 2026-10-28-videos-as-links).
+        for tag in html_tags(&md) {
+            failures.push(format!("{name}: raw HTML <{tag}> shows as text; write Markdown"));
         }
         for t in link_targets(&md) {
             // Images stay at /images/ (served from content/images/).

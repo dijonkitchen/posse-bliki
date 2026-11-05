@@ -11,12 +11,22 @@ The machine-readable schema lives at [`content-schema.json`](content-schema.json
 |---|---|---|---|
 | `content/index.md` | home | `home.html` | no (h-card instead) |
 | `content/<page>.md` | page | `page.html` | no |
+| `content/blogroll.md` | page, also `/blogroll.opml` | `page.html` | no (see [feeds.md](feeds.md)) |
+| `content/now.md` | page, a [now page](https://nownownow.com/about) | `page.html` | no (see below) |
 | `content/notes/**/*.md` | post | `post.html` | yes |
 
 Images go in `content/images/` and are linked as `/images/<file>`
 (see [performance.md](performance.md)).
 
 The directory determines the kind. No `type:` field needed in front-matter.
+
+`content/now.md`, when published, is linked from every page's header, and
+`content/blogroll.md` from every page's footer (ADR 2026-11-05-now-in-the-header). The now page must have `updated` (the build fails
+without it), shown under its title as "Updated <date>", since a now page
+is only as good as its date (ADR 2026-11-01-now-page).
+
+`TODO(JC)` marks a placeholder still to fill in. No published page may
+contain one; keep the note `draft: true` until it's filled in.
 
 ## Front-matter fields
 
@@ -47,6 +57,13 @@ scheduled note from a published one is a broken link, as for a draft.
 Always `YYYY-MM-DD` (or full ISO-8601 with time). Obsidian's daily-note format
 is fine. Strings only — no implicit YAML date types, since their stringification
 varies by parser.
+
+## No raw HTML
+
+The build escapes HTML in notes, so a tag like `<iframe>` shows as text.
+Notes are Markdown only, and a raw tag in a note's prose (outside code) fails
+the harness. Videos are links to the video's page, not embeds
+(ADR 2026-10-28-videos-as-links).
 
 ## Links between notes
 

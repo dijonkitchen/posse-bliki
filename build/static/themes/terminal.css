@@ -2,12 +2,12 @@
  * Terminal: a style for the style picker.
  *
  * Every page links it, but its rules only apply while the picker in the
- * header says Terminal: they all sit inside one :has() selector, nested.
+ * header says Terminal: they all sit inside one selector, nested.
  * On top of /style.css it changes the colour tokens, the fonts and a few
  * flourishes. Copy it, change it, make your own (ADR 2026-10-18-style-picker).
  * Text pairs still meet WCAG AAA 7:1.
  */
-:root:has(#style [value="terminal"]:checked) {
+:root:is([data-style="terminal"], :has(#style [value="terminal"]:checked)) {
   /* Always dark, whatever the operating system asks for. */
   color-scheme: dark;
   --text-1: #7dff9b;

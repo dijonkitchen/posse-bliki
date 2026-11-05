@@ -254,17 +254,22 @@ pub fn strip_html(html: &str) -> String {
     out
 }
 
+/// Decode the entities the markdown renderer and `util::escape` emit.
+pub fn unescape(s: &str) -> String {
+    s.replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", "\"")
+        .replace("&#34;", "\"")
+        .replace("&#39;", "'")
+        .replace("&amp;", "&")
+}
+
 /// Plain-text excerpt of rendered HTML for `<meta name="description">`:
 /// tags stripped, the markdown renderer's entities decoded, whitespace
 /// collapsed, and cut at a word boundary to at most `max` characters
 /// (an ellipsis marks a cut).
 pub fn excerpt(html: &str, max: usize) -> String {
-    let text = strip_html(html)
-        .replace("&lt;", "<")
-        .replace("&gt;", ">")
-        .replace("&quot;", "\"")
-        .replace("&#39;", "'")
-        .replace("&amp;", "&");
+    let text = unescape(&strip_html(html));
     let words: Vec<&str> = text.split_whitespace().collect();
     let mut out = String::new();
     for w in &words {

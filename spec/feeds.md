@@ -45,6 +45,31 @@ Spec: <https://www.jsonfeed.org/version/1.1/>
 - Each item: `id` (canonical URL), `url`, `title`, `content_html`,
   `date_published` (RFC 3339), `tags`, optional `summary`.
 
+## Blogroll — `/blogroll/` and `/blogroll.opml`
+
+When the vault has `content/blogroll.md`, it is an ordinary page that
+lists the sites JC reads, and the build also emits `/blogroll.opml` from
+it (ADR 2026-10-25-blogroll). Why: OPML is the file every feed reader
+imports, so a reader can follow the whole list in one step, and the list
+stays one Markdown file that reads the same on GitHub and in Obsidian.
+
+- Each list item on the page is one site, written
+  `- [Name](https://site/) ([feed](https://site/feed.xml)): why I read it.`
+  The first link is the site and must be an absolute web address; a link
+  reading `feed` is its feed; the rest of the text is its description.
+  An item without a site link is a build error.
+- `/blogroll.opml` is OPML 2.0 and well-formed XML: a `<head>` with
+  `<title>`, `<ownerName>`, `<ownerId>` (the site) and `<docs>`, and one
+  `<outline>` per item in page order: `type="rss"` with `text`, `title`,
+  `htmlUrl` and `xmlUrl` when the item has a feed, otherwise `type="link"`
+  with `url`; `description` when the item has one. No dates, so the file
+  only changes when the list does.
+- The blogroll page links the file with
+  `<link rel="alternate" type="text/x-opml">` and a visible link under the
+  list, and every page's footer links `/blogroll/`. Without
+  `blogroll.md` there is no OPML file and no footer link.
+- Tested in `tests/harness/blogroll.rs`.
+
 ## Sitemap — `/sitemap.xml`
 
 - `urlset` per <https://www.sitemaps.org/protocol.html>.

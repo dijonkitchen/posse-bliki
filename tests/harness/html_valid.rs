@@ -36,8 +36,9 @@ fn universal_invariants() {
     ];
     for (p, text) in html_files() {
         for needle in needles {
-            if p.ends_with("404.html") && needle.starts_with("<link rel=\"canonical\"") {
-                continue; // 404s don't get a canonical
+            let error_page = p.ends_with("404.html") || p.ends_with("offline.html");
+            if error_page && needle.starts_with("<link rel=\"canonical\"") {
+                continue; // 404 and offline pages don't get a canonical
             }
             assert!(text.contains(needle), "{}: missing {needle:?}", rel(p, site()));
         }
@@ -48,7 +49,7 @@ fn universal_invariants() {
 fn only_the_style_picker_script() {
     // The site must work with JS off; the one script only remembers the
     // picked style (ADR 2026-10-18-style-picker).
-    let allowed = "<script src=\"/style-picker.js\"></script>";
+    let allowed = "<script src=\"/style-picker.js\" data-styles=\"";
     for (p, text) in html_files() {
         let lower = text.to_lowercase();
         let scripts = lower.matches("<script").count();

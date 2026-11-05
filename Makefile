@@ -38,9 +38,12 @@ serve: ## Build, watch content/, and serve at :$(PORT)
 
 ci: lint test build ## Full local CI: same checks .github/workflows/ci.yml runs
 
+# The checker reads pages as file: URLs, where the CSP's 'self' matches
+# nothing, so it flags every stylesheet and script. tests/harness/csp.rs
+# checks the policy instead (ADR 2026-10-28-csp-meta-tag).
 validate: build $(VNU_JAR) ## Check every built page with the Nu HTML Checker (needs Java)
 	java -jar $(VNU_JAR) --skip-non-html --Werror \
-		--filterpattern '.*Trailing slash on void elements.*' $(OUT)
+		--filterpattern '.*(Trailing slash on void elements|Resource violates Content Security Policy).*' $(OUT)
 
 $(VNU_JAR):
 	mkdir -p target/vnu

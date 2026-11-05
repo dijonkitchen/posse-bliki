@@ -6,11 +6,11 @@
  * to keep WCAG AAA 7:1.
  *
  * It loads only when picked, and its rules only apply while the picker in
- * the header says Facebook: they all sit inside one :has() selector,
+ * the header says Facebook: they all sit inside one selector,
  * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
  * ADR 2026-10-20-zen-garden-styles).
  */
-:root:has(#style [value="facebook"]:checked) {
+:root:is([data-style="facebook"], :has(#style [value="facebook"]:checked)) {
   /* The 2007 profile page, always light. */
   color-scheme: light;
   --text-1: #1c1e21;

@@ -18,6 +18,7 @@ use std::process::{Command, Output};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::OnceLock;
 
+use posse_bliki_build::indent::BLOCK;
 use posse_bliki_build::json::{self, Json};
 
 pub fn repo() -> &'static Path {
@@ -130,8 +131,91 @@ pub fn post_html_files() -> Vec<PathBuf> {
         .collect()
 }
 
+/// The file's text; for a page, with each tag back on one line
+/// (`flat_tags`), so checks match attributes as `<a class="x" href="y">`.
 pub fn read(p: &Path) -> String {
+    let text = read_as_built(p);
+    if p.extension().is_some_and(|e| e == "html") {
+        flat_tags(&text)
+    } else {
+        text
+    }
+}
+
+/// The file's text byte for byte.
+pub fn read_as_built(p: &Path) -> String {
     fs::read_to_string(p).unwrap_or_else(|e| panic!("read {}: {e}", p.display()))
+}
+
+/// `html` with the whitespace between a tag's attributes joined to single
+/// spaces, and a block's content joined back to its start and end tags,
+/// undoing the build's layout (ADRs 2026-10-28-one-attribute-per-line and
+/// 2026-10-29-block-content-on-its-own-lines). Other text, quoted values and
+/// the contents of `<script>` and `<style>` are untouched.
+pub fn flat_tags(html: &str) -> String {
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(i) = rest.find('<') {
+        out.push_str(&rest[..i]);
+        rest = &rest[i..];
+        if rest.starts_with("<!--") {
+            let end = rest.find("-->").map_or(rest.len(), |j| j + 3);
+            out.push_str(&rest[..end]);
+            rest = &rest[end..];
+            continue;
+        }
+        let closing = rest.starts_with("</");
+        let tag_name: String = rest[if closing { 2 } else { 1 }..]
+            .chars()
+            .take_while(char::is_ascii_alphanumeric)
+            .collect::<String>()
+            .to_ascii_lowercase();
+        let block = BLOCK.contains(&tag_name.as_str());
+        if closing && block {
+            let kept = out.trim_end_matches([' ', '\n']).len();
+            if out[kept..].contains('\n') {
+                out.truncate(kept);
+            }
+        }
+        let mut quote = None;
+        let mut space = false;
+        let mut end = rest.len();
+        for (j, c) in rest.char_indices() {
+            match (quote, c) {
+                (None, c) if c.is_ascii_whitespace() => {
+                    space = true;
+                    continue;
+                }
+                (None, '>') => {
+                    out.push('>');
+                    end = j + 1;
+                    break;
+                }
+                (None, '"' | '\'') => quote = Some(c),
+                (Some(q), _) if c == q => quote = None,
+                _ => {}
+            }
+            if std::mem::take(&mut space) {
+                out.push(' ');
+            }
+            out.push(c);
+        }
+        let name: String = rest[1..end].chars().take_while(char::is_ascii_alphanumeric).collect();
+        rest = &rest[end..];
+        if !closing && block {
+            let after = rest.trim_start_matches([' ', '\n']);
+            if rest[..rest.len() - after.len()].contains('\n') {
+                rest = after;
+            }
+        }
+        if matches!(name.to_ascii_lowercase().as_str(), "script" | "style") {
+            let j = rest.find("</").unwrap_or(rest.len());
+            out.push_str(&rest[..j]);
+            rest = &rest[j..];
+        }
+    }
+    out.push_str(rest);
+    out
 }
 
 /// `p` relative to `root`, for failure messages.

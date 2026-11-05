@@ -8,11 +8,11 @@
  * lightened a little (ADR 2026-10-22-ft-solarized-and-editor-styles).
  *
  * It loads only when picked, and its rules only apply while the picker in
- * the header says Editor Dark: they all sit inside one :has() selector,
+ * the header says Editor Dark: they all sit inside one selector,
  * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
  * ADR 2026-10-20-zen-garden-styles).
  */
-:root:has(#style [value="editor-dark"]:checked) {
+:root:is([data-style="editor-dark"], :has(#style [value="editor-dark"]:checked)) {
   /* The editor at night, always dark. */
   color-scheme: dark;
   --text-1: #d4d4d4;
