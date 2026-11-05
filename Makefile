@@ -5,6 +5,8 @@ PORT ?= 8080
 OUT  ?= public
 # URL the site is served from; empty keeps the config base_url
 BASE_URL ?=
+# publish cutoff date (YYYY-MM-DD) to preview scheduled posts; empty is today in UTC
+TODAY ?=
 # jf2 file of received webmentions to show on posts; empty shows none
 WEBMENTIONS ?=
 # Unicode Character Database release `make tables` reads (see build/unicode.rs)
@@ -29,16 +31,19 @@ test: ## Run the Rust unit tests and the spec harness (tests/harness)
 	cargo test --locked --release --quiet
 
 build: ## Build the site → ./$(OUT) (Rust binary, std only)
-	cargo run --locked --release -- --out $(OUT) $(if $(BASE_URL),--base-url $(BASE_URL)) $(if $(WEBMENTIONS),--webmentions $(WEBMENTIONS))
+	cargo run --locked --release -- --out $(OUT) $(if $(BASE_URL),--base-url $(BASE_URL)) $(if $(WEBMENTIONS),--webmentions $(WEBMENTIONS)) $(if $(TODAY),--today $(TODAY))
 
 serve: ## Build, watch content/, and serve at :$(PORT)
 	cargo run --locked --release -- --out $(OUT) --serve --port $(PORT)
 
 ci: lint test build ## Full local CI: same checks .github/workflows/ci.yml runs
 
+# The checker reads pages as file: URLs, where the CSP's 'self' matches
+# nothing, so it flags every stylesheet and script. tests/harness/csp.rs
+# checks the policy instead (ADR 2026-10-28-csp-meta-tag).
 validate: build $(VNU_JAR) ## Check every built page with the Nu HTML Checker (needs Java)
 	java -jar $(VNU_JAR) --skip-non-html --Werror \
-		--filterpattern '.*Trailing slash on void elements.*' $(OUT)
+		--filterpattern '.*(Trailing slash on void elements|Resource violates Content Security Policy).*' $(OUT)
 
 $(VNU_JAR):
 	mkdir -p target/vnu

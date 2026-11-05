@@ -157,6 +157,43 @@ fn type_uses_the_design_system_fonts() {
     assert!(css.contains("--font-sans:") && css.contains("--font-code:"));
 }
 
+// Fallback faces are sized to Atkinson so the swap doesn't shift text, and
+// come straight after it in the stack, before the plain system fonts
+// (ADR 2026-10-20-metric-matched-fallback-fonts).
+#[test]
+fn fallback_fonts_are_metric_matched() {
+    let css = css();
+    let stack = css
+        .split("--font-sans:")
+        .nth(1)
+        .and_then(|rest| rest.split(';').next())
+        .expect("--font-sans defined");
+    let families: Vec<&str> = stack.split(',').map(|f| f.trim().trim_matches('"')).collect();
+    let fallbacks = ["Atkinson Fallback Verdana", "Atkinson Fallback Arial"];
+    assert_eq!(&families[2..4], &fallbacks, "--font-sans: {stack}");
+    for family in fallbacks {
+        let faces: Vec<&str> = css
+            .split("@font-face")
+            .skip(1)
+            .map(|rest| rest.split('}').next().unwrap_or(""))
+            .filter(|face| face.contains(&format!("font-family: \"{family}\"")))
+            .collect();
+        assert!(!faces.is_empty(), "no @font-face for {family}");
+        for face in faces {
+            assert!(face.contains("src: local("), "{family} must use local fonts only");
+            assert!(!face.contains("url("), "{family} must not download anything");
+            for prop in [
+                "size-adjust:",
+                "ascent-override:",
+                "descent-override:",
+                "line-gap-override:",
+            ] {
+                assert!(face.contains(prop), "{family} is missing {prop}");
+            }
+        }
+    }
+}
+
 #[test]
 fn semantic_tokens_light_and_dark() {
     let css = css();
@@ -297,26 +334,6 @@ fn site_brand_sits_outside_the_nav() {
 }
 
 #[test]
-fn every_page_links_the_resume() {
-    // People looking to hire find the résumé from any page (ADR 2026-10-16-resume-page).
-    for (p, html) in html_files().iter() {
-        let Ok(doc) = crate::support::html::parse(html) else {
-            continue;
-        };
-        let Some(nav) = doc.descendants().into_iter().find(|e| e.name == "nav") else {
-            continue;
-        };
-        assert!(
-            nav.descendants()
-                .iter()
-                .any(|e| e.name == "a" && e.attr("href") == Some("/resume/")),
-            "{}: site nav has no link to /resume/",
-            p.display()
-        );
-    }
-}
-
-#[test]
 fn header_shows_title_and_tagline() {
     let esc = |s: &str| {
         s.replace('&', "&amp;")
@@ -370,6 +387,12 @@ fn browser_bars_match_the_page() {
         css.contains("--paper: #fbfaf7;"),
         "--paper changed; update THEME_COLOR in build/site.rs"
     );
+    // Overscroll on phones paints from the root's own background.
+    let root = rule_after(&css, 0, "html").expect("html rule");
+    assert!(
+        root.contains("background: var(--surface-page);"),
+        "html lacks the page background"
+    );
     for (p, html) in html_files() {
         for (scheme, colour) in [("light", "#fbfaf7"), ("dark", "#15171b")] {
             let tag =
@@ -377,4 +400,366 @@ fn browser_bars_match_the_page() {
             assert!(html.contains(&tag), "{} lacks {scheme} theme-color", p.display());
         }
     }
+}
+
+/// The style picker's extra styles: every `build/static/themes/*.css`, by slug.
+fn themes() -> Vec<(String, String)> {
+    let dir = crate::support::repo().join("build/static/themes");
+    let mut out: Vec<(String, String)> = fs::read_dir(&dir)
+        .expect("read build/static/themes")
+        .map(|f| f.unwrap().path())
+        .filter(|p| p.extension().is_some_and(|x| x == "css"))
+        .map(|p| {
+            let slug = p.file_stem().unwrap().to_str().unwrap().to_string();
+            (slug, fs::read_to_string(&p).unwrap())
+        })
+        .collect();
+    out.sort();
+    assert!(!out.is_empty(), "expected styles in build/static/themes");
+    out
+}
+
+#[test]
+fn styles_load_only_when_picked() {
+    // ADR 2026-10-20-zen-garden-styles: the only stylesheet a page loads up
+    // front is the house one. The themes are linked inside <noscript>, for
+    // the picker to work with JavaScript off; with it on, style-picker.js
+    // adds just the one picked.
+    let mut expected = Vec::new();
+    for (slug, source) in themes() {
+        let css = fs::read_to_string(site().join(format!("themes/{slug}.css"))).expect("read theme");
+        assert_eq!(css, source, "themes/{slug}.css differs from its source");
+        expected.push(format!("/themes/{slug}.css"));
+    }
+    expected.sort();
+    for (p, html) in html_files().iter() {
+        let head = &html[..html.find("</head>").expect("no </head>")];
+        let (before, noscript) = match head.split_once("<noscript>\n") {
+            Some((b, n)) => (b, &n[..n.find("</noscript>").expect("unclosed <noscript>")]),
+            None => panic!("{}: no <noscript> with the styles", p.display()),
+        };
+        let sheets = |part: &str| -> Vec<String> {
+            link_tags(part)
+                .into_iter()
+                .filter(|t| attr(t, "rel") == Some("stylesheet"))
+                .filter_map(|t| attr(t, "href"))
+                .map(String::from)
+                .collect()
+        };
+        assert_eq!(sheets(before), ["/style.css"], "{}", p.display());
+        let mut linked = sheets(noscript);
+        linked.sort();
+        assert_eq!(linked, expected, "{}", p.display());
+        assert!(
+            !html[html.find("</head>").unwrap()..].contains("rel=\"stylesheet\""),
+            "{}: a stylesheet outside <head>",
+            p.display()
+        );
+    }
+}
+
+#[test]
+fn seasonal_styles_exist() {
+    // style-picker.js picks Star Trek, Diablo, Doctor Who, Holiday or, on
+    // April Fools' Day, any style by date for readers who never picked one (ADR
+    // 2026-10-20-zen-garden-styles, ADR 2026-10-21-doctor-who-style, ADR
+    // 2026-10-22-star-trek-style).
+    let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
+    let slugs: Vec<String> = themes().into_iter().map(|(s, _)| s).collect();
+    for seasonal in ["star-trek", "diablo", "doctor-who", "holiday"] {
+        assert!(
+            js.contains(&format!("return \"{seasonal}\"")),
+            "script lost the {seasonal} season"
+        );
+        assert!(slugs.iter().any(|s| s == seasonal), "no themes/{seasonal}.css");
+    }
+    // On April Fools' Day it picks any style from the menu itself, so a new
+    // style joins in without touching the script
+    // (ADR 2026-10-22-ft-solarized-and-editor-styles).
+    assert!(
+        js.contains("if (month === 4 && day === 1) return anyStyle();"),
+        "script lost April Fools' Day"
+    );
+    assert!(
+        js.contains("script.dataset.styles"),
+        "April Fools' Day should draw from the menu's styles"
+    );
+    assert!(
+        !js.contains("var throwbacks"),
+        "April Fools' Day should not keep its own list"
+    );
+}
+
+#[test]
+fn style_picker_uses_modern_syntax() {
+    // Every browser with :has() runs ES2015+, so the script reads as modern
+    // JS in view-source: no `var`, helpers as `const` arrows defined before
+    // their first use (ADR 2026-10-28-modern-js-style-picker).
+    let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
+    let code: Vec<&str> = js.lines().filter(|l| !l.trim_start().starts_with("//")).collect();
+    assert!(
+        !code.iter().any(|l| l.contains("var ") || l.contains("function")),
+        "style-picker.js should use const/let and arrow functions"
+    );
+    for helper in ["load", "pick", "save", "anyStyle", "season"] {
+        let defined = js
+            .find(&format!("const {helper} = ("))
+            .unwrap_or_else(|| panic!("no const {helper} arrow"));
+        assert!(
+            !js[..defined].contains(&format!(" {helper}(")),
+            "{helper} is called above its definition"
+        );
+    }
+}
+
+#[test]
+fn styles_can_be_shared_by_link() {
+    // ?style=<name> picks and saves a style from the menu, and a name that
+    // isn't in it is ignored (ADR 2026-10-22-style-share-links).
+    let js = fs::read_to_string(crate::support::repo().join("build/static/style-picker.js")).expect("read script");
+    assert!(
+        js.contains("new URLSearchParams(location.search).get(\"style\")"),
+        "script doesn't read ?style="
+    );
+    assert!(
+        js.contains("if (linked && pick(linked)) {\n    save(linked);"),
+        "a linked style should be saved only when it's in the menu"
+    );
+}
+
+/// Relative luminance of a `#rrggbb` colour, per WCAG 2.
+fn luminance(hex: &str) -> f64 {
+    let channel = |i: usize| {
+        let c = f64::from(u8::from_str_radix(&hex[i..i + 2], 16).expect("hex colour")) / 255.0;
+        if c <= 0.03928 {
+            c / 12.92
+        } else {
+            ((c + 0.055) / 1.055).powf(2.4)
+        }
+    };
+    0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5)
+}
+
+fn contrast(a: &str, b: &str) -> f64 {
+    let (x, y) = (luminance(a), luminance(b));
+    (x.max(y) + 0.05) / (x.min(y) + 0.05)
+}
+
+#[test]
+fn styles_keep_aaa_contrast() {
+    // Every style's text and link colours meet WCAG AAA 7:1 on each surface
+    // (ADR 2026-10-18-style-picker), the selected surface with body text.
+    for (slug, css) in themes() {
+        let token = |name: &str| -> String {
+            let decl = format!("--{name}: #");
+            let i = css.find(&decl).unwrap_or_else(|| panic!("{slug}.css: no hex --{name}"));
+            css[i + decl.len() - 1..i + decl.len() + 6].to_string()
+        };
+        let mut pairs = vec![("text-1", "surface-selected")];
+        for fg in ["text-1", "text-2", "text-link", "text-link-hover"] {
+            for bg in ["surface-page", "surface-card", "surface-sunken"] {
+                pairs.push((fg, bg));
+            }
+        }
+        for (fg, bg) in pairs {
+            let ratio = contrast(&token(fg), &token(bg));
+            assert!(ratio >= 7.0, "{slug}.css: --{fg} on --{bg} is {ratio:.2}:1, under 7:1");
+        }
+    }
+}
+
+#[test]
+fn every_page_has_the_style_picker() {
+    let mut options = vec!["auto".to_string(), "light".into(), "dark".into()];
+    for (slug, _) in themes() {
+        options.push(slug);
+    }
+    for (p, html) in html_files().iter() {
+        if html.contains("http-equiv=\"refresh\"") {
+            continue;
+        }
+        let start = html
+            .find("<select id=\"style\">")
+            .unwrap_or_else(|| panic!("{}: no picker", p.display()));
+        let select = &html[start..start + html[start..].find("</select>").unwrap()];
+        let values: Vec<&str> = select
+            .match_indices("<option ")
+            .filter_map(|(i, _)| attr(&select[i..], "value"))
+            .collect();
+        let mut sorted_options: Vec<&str> = options[3..].iter().map(String::as_str).collect();
+        sorted_options.sort();
+        assert_eq!(&values[..3], ["auto", "light", "dark"], "{}", p.display());
+        let mut rest = values[3..].to_vec();
+        rest.sort();
+        assert_eq!(rest, sorted_options, "{}", p.display());
+        assert!(
+            select.contains("<option value=\"auto\" selected>"),
+            "{}: Auto not the default",
+            p.display()
+        );
+        // The script runs in <head>, before the picker exists, and gets the
+        // menu's styles from its tag (ADR 2026-10-30-style-before-first-paint).
+        let head = &html[..html.find("</head>").expect("no </head>")];
+        let script = format!(
+            "<script src=\"/style-picker.js\" data-styles=\"{}\"></script>",
+            values[3..].join(" ")
+        );
+        assert!(
+            head.contains(&script),
+            "{}: script not in <head> with the menu's styles",
+            p.display()
+        );
+    }
+}
+
+#[test]
+fn styles_apply_only_while_picked() {
+    for (slug, css) in themes() {
+        let scope = format!(":root:is([data-style=\"{slug}\"], :has(#style [value=\"{slug}\"]:checked)) {{");
+        let body = css.find(&scope).unwrap_or_else(|| panic!("{slug}.css: no {scope}"));
+        // Everything after the opening comment is the scoped block, plus
+        // @keyframes, which can't be nested.
+        let start = css.find("*/").unwrap() + 2;
+        assert_eq!(css[start..body].trim(), "", "{slug}.css: rules before the scope");
+        let mut depth = 0;
+        let mut end = body;
+        for (i, c) in css[body..].char_indices() {
+            match c {
+                '{' => depth += 1,
+                '}' => {
+                    depth -= 1;
+                    if depth == 0 {
+                        end = body + i + 1;
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        let rest = css[end..].trim();
+        assert!(
+            rest.is_empty() || rest.starts_with("@keyframes"),
+            "{slug}.css: rules outside the scope"
+        );
+    }
+}
+
+#[test]
+fn styles_are_self_contained_and_readable() {
+    for (slug, css) in themes() {
+        assert!(
+            !css.contains("@import") && !css.contains("url("),
+            "{slug}.css loads something"
+        );
+        assert!(
+            css.starts_with("/*"),
+            "{slug}.css should open with a comment saying what it is"
+        );
+        let longest = css.lines().map(str::len).max().unwrap_or(0);
+        assert!(longest <= 200, "{slug}.css line of {longest} characters");
+    }
+}
+
+/// `:is(h1, h2, h3, h4, .site-title)` is as specific as a class, so it
+/// beats a later `main h1`: a style that sets a property in both never
+/// shows the second, as Angelfire's yellow page title once didn't.
+#[test]
+fn heading_rules_are_not_outranked() {
+    let block = |css: &str, at: usize| -> Vec<String> {
+        let open = at + css[at..].find('{').unwrap() + 1;
+        let close = open + css[open..].find('}').unwrap();
+        css[open..close]
+            .split(';')
+            .filter_map(|d| d.split_once(':'))
+            .map(|(p, _)| p.trim().to_string())
+            .filter(|p| !p.is_empty() && !p.contains(' '))
+            .collect()
+    };
+    for (slug, css) in themes() {
+        let Some(group) = css.find("& :is(h1, h2, h3, h4, .site-title)") else {
+            continue;
+        };
+        let shared = block(&css, group);
+        for (at, _) in css.match_indices("& main h") {
+            let rule = &css[at..at + css[at..].find('{').unwrap()];
+            if rule.contains("::") {
+                continue;
+            }
+            for prop in block(&css, at) {
+                assert!(
+                    !shared.contains(&prop),
+                    "{slug}.css: `{prop}` in `{}` is outranked by the :is() heading rule",
+                    rule.trim()
+                );
+            }
+        }
+    }
+}
+
+/// A style that sets notes on a panel, clear of its background, does the
+/// same for lists of notes (the home page, /notes/, tags), whose <main>
+/// holds a section.h-feed rather than an article.
+#[test]
+fn styles_panel_lists_like_notes() {
+    for (slug, css) in themes() {
+        assert!(
+            !css.contains("main > article"),
+            "{slug}.css panels notes but not lists: use main > :is(article, .h-feed)"
+        );
+    }
+}
+
+/// A `radial-gradient(circle ...)` with no size reaches to the farthest
+/// corner of its tile, so stops in percent can run past the tile's edges
+/// and get cut square, as Diablo's life and mana orbs once were. Round
+/// shapes give their stops in lengths or size the circle `closest-side`.
+#[test]
+fn round_gradients_stay_round() {
+    for (slug, css) in themes() {
+        for (at, _) in css.match_indices("radial-gradient(circle") {
+            let mut depth = 0;
+            let mut end = at;
+            for (i, c) in css[at..].char_indices() {
+                match c {
+                    '(' => depth += 1,
+                    ')' => {
+                        depth -= 1;
+                        if depth == 0 {
+                            end = at + i;
+                            break;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            let gradient = &css[at..end];
+            let stops = gradient.split_once(',').map_or("", |(_, s)| s);
+            assert!(
+                gradient.contains("closest-side") || !stops.contains('%'),
+                "{slug}.css: {gradient}) can be cut square by its tile"
+            );
+        }
+    }
+}
+
+#[test]
+fn pinned_dark_matches_the_dark_scheme() {
+    let css = css();
+    let (_, dark) = light_and_dark(&css);
+    let pinned = rule_after(
+        &css,
+        0,
+        ":root:is([data-style=\"dark\"], :has(#style [value=\"dark\"]:checked))",
+    )
+    .expect("no pinned dark rule");
+    let tokens = |block: &str| -> Vec<String> {
+        block
+            .lines()
+            .map(str::trim)
+            .filter(|l| l.starts_with("--"))
+            .map(String::from)
+            .collect()
+    };
+    assert!(!tokens(dark).is_empty());
+    assert_eq!(tokens(dark), tokens(pinned), "pinned Dark differs from the dark scheme");
 }

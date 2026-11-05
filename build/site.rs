@@ -6,9 +6,11 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use crate::blogroll;
 use crate::date::{self, Date};
 use crate::frontmatter::{self, FrontMatter, LoadError, Value};
 use crate::image;
+use crate::indent;
 use crate::json::{self, Json};
 use crate::markdown;
 use crate::text;
@@ -16,6 +18,113 @@ use crate::util::{escape as e, percent_decode, py_repr_str};
 use crate::webmention::{self, Mention};
 
 const STYLE_CSS: &str = include_str!("static/style.css");
+
+/// The styles in every page's style picker besides Auto, Light and Dark:
+/// (slug, name, menu group, stylesheet), in menu order. See ADR
+/// 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles, ADR
+/// 2026-10-21-doctor-who-style, ADR 2026-10-22-star-trek-style and ADR
+/// 2026-10-22-ft-solarized-and-editor-styles.
+const THEMES: &[(&str, &str, &str, &str)] = &[
+    (
+        "terminal",
+        "Terminal",
+        "Originals",
+        include_str!("static/themes/terminal.css"),
+    ),
+    (
+        "broadsheet",
+        "Broadsheet",
+        "Originals",
+        include_str!("static/themes/broadsheet.css"),
+    ),
+    (
+        "solarized-light",
+        "Solarized Light",
+        "Editors",
+        include_str!("static/themes/solarized-light.css"),
+    ),
+    (
+        "editor-dark",
+        "Editor Dark",
+        "Editors",
+        include_str!("static/themes/editor-dark.css"),
+    ),
+    (
+        "tranquille",
+        "Tranquille",
+        "CSS Zen Garden",
+        include_str!("static/themes/tranquille.css"),
+    ),
+    (
+        "mid-century",
+        "Mid Century",
+        "CSS Zen Garden",
+        include_str!("static/themes/mid-century.css"),
+    ),
+    (
+        "steel",
+        "Steel",
+        "CSS Zen Garden",
+        include_str!("static/themes/steel.css"),
+    ),
+    (
+        "apothecary",
+        "Apothecary",
+        "CSS Zen Garden",
+        include_str!("static/themes/apothecary.css"),
+    ),
+    ("diablo", "Diablo", "Seasonal", include_str!("static/themes/diablo.css")),
+    (
+        "holiday",
+        "Holiday",
+        "Seasonal",
+        include_str!("static/themes/holiday.css"),
+    ),
+    (
+        "doctor-who",
+        "Doctor Who",
+        "Seasonal",
+        include_str!("static/themes/doctor-who.css"),
+    ),
+    (
+        "star-trek",
+        "Star Trek",
+        "Seasonal",
+        include_str!("static/themes/star-trek.css"),
+    ),
+    (
+        "geocities",
+        "GeoCities",
+        "Throwbacks",
+        include_str!("static/themes/geocities.css"),
+    ),
+    (
+        "angelfire",
+        "Angelfire",
+        "Throwbacks",
+        include_str!("static/themes/angelfire.css"),
+    ),
+    ("xanga", "Xanga", "Throwbacks", include_str!("static/themes/xanga.css")),
+    (
+        "jekyll",
+        "Jekyll",
+        "Throwbacks",
+        include_str!("static/themes/jekyll.css"),
+    ),
+    (
+        "facebook",
+        "Facebook",
+        "Throwbacks",
+        include_str!("static/themes/facebook.css"),
+    ),
+];
+/// Loads the picked style and remembers it across pages; the picker works
+/// without it on the current page (ADR 2026-10-18-style-picker,
+/// ADR 2026-10-20-zen-garden-styles).
+const STYLE_PICKER_JS: &str = include_str!("static/style-picker.js");
+/// Keeps pages as they're read for reading offline; style-picker.js starts
+/// it (ADR 2026-10-29-offline-reading).
+const SERVICE_WORKER_JS: &str = include_str!("static/sw.js");
 /// Site icons, after the spork on JC's Substack (spec/performance.md):
 /// `favicon.ico` (32px) for old browsers and clients that request it
 /// unprompted, `icon.svg` for the tab (redrawn solid so it reads at 16px,
@@ -83,6 +192,9 @@ pub struct Config {
     /// Received webmentions keyed by `webmention::url_key` of their target;
     /// empty unless `--webmentions` is given.
     pub mentions: HashMap<String, Vec<Mention>>,
+    /// Notes dated after this day are held back until it arrives
+    /// (ADR 2026-10-20-scheduled-posts); `--today` overrides the UTC clock.
+    pub today: Date,
 }
 
 pub fn default_config() -> Config {
@@ -103,6 +215,7 @@ pub fn default_config() -> Config {
             ("https://fed.brid.gy/", "https://fed.brid.gy/webmention"),
         ],
         mentions: HashMap::new(),
+        today: Date::today_utc(),
     }
 }
 
@@ -387,12 +500,50 @@ fn apply_base_path(dir: &Path, prefix: &str) -> Result<(), String> {
 
 // --- templates ---
 
-fn base(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str) -> String {
-    page(site, title, meta, canonical, content, false)
+/// Where to report a security problem: GitHub's private vulnerability
+/// reporting for this repository (ADR 2026-10-28-security-txt).
+const SECURITY_CONTACT: &str = "https://github.com/dijonkitchen/posse-bliki/security/advisories/new";
+/// How far ahead security.txt expires; RFC 9116 asks for under a year.
+const SECURITY_TXT_DAYS: i64 = 180;
+
+/// `content/blogroll.md`, whose list also ships as OPML (ADR 2026-10-25-blogroll).
+const BLOGROLL: &str = "blogroll";
+const BLOGROLL_OPML: &str = "/blogroll.opml";
+
+/// `content/now.md`, a now page after Derek Sivers's (ADR 2026-11-01-now-page).
+const NOW: &str = "now";
+
+/// The optional pages every page links to, when the vault has them.
+#[derive(Clone, Copy)]
+struct FooterLinks {
+    blogroll: bool,
+    now: bool,
+}
+
+fn footer_links(notes: &[Note]) -> FooterLinks {
+    let has = |slug: &str| notes.iter().any(|n| n.slug == slug && n.kind == Kind::Page);
+    FooterLinks {
+        blogroll: has(BLOGROLL),
+        now: has(NOW),
+    }
+}
+
+fn base(site: &Config, links: FooterLinks, title: &str, meta: &str, canonical: Option<&str>, content: &str) -> String {
+    page(site, links, title, meta, canonical, content, false)
 }
 
 /// `home` makes the site title the page's `<h1>` (ADR 2026-10-16-site-title-heads-home).
-fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content: &str, home: bool) -> String {
+/// `links` adds the header link to `/now/` and the footer link to `/blogroll/`
+/// when the vault has them (ADR 2026-11-05-now-in-the-header).
+fn page(
+    site: &Config,
+    links: FooterLinks,
+    title: &str,
+    meta: &str,
+    canonical: Option<&str>,
+    content: &str,
+    home: bool,
+) -> String {
     let t = e(site.title);
     let brand = if home {
         format!("<h1 class=\"site-title\"><a href=\"/\" aria-current=\"page\">{t}</a></h1>")
@@ -421,8 +572,35 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
     } else {
         String::new()
     };
-    format!(
-        "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n\
+    // Theme stylesheets load only when picked: style-picker.js adds the one
+    // in use, and with JavaScript off the <noscript> copy links them all so
+    // the picker still works through :has() (ADR 2026-10-20-zen-garden-styles).
+    let theme_links: String = THEMES
+        .iter()
+        .map(|(slug, ..)| format!("<link rel=\"stylesheet\" href=\"/themes/{slug}.css\">\n"))
+        .collect();
+    let now = if links.now { "<a href=\"/now/\">Now</a>\n" } else { "" };
+    let blogroll = if links.blogroll {
+        "<a href=\"/blogroll/\">Blogroll</a> \u{b7}\n"
+    } else {
+        ""
+    };
+    // style-picker.js runs in <head>, before the picker exists, so it gets
+    // the menu's styles from its own tag (ADR 2026-10-30-style-before-first-paint).
+    let theme_slugs = THEMES.iter().map(|(slug, ..)| *slug).collect::<Vec<_>>().join(" ");
+    let mut theme_options = String::new();
+    for (i, (slug, name, group, _)) in THEMES.iter().enumerate() {
+        if i == 0 || THEMES[i - 1].2 != *group {
+            if i > 0 {
+                theme_options.push_str("</optgroup>\n");
+            }
+            theme_options.push_str(&format!("<optgroup label=\"{group}\">\n"));
+        }
+        theme_options.push_str(&format!("<option value=\"{slug}\">{name}</option>\n"));
+    }
+    theme_options.push_str("</optgroup>\n");
+    let html = format!(
+        "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n{CSP}\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n{THEME_COLOR}<title>{title}</title>\n{meta}\n{canon}\n\
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
@@ -432,17 +610,20 @@ fn page(site: &Config, title: &str, meta: &str, canonical: Option<&str>, content
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
 <link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
-<link rel=\"stylesheet\" href=\"/style.css\">\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
+<link rel=\"stylesheet\" href=\"/style.css\">\n<noscript>\n{theme_links}</noscript>\n\
+<script src=\"/style-picker.js\" data-styles=\"{theme_slugs}\"></script>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
-<div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/resume/\">Résumé</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
-</nav>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
-<a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n<a href=\"/colophon/\">Colophon</a>\n\
+<div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n{now}<a href=\"/about/\">About</a>\n\
+</nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
+<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
+<a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n{blogroll}<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),
         tagline = e(site.tagline),
         wm = e(site.webmention_endpoint),
         pb = e(site.pingback),
-    )
+    );
+    indent::indent(&html)
 }
 
 fn description_meta(text: &str) -> String {
@@ -530,6 +711,7 @@ fn backlinks_block(notes: &[Note], n: &Note) -> String {
 }
 
 fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Result<String, String> {
+    let links = footer_links(notes);
     let d = n.post_date()?;
     let updated = n
         .updated
@@ -591,6 +773,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     );
     Ok(base(
         site,
+        links,
         &format!("{} \u{2014} {}", e(n.title()), e(site.title)),
         &summary_meta(site, n),
         Some(canonical),
@@ -604,6 +787,12 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
 const THEME_COLOR: &str = "<meta name=\"theme-color\" media=\"(prefers-color-scheme: light)\" content=\"#fbfaf7\">\n\
 <meta name=\"theme-color\" media=\"(prefers-color-scheme: dark)\" content=\"#15171b\">\n";
 
+/// Pages load only the site's own files, so the policy allows nothing else.
+/// A `<meta>` because GitHub Pages can't send headers (ADR 2026-10-28-csp-meta-tag).
+const CSP: &str = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; \
+script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'self'; \
+base-uri 'none'; form-action 'none'\">\n";
+
 /// The author as readers see it, "JC", with the full name kept for mf2
 /// parsers as `p-name` (ADR 2026-10-16-site-title-heads-home).
 fn author_label(site: &Config) -> String {
@@ -614,20 +803,49 @@ fn author_label(site: &Config) -> String {
     )
 }
 
-fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> String {
+fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Result<String, String> {
+    let (opml, mut meta) = if n.slug == BLOGROLL {
+        (
+            format!(
+                "<p class=\"blogroll-opml\">All of these as one <a href=\"{BLOGROLL_OPML}\" type=\"text/x-opml\">OPML file</a> to import into your feed reader.</p>\n"
+            ),
+            format!(
+                "<link rel=\"alternate\" type=\"text/x-opml\" title=\"{} blogroll\" href=\"{BLOGROLL_OPML}\">\n",
+                e(site.title)
+            ),
+        )
+    } else {
+        (String::new(), String::new())
+    };
+    meta.push_str(&summary_meta(site, n));
+    // A now page is only as good as its date, so it must have one
+    // (ADR 2026-11-01-now-page).
+    let updated = if n.slug == NOW {
+        let u = n
+            .updated
+            .ok_or("now.md: a now page needs an `updated` date, so readers know how current it is")?;
+        format!(
+            "<p class=\"now-updated\">Updated <time datetime=\"{}\">{}</time></p>\n",
+            u.iso(),
+            u.human()
+        )
+    } else {
+        String::new()
+    };
     let content = format!(
-        "\n<article>\n<h1>{}</h1>\n{}\n</article>\n{}\n",
+        "\n<article>\n<h1>{}</h1>\n{updated}{}\n{opml}</article>\n{}\n",
         e(n.title()),
         n.content_html,
         backlinks_block(notes, n)
     );
-    base(
+    Ok(base(
         site,
+        footer_links(notes),
         &format!("{} \u{2014} {}", e(n.title()), e(site.title)),
-        &summary_meta(site, n),
+        &meta,
         Some(canonical),
         &content,
-    )
+    ))
 }
 
 fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonical: &str) -> Result<String, String> {
@@ -668,7 +886,15 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         Some(s) => description_meta(s),
         None => description_meta(site.tagline),
     };
-    Ok(page(site, &e(site.title), &meta, Some(canonical), &content, true))
+    Ok(page(
+        site,
+        footer_links(notes),
+        &e(site.title),
+        &meta,
+        Some(canonical),
+        &content,
+        true,
+    ))
 }
 
 fn render_list(
@@ -703,6 +929,7 @@ fn render_list(
     );
     Ok(base(
         site,
+        footer_links(notes),
         &format!("{} \u{2014} {}", e(list_title), e(site.title)),
         &description_meta(description),
         Some(canonical),
@@ -710,22 +937,37 @@ fn render_list(
     ))
 }
 
-fn render_redirect(site: &Config, target: &str, canonical: &str) -> String {
+fn render_redirect(site: &Config, links: FooterLinks, target: &str, canonical: &str) -> String {
     let t = e(target);
     let meta = format!(
         "\n<meta http-equiv=\"refresh\" content=\"0; url={}\">\n<meta name=\"robots\" content=\"noindex\">\n",
         t
     );
     let content = format!("\n<p>This page has moved to <a href=\"{}\">{}</a>.</p>\n", t, t);
-    base(site, "Redirecting\u{2026}", &meta, Some(canonical), &content)
+    base(site, links, "Redirecting\u{2026}", &meta, Some(canonical), &content)
 }
 
-fn render_404(site: &Config) -> String {
+fn render_404(site: &Config, links: FooterLinks) -> String {
     let content = "\n<article>\n<h1>Not found</h1>\n<p>That page isn't here. Try the <a href=\"/\">home page</a> or the <a href=\"/notes/\">notes index</a>.</p>\n</article>\n";
     base(
         site,
+        links,
         &format!("Not found \u{2014} {}", e(site.title)),
         &description_meta(site.tagline),
+        None,
+        content,
+    )
+}
+
+/// What the service worker shows for a page that wasn't kept, when the
+/// reader is offline (ADR 2026-10-29-offline-reading).
+fn render_offline(site: &Config, links: FooterLinks) -> String {
+    let content = "\n<article>\n<h1>You're offline</h1>\n<p>This page isn't saved on this device yet. Pages you've read here are, so try the <a href=\"/\">home page</a> or go back.</p>\n</article>\n";
+    base(
+        site,
+        links,
+        &format!("Offline \u{2014} {}", e(site.title)),
+        "\n<meta name=\"robots\" content=\"noindex\">\n",
         None,
         content,
     )
@@ -734,7 +976,10 @@ fn render_404(site: &Config) -> String {
 // --- main entry point ---
 
 pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), String> {
-    let mut notes: Vec<Note> = load_notes(content)?.into_iter().filter(|n| !n.draft()).collect();
+    let mut notes: Vec<Note> = load_notes(content)?
+        .into_iter()
+        .filter(|n| !n.draft() && n.date.is_none_or(|d| d <= site.today))
+        .collect();
 
     // unique slugs
     let mut seen: HashMap<&str, usize> = HashMap::new();
@@ -817,7 +1062,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         let html = match n.kind {
             Kind::Home => render_home(site, &notes, n, &posts, &c)?,
             Kind::Post => render_post(site, &notes, n, &c)?,
-            Kind::Page => render_page(site, &notes, n, &c),
+            Kind::Page => render_page(site, &notes, n, &c)?,
         };
         write(&n.out_path, &html)?;
     }
@@ -868,17 +1113,31 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
             } else {
                 out.join(dir).join("index.html")
             };
-            write(&p, &render_redirect(site, &n.url, &canonical(&n.url)))?;
+            write(
+                &p,
+                &render_redirect(site, footer_links(&notes), &n.url, &canonical(&n.url)),
+            )?;
         }
     }
 
     // spec/url-policy.md: the Jekyll site's A-to-Z post list (ADR 2026-10-16-old-all-page).
-    let notes_index = render_redirect(site, "/notes/", &canonical("/notes/"));
+    let notes_index = render_redirect(site, footer_links(&notes), "/notes/", &canonical("/notes/"));
     write(&out.join("all/index.html"), &notes_index)?;
     write(&out.join("all.html"), &notes_index)?;
 
     // 404
-    write(&out.join("404.html"), &render_404(site))?;
+    write(&out.join("404.html"), &render_404(site, footer_links(&notes)))?;
+    write(&out.join("offline.html"), &render_offline(site, footer_links(&notes)))?;
+
+    // spec/feeds.md: the blogroll's sites as OPML (ADR 2026-10-25-blogroll).
+    if let Some(n) = notes.iter().find(|n| n.slug == BLOGROLL && n.kind == Kind::Page) {
+        let sites = blogroll::sites(&n.content_html)?;
+        let title = format!("{} blogroll", site.title);
+        write(
+            &out.join(BLOGROLL_OPML.trim_start_matches('/')),
+            &blogroll::opml(&title, site.author_name, &format!("{}/", base_url), &sites),
+        )?;
+    }
 
     // RSS
     let mut rss = format!(
@@ -994,8 +1253,25 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         &format!("User-agent: *\nAllow: /\n\nSitemap: {}/sitemap.xml\n", base_url),
     )?;
 
+    // security.txt (RFC 9116), dated off the build's today so the daily
+    // rebuild keeps Expires ahead (ADR 2026-10-28-security-txt).
+    let expires = Date::from_days_since_epoch(site.today.days_from_epoch() + SECURITY_TXT_DAYS);
+    write(
+        &out.join(".well-known").join("security.txt"),
+        &format!(
+            "Contact: {SECURITY_CONTACT}\nExpires: {}T00:00:00Z\nPreferred-Languages: en\nCanonical: {}/.well-known/security.txt\n",
+            expires.iso(),
+            base_url
+        ),
+    )?;
+
     // static assets
     write(&out.join("style.css"), STYLE_CSS)?;
+    for (slug, _, _, css) in THEMES {
+        write(&out.join("themes").join(format!("{slug}.css")), css)?;
+    }
+    write(&out.join("style-picker.js"), STYLE_PICKER_JS)?;
+    write(&out.join("sw.js"), SERVICE_WORKER_JS)?;
     for (name, bytes) in ICONS {
         write_bytes(&out.join(name), bytes)?;
     }

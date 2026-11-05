@@ -26,6 +26,7 @@ URLs are forever. Changes here require a redirect from every old URL — see
 | `/feed.json` | JSON Feed v1.1 |
 | `/sitemap.xml` | Sitemap |
 | `/robots.txt` | Generated |
+| `/.well-known/security.txt` | Generated, RFC 9116: `Contact`, `Expires` 180 days after the build date, `Canonical` (ADR 2026-10-28-security-txt) |
 | `/tags/<tag>/` | Tag list page |
 | `/notes/` | Notes list page |
 | `/404.html` | 404 page |

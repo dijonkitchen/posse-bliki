@@ -1,0 +1,89 @@
+/*
+ * Broadsheet: a style for the style picker, after the Financial Times:
+ * salmon paper, slate ink, serif headlines over plain sans text, thin
+ * rules, a short thick bar over each section, and teal links with claret
+ * on hover. Written from scratch here, with no logo, masthead art or
+ * fonts; the FT's look and marks belong to the Financial Times. Its teal
+ * and grey are darkened a little to keep WCAG AAA 7:1
+ * (ADR 2026-10-22-ft-solarized-and-editor-styles).
+ *
+ * It loads only when picked, and its rules only apply while the picker in
+ * the header says Broadsheet: they all sit inside one selector,
+ * nested. Copy it, change it, make your own (ADR 2026-10-18-style-picker,
+ * ADR 2026-10-20-zen-garden-styles).
+ */
+:root:is([data-style="broadsheet"], :has(#style [value="broadsheet"]:checked)) {
+  /* Salmon paper, always light. */
+  color-scheme: light;
+  --text-1: #33302e;
+  --text-2: #4d4845;
+  --text-link: #08505a;
+  --text-link-hover: #8a0e37;
+  --surface-page: #fff1e5;
+  --surface-card: #fff7ef;
+  --surface-sunken: #f6e6d6;
+  --surface-selected: #f2dfce;
+  --border-strong: #33302e;
+  --border-subtle: #ccc1b7;
+  --focus-halo: #ffd23f;
+  --focus-ring: #33302e;
+  --badge-neutral-bg: #f6e6d6;
+  --badge-neutral-border: #ccc1b7;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --broadsheet-serif: Georgia, "Times New Roman", Times, serif;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-pill: 0;
+
+  /* The masthead: a serif name in capitals, centred over a rule. */
+  & .site-header {
+    justify-content: center;
+    text-align: center;
+    border-block-end: 1px solid var(--border-strong);
+    margin-block-end: var(--space-6);
+  }
+  & .site-brand { margin-inline: auto; flex-basis: 100%; }
+  & .site-title {
+    font-family: var(--broadsheet-serif);
+    font-weight: var(--weight-regular);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+  & .site-tagline { margin-inline: auto; }
+  & .site-header nav a { color: var(--text-1); text-decoration: none; font-weight: var(--weight-bold); }
+  & .site-header nav a:hover { color: var(--text-link-hover); text-decoration: underline; }
+
+  /* Headlines in serif; section heads as small sans capitals under a
+     short thick bar, the way the paper tops each section. */
+  & :is(h1, h3, h4) { font-family: var(--broadsheet-serif); font-weight: var(--weight-bold); letter-spacing: 0; }
+  & main h1 { font-size: var(--size-2xl); line-height: 1.15; }
+  & main h2 {
+    padding-block-start: var(--space-2);
+    border-block-start: 4px solid transparent;
+    border-image: linear-gradient(90deg, var(--text-1) 0 3rem, var(--border-subtle) 3rem) 1;
+    font-size: var(--size-sm);
+    font-weight: var(--weight-bold);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  & a { text-decoration-thickness: 1px; text-underline-offset: .2em; }
+  & p { hyphens: auto; }
+  /* A pull quote: big serif, with a claret quote mark. */
+  & blockquote {
+    border-inline-start: 0;
+    font-family: var(--broadsheet-serif);
+    font-size: var(--size-lg);
+  }
+  & blockquote::before {
+    content: "\201C";
+    content: "\201C" / "";
+    display: block;
+    height: .6em;
+    color: #990f3d;
+    font-size: 3em;
+    line-height: 1;
+  }
+  & hr { border: 0; border-block-start: 1px solid var(--border-subtle); }
+  & ::selection { background: #f2dfce; }
+}

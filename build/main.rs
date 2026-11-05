@@ -3,11 +3,12 @@
 //! Behaviour is defined by `spec/` and verified by `tests/`; see
 //! docs/adr/2026-10-06-rust-build-zero-dependencies.md.
 
+use posse_bliki_build::date::Date;
 use posse_bliki_build::{serve, site, webmention};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-const USAGE: &str = "usage: bliki [--content DIR] [--out DIR] [--base-url URL] [--webmentions FILE] [--serve] [--port N] [--print-config] [--pending-webmentions FEED]
+const USAGE: &str = "usage: bliki [--content DIR] [--out DIR] [--base-url URL] [--webmentions FILE] [--today DATE] [--serve] [--port N] [--print-config] [--pending-webmentions FEED]
 
 Build the posse-bliki site.
 
@@ -19,6 +20,8 @@ options:
   --webmentions FILE
                    show the received webmentions in FILE (webmention.io jf2)
                    on the posts they respond to
+  --today DATE     publish only notes dated on or before DATE (YYYY-MM-DD;
+                   default: today in UTC)
   --serve          build, serve the output at 127.0.0.1:PORT and rebuild on changes
   --port N         port for --serve (default: 8080)
   --print-config   print the site config as JSON and exit
@@ -33,6 +36,7 @@ struct Args {
     out: PathBuf,
     base_url: Option<String>,
     webmentions: Option<PathBuf>,
+    today: Option<String>,
     pending: Option<PathBuf>,
     serve: bool,
     port: u16,
@@ -45,6 +49,7 @@ fn parse_args() -> Result<Args, String> {
         out: PathBuf::from("public"),
         base_url: None,
         webmentions: None,
+        today: None,
         pending: None,
         serve: false,
         port: 8080,
@@ -67,6 +72,7 @@ fn parse_args() -> Result<Args, String> {
             "--out" => args.out = PathBuf::from(value("--out")?),
             "--base-url" => args.base_url = Some(value("--base-url")?),
             "--webmentions" => args.webmentions = Some(PathBuf::from(value("--webmentions")?)),
+            "--today" => args.today = Some(value("--today")?),
             "--pending-webmentions" => args.pending = Some(PathBuf::from(value("--pending-webmentions")?)),
             "--port" => {
                 let v = value("--port")?;
@@ -112,6 +118,15 @@ fn main() -> ExitCode {
     let mut cfg = site::default_config();
     if let Some(url) = args.base_url {
         cfg.base_url = Box::leak(url.into_boxed_str());
+    }
+    if let Some(s) = &args.today {
+        match Date::parse(s).filter(|_| s.len() == 10) {
+            Some(d) => cfg.today = d,
+            None => {
+                eprintln!("bliki: error: argument --today: expected YYYY-MM-DD, got '{}'", s);
+                return ExitCode::from(2);
+            }
+        }
     }
     if args.print_config {
         println!("{}", cfg.to_json());

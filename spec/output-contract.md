@@ -15,13 +15,24 @@ in `tests/`.
 - `<!DOCTYPE html>` first, `<html lang="en">`.
 - `<meta charset="utf-8">`.
 - `<meta name="viewport" content="width=device-width, initial-scale=1">`.
+- `<meta http-equiv="Content-Security-Policy">` right after the charset,
+  allowing only the site's own scripts, styles, images, fonts, manifest and
+  fetches (`default-src 'none'`, `base-uri 'none'`, `form-action 'none'`). Pages
+  load nothing the policy would block: no inline styles, `<style>`, event
+  handler attributes, embeds, or files from other hosts
+  (ADR 2026-10-28-csp-meta-tag).
 - `<title>` is present and non-empty.
 - `<link rel="canonical">` matches the page's canonical URL on `site.base_url`.
 - `<link rel="alternate" type="application/rss+xml" href="/index.xml">`.
 - `<link rel="alternate" type="application/feed+json" href="/feed.json">`.
 - `<link rel="webmention">` and `<link rel="pingback">` (configured target).
 - All internal links resolve to a real emitted file.
-- No `<script>` tags. (Site is fully functional with JS off.)
+- No `<script>` except `<script src="/style-picker.js"
+  data-styles="…">`, last in `<head>`, where `data-styles` lists the
+  picker's styles (ADR 2026-10-30-style-before-first-paint). The site is fully functional with JS off; the
+  script only loads and remembers the picked style, and starts `/sw.js`
+  for offline reading (ADR 2026-10-18-style-picker,
+  ADR 2026-10-20-zen-garden-styles, ADR 2026-10-29-offline-reading).
 - Styling follows [design.md](design.md).
 - Loading follows [performance.md](performance.md).
 
@@ -71,6 +82,10 @@ In addition to the universal invariants, every post page must:
 ## Error pages
 
 - `/404.html` exists and is valid HTML5.
+- `/offline.html` exists, is valid HTML5 and `noindex`, and is left out of
+  the sitemap. The service worker shows it for a page that wasn't kept
+  when the reader is offline. Like the 404, it has no canonical.
+  Enforced by `tests/harness/offline.rs` (ADR 2026-10-29-offline-reading).
 
 ## Serving under a sub-path
 

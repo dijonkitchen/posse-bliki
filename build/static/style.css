@@ -35,6 +35,52 @@
   font-display: swap;
   src: url("fonts/jetbrains-mono-latin.woff2") format("woff2");
 }
+/*
+ * Fallbacks sized to match Atkinson Hyperlegible Next, so text doesn't jump
+ * when the web font swaps in (ADR 2026-10-20-metric-matched-fallback-fonts).
+ * size-adjust = Atkinson's average glyph width / the local font's; the
+ * ascent and descent overrides are Atkinson's (984 and 316 per 1000)
+ * divided by that. Widths are Capsize's latin xWidthAvg. Verdana comes
+ * first, as in --font-sans; Arial (or its metric twin Liberation Sans)
+ * covers systems without it. Italics are synthesised for the few
+ * milliseconds before the web font arrives.
+ */
+@font-face {
+  font-family: "Atkinson Fallback Verdana";
+  font-weight: 200 600;
+  src: local("Verdana");
+  size-adjust: 86.68%;
+  ascent-override: 113.52%;
+  descent-override: 36.45%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Atkinson Fallback Verdana";
+  font-weight: 700 800;
+  src: local("Verdana Bold"), local("Verdana-Bold");
+  size-adjust: 83.67%;
+  ascent-override: 117.60%;
+  descent-override: 37.77%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Atkinson Fallback Arial";
+  font-weight: 200 600;
+  src: local("Arial"), local("ArialMT"), local("Liberation Sans"), local("Arimo");
+  size-adjust: 99.60%;
+  ascent-override: 98.80%;
+  descent-override: 31.73%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Atkinson Fallback Arial";
+  font-weight: 700 800;
+  src: local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"), local("Arimo Bold");
+  size-adjust: 99.59%;
+  ascent-override: 98.81%;
+  descent-override: 31.73%;
+  line-gap-override: 0%;
+}
 
 /* --- colour: primitives (OKLCH, one lightness ladder for every hue) --- */
 :root {
@@ -87,9 +133,10 @@
   --badge-neutral-border: var(--sand-200);
   color-scheme: light dark;
 }
-/* Dark follows the operating system. Accents at L 0.795, tints at L 0.28. */
+/* Dark follows the operating system, unless the style picker says Light.
+   Accents at L 0.795, tints at L 0.28. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-style="light"], :has(#style [value="light"]:checked)) {
     --text-1: oklch(0.943 0.007 88.6);
     --text-2: oklch(0.808 0.009 91.5);
     --text-link: oklch(0.795 0.104 253.8);
@@ -106,10 +153,35 @@
     --badge-neutral-border: oklch(0.367 0.017 262.3);
   }
 }
+/* The style picker (ADR 2026-10-18-style-picker): Light and Dark override the
+   operating system. Dark repeats the tokens above; a harness test keeps the
+   two in step. Every style also matches <html data-style>, which
+   style-picker.js sets from <head> before the picker exists, so a picked
+   style is in place at first paint (ADR 2026-10-30-style-before-first-paint). */
+:root:is([data-style="light"], :has(#style [value="light"]:checked)) { color-scheme: light; }
+:root:is([data-style="dark"], :has(#style [value="dark"]:checked)) {
+  color-scheme: dark;
+  --text-1: oklch(0.943 0.007 88.6);
+  --text-2: oklch(0.808 0.009 91.5);
+  --text-link: oklch(0.795 0.104 253.8);
+  --text-link-hover: oklch(0.889 0.055 255.2);
+  --surface-page: oklch(0.204 0.009 264.4);
+  --surface-card: oklch(0.251 0.012 264.3);
+  --surface-sunken: oklch(0.181 0.007 258.4);
+  --surface-selected: oklch(0.286 0.044 255.6);
+  --border-strong: oklch(0.704 0.016 260.7);
+  --border-subtle: oklch(0.336 0.015 264.3);
+  --focus-halo: oklch(0.879 0.162 90.9);
+  --focus-ring: oklch(1 0 0);
+  --badge-neutral-bg: oklch(0.3 0.014 261.7);
+  --badge-neutral-border: oklch(0.367 0.017 262.3);
+}
 
 /* --- type: 18px base, ~1.25 ratio, nothing below 16px --- */
 :root {
-  --font-sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", Verdana, "Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans", Ubuntu, Cantarell, "DejaVu Sans", sans-serif;
+  --font-sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible",
+    "Atkinson Fallback Verdana", "Atkinson Fallback Arial",
+    Verdana, "Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans", Ubuntu, Cantarell, "DejaVu Sans", sans-serif;
   --font-code: "JetBrains Mono", "Atkinson Hyperlegible Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
   --size-sm: 1rem;
   --size-base: 1.125rem;
@@ -126,7 +198,10 @@
   --tracking-body: 0.01em;
   --tracking-display: -0.01em;
   --para-space: 1em;
-  --measure: 66ch;
+  /* 66ch of Atkinson Hyperlegible Next, whose "0" is 0.648em wide. In em, the
+   * column keeps its width while a fallback font is showing; in ch it would
+   * shrink to the fallback's "0" (ADR 2026-10-20-metric-matched-fallback-fonts). */
+  --measure: 42.77em;
 }
 
 /* --- space, shape, motion --- */
@@ -160,7 +235,11 @@
 
 /* --- element defaults --- */
 *, *::before, *::after { box-sizing: border-box; }
+/* The root carries the page colour too, so the area a phone shows when you
+ * scroll past the top or bottom matches the page in light and dark
+ * (ADR 2026-10-16-browser-bars-match-page). */
 html {
+  background: var(--surface-page);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-block: var(--space-8);
@@ -273,7 +352,7 @@ th { background: var(--surface-sunken); font-weight: var(--weight-bold); }
   :focus-visible { outline: 3px solid Highlight; outline-offset: 3px; }
 }
 
-/* --- page layout: one left-aligned column, text measure 66ch --- */
+/* --- page layout: one left-aligned column, text measure 66 characters --- */
 /* Phones: a 16px gutter leaves the most room for text. */
 .site-header, main, .site-footer {
   max-width: calc(var(--measure) + 2 * var(--space-5));
@@ -358,8 +437,8 @@ main { padding-block-end: var(--space-7); }
 
 /* --- notes (h-entry) --- */
 .h-entry > header { margin-bottom: var(--space-6); }
-.meta, .p-summary { color: var(--text-2); }
-.meta { font-size: var(--size-sm); }
+.meta, .p-summary, .now-updated { color: var(--text-2); }
+.meta, .now-updated { font-size: var(--size-sm); }
 .meta a { color: inherit; }
 .h-entry > header .p-summary { font-size: var(--size-lg); }
 .e-content > :first-child { margin-top: 0; }
@@ -453,3 +532,20 @@ main { padding-block-end: var(--space-7); }
 .webmentions time { color: var(--text-2); font-size: var(--size-sm); }
 .webmentions .p-content { color: var(--text-2); }
 .h-feed > p { margin-top: var(--space-4); }
+
+/* The style picker in the header (ADR 2026-10-18-style-picker). */
+.style-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--target-min);
+}
+.style-picker select {
+  min-height: var(--target-min);
+  padding-inline: var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card);
+  color: var(--text-1);
+  font: inherit;
+}
