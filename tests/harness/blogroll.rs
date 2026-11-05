@@ -3,7 +3,7 @@
 use std::fs;
 
 use crate::support::html::Element;
-use crate::support::{build, content_dir, html_files, read, rel, site, temp_dir, vault_copy, xml};
+use crate::support::{build, content_dir, html_files, read, rel, site, small_vault, temp_dir, vault_copy, xml};
 
 fn outlines() -> Vec<Element> {
     let root = xml::parse(&read(&site().join("blogroll.opml"))).expect("blogroll.opml is well-formed XML");
@@ -68,17 +68,7 @@ fn every_page_footer_links_the_blogroll() {
 
 #[test]
 fn no_blogroll_page_means_no_opml_and_no_link() {
-    let vault = vault_copy("no-blogroll");
-    fs::remove_file(vault.join("blogroll.md")).unwrap();
-    let colophon = vault.join("colophon.md");
-    let kept: Vec<String> = read(&colophon)
-        .lines()
-        .filter(|l| !l.contains("blogroll.md"))
-        .map(String::from)
-        .collect();
-    fs::write(&colophon, kept.join("\n")).unwrap();
-    let follow = vault.join("follow.md");
-    fs::write(&follow, read(&follow).replace("[blogroll](blogroll.md)", "blogroll")).unwrap();
+    let vault = small_vault("no-blogroll", &[]);
     let out = temp_dir("no-blogroll-out");
     build(&vault, &out, &[]).expect("build without a blogroll");
     assert!(

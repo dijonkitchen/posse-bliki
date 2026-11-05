@@ -242,6 +242,22 @@ pub fn vault_copy(label: &str) -> PathBuf {
     dst
 }
 
+/// A vault with only a home page and `pages` (path, Markdown), for tests
+/// about pages a vault may leave out, such as the now, follow and blogroll
+/// pages. Nothing in it links to a page the test leaves out, so the test
+/// needn't rewrite links the way an edited `vault_copy` would.
+pub fn small_vault(label: &str, pages: &[(&str, &str)]) -> PathBuf {
+    let dst = temp_dir(label).join("vault");
+    fs::create_dir_all(&dst).expect("mkdir");
+    fs::write(dst.join("index.md"), "---\ntitle: Home\n---\n").expect("write index.md");
+    for (path, md) in pages {
+        let to = dst.join(path);
+        fs::create_dir_all(to.parent().unwrap()).expect("mkdir");
+        fs::write(&to, md).expect("write page");
+    }
+    dst
+}
+
 /// Every `href="..."` value in `html`, in order.
 pub fn hrefs(html: &str) -> Vec<&str> {
     attr_values(html, "href")

@@ -5,7 +5,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
-use crate::support::{build, content_dir, files_with_ext, html_files, read, rel, site, temp_dir, vault_copy};
+use crate::support::{
+    build, content_dir, files_with_ext, html_files, read, rel, site, small_vault, temp_dir, vault_copy,
+};
 
 const PLACEHOLDER: &str = "TODO(JC)";
 
@@ -110,8 +112,7 @@ fn every_page_footer_links_the_colophon() {
 
 #[test]
 fn no_now_page_means_no_now_link() {
-    let vault = vault_copy("no-now");
-    fs::remove_file(vault.join("now.md")).unwrap();
+    let vault = small_vault("no-now", &[]);
     let out = temp_dir("no-now-out");
     build(&vault, &out, &[]).expect("build without a now page");
     let home = read(&out.join("index.html"));

@@ -1,9 +1,7 @@
 //! The follow page: how to follow the site and its blogroll in a feed reader
 //! (spec/feeds.md, ADR 2026-11-05-follow-with-a-feed-reader).
 
-use std::fs;
-
-use crate::support::{build, config_str, content_dir, html_files, read, rel, site, temp_dir, vault_copy};
+use crate::support::{build, config_str, content_dir, html_files, read, rel, site, small_vault, temp_dir};
 
 const FOOTER_LINK: &str = r#"<a href="/follow/">Follow</a>"#;
 
@@ -95,13 +93,7 @@ fn substack_subscribe_link_lands_on_the_follow_page() {
 
 #[test]
 fn no_follow_page_means_no_follow_link() {
-    let vault = vault_copy("no-follow");
-    fs::remove_file(vault.join("follow.md")).unwrap();
-    for page in ["about.md", "blogroll.md"] {
-        let p = vault.join(page);
-        let kept = read(&p).replace("(follow.md)", "(colophon.md)");
-        fs::write(&p, kept).unwrap();
-    }
+    let vault = small_vault("no-follow", &[]);
     let out = temp_dir("no-follow-out");
     build(&vault, &out, &[]).expect("build without a follow page");
     let home = read(&out.join("index.html"));
@@ -110,12 +102,10 @@ fn no_follow_page_means_no_follow_link() {
 
 #[test]
 fn without_a_blogroll_the_follow_page_lists_only_the_feed() {
-    let vault = vault_copy("follow-no-blogroll");
-    fs::remove_file(vault.join("blogroll.md")).unwrap();
-    for page in ["follow.md", "colophon.md"] {
-        let p = vault.join(page);
-        fs::write(&p, read(&p).replace("[blogroll](blogroll.md)", "blogroll")).unwrap();
-    }
+    let vault = small_vault(
+        "follow-no-blogroll",
+        &[("follow.md", "---\ntitle: Follow\n---\n\nUse a feed reader.\n")],
+    );
     let out = temp_dir("follow-no-blogroll-out");
     build(&vault, &out, &[]).expect("build without a blogroll");
     let html = read(&out.join("follow/index.html"));
