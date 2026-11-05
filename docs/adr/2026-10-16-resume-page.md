@@ -7,16 +7,16 @@
 
 ## Context
 
-JC's work history lived in a private résumé note in the Modin vault and on
-LinkedIn. Following POSSE, the canonical copy should live on JC's own site,
-where it outlasts any one platform and links to the writing behind it.
+JC's work history lived in a private résumé and on LinkedIn. Following
+POSSE, the canonical copy should live on JC's own site, where it outlasts
+any one platform and links to the writing behind it.
 
 ## Decision
 
 - A page at `/resume/` (`content/resume.md`, alias `/cv/`) holds a short
   summary, what JC is looking for, how to get in touch, experience, skills
-  and education. The experience comes from the résumé note in Modin and
-  the current role from the now page; anything not found in JC's own
+  and education. The experience comes from JC's own résumé and the
+  current role from the now page; anything not found in JC's own
   materials was asked of JC rather than invented (JC filled in dates,
   what work they want, and education on 2026-11-05).
 - It is a plain Markdown page. The file is `resume.md`, not `work.md`,
