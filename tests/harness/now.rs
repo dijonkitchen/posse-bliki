@@ -1,4 +1,5 @@
-//! The now page, after Derek Sivers's (spec/content-schema.md, ADR 2026-11-01-now-page).
+//! The now page, after Derek Sivers's (spec/content-schema.md, ADR 2026-11-01-now-page,
+//! ADR 2026-11-05-now-in-the-header).
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -55,32 +56,58 @@ fn now_page_says_when_it_was_updated() {
     );
 }
 
+/// The hrefs of the header's site nav, in order.
+fn nav_hrefs(html: &str) -> Vec<String> {
+    let nav = html
+        .split("<nav aria-label=\"Site\">")
+        .nth(1)
+        .and_then(|rest| rest.split("</nav>").next())
+        .unwrap_or("");
+    nav.split("href=\"")
+        .skip(1)
+        .filter_map(|h| h.split('"').next())
+        .map(String::from)
+        .collect()
+}
+
 #[test]
-fn every_page_footer_links_a_published_now_page() {
+fn every_page_header_reads_notes_now_about() {
     let out = published_now();
-    let missing: Vec<String> = files_with_ext(out, "html")
+    let wrong: Vec<String> = files_with_ext(out, "html")
         .iter()
-        .filter(|p| !footer(&read(p)).contains(r#"<a href="/now/">Now</a>"#))
+        .filter(|p| nav_hrefs(&read(p)) != ["/notes/", "/now/", "/about/"])
         .map(|p| rel(p, out))
         .collect();
     assert!(
+        wrong.is_empty(),
+        "pages whose header nav isn't Notes, Now, About:\n{}",
+        wrong.join("\n")
+    );
+}
+
+#[test]
+fn every_page_footer_links_the_colophon() {
+    let missing: Vec<String> = html_files()
+        .iter()
+        .filter(|(_, h)| !footer(h).contains(r#"<a href="/colophon/">Colophon</a>"#))
+        .map(|(p, _)| rel(p, site()))
+        .collect();
+    assert!(
         missing.is_empty(),
-        "pages without a Now footer link:\n{}",
+        "pages without a Colophon footer link:\n{}",
         missing.join("\n")
     );
 }
 
 #[test]
-fn footer_links_now_only_when_the_page_is_built() {
-    let built = site().join("now/index.html").exists();
-    for (p, h) in html_files() {
-        assert_eq!(
-            footer(h).contains("/now/"),
-            built,
-            "{}: Now footer link doesn't match whether /now/ is built",
-            rel(p, site())
-        );
-    }
+fn no_now_page_means_no_now_link() {
+    let vault = vault_copy("no-now");
+    fs::remove_file(vault.join("now.md")).unwrap();
+    let out = temp_dir("no-now-out");
+    build(&vault, &out, &[]).expect("build without a now page");
+    let home = read(&out.join("index.html"));
+    assert_eq!(nav_hrefs(&home), ["/notes/", "/about/"]);
+    assert!(!home.contains("/now/"), "links a now page that doesn't exist");
 }
 
 #[test]
