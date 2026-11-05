@@ -20,9 +20,10 @@ may want the history behind it.
 - On About the link is in the opening paragraph, since visitors often
   expect "About" to be about the person, and here it's about the site
   (JC agreed 2026-11-05).
-- About writes the email the same way as the bio, `jc` [at]
-  dijonkitchen.org, instead of the `${my-initials}` puzzle, so the two
-  pages don't seem to give different addresses.
+- About keeps its email riddle, "contact me at `${my-initials}` [at]
+  MY_DOMAIN_NAME", and the bio uses the same one, so the two pages don't
+  seem to give different addresses (JC asked to stick with that wording,
+  2026-11-05).
 
 ## Consequences
 
