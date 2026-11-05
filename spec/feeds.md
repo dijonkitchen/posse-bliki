@@ -80,6 +80,11 @@ a feed is the one way to follow that needs no platform, account or
 algorithm, and the bare feed link opens as raw XML in a browser, which
 tells a newcomer nothing.
 
+- A "Why a feed" section explains it: the feeds and the blogroll are
+  open web standards (it links the RSS 2.0, JSON Feed and OPML specs),
+  there's no algorithm ranking or rewriting posts, and nothing tracks
+  the reader.
+
 - Under the page's text the build lists the full address of `/index.xml`
   and, when there is a blogroll, of `/blogroll.opml`, from the site's
   base URL, to copy into a reader. The build writes them because content

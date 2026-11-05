@@ -31,6 +31,23 @@ fn follow_page_suggests_a_feed_reader() {
     assert!(html.contains(r#"href="https://www.feedflow.dev/""#));
 }
 
+/// JC asked the page to explain that following is open web standards,
+/// with no algorithm or tracking in between.
+#[test]
+fn follow_page_explains_open_standards_without_algorithms_or_tracking() {
+    let md = read(&content_dir().join("follow.md"));
+    for spec in [
+        "https://www.rssboard.org/rss-specification",
+        "https://www.jsonfeed.org/version/1.1/",
+        "https://opml.org/spec2.opml",
+    ] {
+        assert!(md.contains(&format!("({spec})")), "follow.md doesn't link {spec}");
+    }
+    for point in ["Open web standards", "No algorithm", "No tracking"] {
+        assert!(md.contains(point), "follow.md doesn't say \"{point}\"");
+    }
+}
+
 #[test]
 fn follow_page_spells_out_the_feed_and_opml_addresses() {
     let html = read(&site().join("follow/index.html"));

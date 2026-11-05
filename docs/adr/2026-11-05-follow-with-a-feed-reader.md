@@ -4,8 +4,9 @@
 - Status: Accepted
 - Decided by: JC, asking to "note best way to follow is to subscribe to
   RSS feed with something like FeedFlow. Suggest this bliki and blog
-  roll." Claude chose a follow page linked from every footer, and the
-  `/subscribe/` redirect.
+  roll", then to "explain how it's using open web standards without
+  algos to track or alter it". Claude chose a follow page linked from
+  every footer, and the `/subscribe/` redirect.
 
 ## Context
 
@@ -31,6 +32,15 @@ posts in the order they were published and imports OPML.
   suggests FeedFlow (any reader works), links [About
   Feeds](https://aboutfeeds.com/) for newcomers, and walks through three
   steps: get a reader, add this bliki, import the blogroll.
+- A "Why a feed" section on the page makes JC's case in four points:
+  **open web standards** (RSS 2.0, JSON Feed and OPML, each linked to
+  its spec, owned by no company), **no algorithm** (a plain file of
+  posts, newest first, the same for everyone; nothing ranks, hides,
+  boosts or rewrites them), **no tracking** (no account, email,
+  analytics, pixels or third-party scripts in the feed or on the site;
+  the host sees requests as any host does, and JC gets no logs), and
+  **yours to keep** (subscriptions export as OPML, and the feed lives on
+  JC's domain).
 - Under the text, the build lists the full addresses of `/index.xml` and
   `/blogroll.opml` (the second only when there's a blogroll), built
   from the site's base URL. A reader asks for a whole address, and
@@ -55,6 +65,10 @@ posts in the order they were published and imports OPML.
   phone it takes one more row in some styles; the header is unchanged.
 - The page names one app. If FeedFlow goes away or JC prefers another,
   it's one line of `follow.md` and the harness check that it's named.
+- The "no tracking" promise holds only while the site keeps its strict
+  CSP (ADR 2026-10-28-csp-meta-tag), which blocks every third-party
+  script, pixel and font. Adding analytics would mean changing this page
+  too.
 
 ## Alternatives considered
 
