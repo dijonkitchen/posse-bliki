@@ -513,7 +513,7 @@ const BLOGROLL_OPML: &str = "/blogroll.opml";
 /// `content/now.md`, a now page after Derek Sivers's (ADR 2026-11-01-now-page).
 const NOW: &str = "now";
 
-/// The optional pages every footer links to, when the vault has them.
+/// The optional pages every page links to, when the vault has them.
 #[derive(Clone, Copy)]
 struct FooterLinks {
     blogroll: bool,
@@ -533,7 +533,8 @@ fn base(site: &Config, links: FooterLinks, title: &str, meta: &str, canonical: O
 }
 
 /// `home` makes the site title the page's `<h1>` (ADR 2026-10-16-site-title-heads-home).
-/// `links` adds the footer links to `/now/` and `/blogroll/` when the vault has them.
+/// `links` adds the header link to `/now/` and the footer link to `/blogroll/`
+/// when the vault has them (ADR 2026-11-05-now-in-the-header).
 fn page(
     site: &Config,
     links: FooterLinks,
@@ -578,11 +579,7 @@ fn page(
         .iter()
         .map(|(slug, ..)| format!("<link rel=\"stylesheet\" href=\"/themes/{slug}.css\">\n"))
         .collect();
-    let now = if links.now {
-        "<a href=\"/now/\">Now</a> \u{b7}\n"
-    } else {
-        ""
-    };
+    let now = if links.now { "<a href=\"/now/\">Now</a>\n" } else { "" };
     let blogroll = if links.blogroll {
         "<a href=\"/blogroll/\">Blogroll</a> \u{b7}\n"
     } else {
@@ -616,9 +613,9 @@ fn page(
 <link rel=\"stylesheet\" href=\"/style.css\">\n<noscript>\n{theme_links}</noscript>\n\
 <script src=\"/style-picker.js\" data-styles=\"{theme_slugs}\"></script>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
-<div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n<a href=\"/about/\">About</a>\n<a href=\"/colophon/\">Colophon</a>\n\
+<div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n{now}<a href=\"/about/\">About</a>\n\
 </nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
-<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}{now}\
+<option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n{blogroll}<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n</footer>\n</body>\n</html>\n",
         lang = e(site.language),

@@ -93,3 +93,23 @@ fn offline_page_is_not_indexed() {
         "offline.html is listed in the sitemap"
     );
 }
+
+#[test]
+fn shell_keeps_every_header_page() {
+    // The header's pages are kept on install so a reader can get around
+    // offline (ADR 2026-10-29-offline-reading, ADR 2026-11-05-now-in-the-header).
+    let paths = shell(&worker());
+    let home = read(&site().join("index.html"));
+    let nav = home
+        .split("<nav aria-label=\"Site\">")
+        .nth(1)
+        .and_then(|rest| rest.split("</nav>").next())
+        .expect("no site nav");
+    for href in nav.split("href=\"").skip(1).filter_map(|h| h.split('"').next()) {
+        let path = href.trim_start_matches('/');
+        assert!(
+            paths.iter().any(|p| p == path),
+            "{href} is in the header but not kept on install"
+        );
+    }
+}

@@ -20,8 +20,8 @@ Images go in `content/images/` and are linked as `/images/<file>`
 
 The directory determines the kind. No `type:` field needed in front-matter.
 
-`content/blogroll.md` and `content/now.md`, when published, are linked from
-every page's footer. The now page must have `updated` (the build fails
+`content/now.md`, when published, is linked from every page's header, and
+`content/blogroll.md` from every page's footer (ADR 2026-11-05-now-in-the-header). The now page must have `updated` (the build fails
 without it), shown under its title as "Updated <date>", since a now page
 is only as good as its date (ADR 2026-11-01-now-page).
 

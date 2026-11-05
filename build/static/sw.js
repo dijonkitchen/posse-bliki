@@ -16,7 +16,7 @@ const SHELL = [
   "./",
   "notes/",
   "about/",
-  "colophon/",
+  "now/",
   "offline.html",
   "style.css",
   "style-picker.js",
