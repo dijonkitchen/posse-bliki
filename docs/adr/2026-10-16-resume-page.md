@@ -17,9 +17,8 @@ where it outlasts any one platform and links to the writing behind it.
   summary, what JC is looking for, how to get in touch, experience, skills
   and education. The experience comes from the résumé note in Modin and
   the current role from the now page; anything not found in JC's own
-  materials is a `TODO(JC)` placeholder, never invented. Like the now
-  page, it stays `draft: true` until JC fills those in, since the harness
-  fails on a published `TODO(JC)`.
+  materials was asked of JC rather than invented (JC filled in dates,
+  what work they want, and education on 2026-11-05).
 - It is a plain Markdown page. The file is `resume.md`, not `work.md`,
   because the 2017 post `notes/work.md` already owns that stem and `/work/`.
 - It is not in the header nav, which JC kept to three links so it doesn't

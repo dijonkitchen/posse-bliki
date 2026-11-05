@@ -3,7 +3,6 @@ title: Résumé
 summary: JC's work history as a software engineer, and how to get in touch about work.
 aliases:
   - /cv/
-draft: true
 ---
 
 I'm JC, a software engineer who has worked across the stack, from
@@ -12,8 +11,7 @@ startups in healthcare, lending and enterprise SaaS. I've worked on
 distributed teams since 2020, and I live in the SF Bay Area. Before that
 I co-founded a startup consultancy in New York.
 
-**Looking for:** TODO(JC): the kind of role or project you want,
-and whether you're open to full-time, contract or consulting work.
+**Looking for:** software engineering roles.
 
 **Get in touch:** email `jc` [at] dijonkitchen.org. Code lives on
 [GitHub](https://github.com/dijonkitchen), including
@@ -23,14 +21,13 @@ and whether you're open to full-time, contract or consulting work.
 
 ### Senior Software Engineer, Spring Health
 
-TODO(JC): start year to present
+2024 to present
 
 - Helping people with the deeper causes of their problems.
-  TODO(JC): what you've built or improved here.
 
 ### Software Engineer, Robin Healthcare
 
-2020 to TODO(JC): end year · Remote
+2020 to 2023 · Remote
 
 - Improved profit margins 507% in 12 months with LangChain generative AI
   for composing medical notes on Azure.
@@ -112,12 +109,11 @@ TODO(JC): start year to present
 
 ## Education
 
+- Philosophy and finance.
 - Dev Bootcamp.
-- TODO(JC): degree, school and year.
 
 ## More about me
 
-What I'm focused on lately, at work and outside it, is on my
-[now page](now.md). What I'm focused on right now is on my [now page](now.md). How I think and write lives in the [notes](about.md). My first month as
+How I think and write lives in the [notes](about.md). My first month as
 an engineer in San Francisco is in [work](notes/work.md), and the long
 way I came to software is in [me](notes/me.md).
