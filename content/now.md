@@ -1,11 +1,11 @@
 ---
 title: Now
 summary: What I'm focused on now, after Derek Sivers's now pages.
-updated: 2026-11-01
+updated: 2026-11-05
 draft: false
 ---
 
-This is what I'm focused on now. 
+This is what I'm focused on now.
 If we haven't talked in a while,
 it's the short version of what you'd hear.
 
@@ -38,9 +38,9 @@ it's the short version of what you'd hear.
 This is a [now page](https://nownownow.com/about), an idea from
 [Derek Sivers](https://sive.rs/now): instead of telling everyone what
 you're up to, keep one page that says it, and update it when life
-changes. 
+changes.
 
-I've seen this all over the web over the years and love it. 
+I've seen this all over the web over the years and love it.
 
 Feel free to reach out too!
 
