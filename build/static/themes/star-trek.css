@@ -75,9 +75,12 @@
   & :is(h1, h2, h3, h4) { color: var(--lcars-orange); font-weight: var(--weight-bold); }
   & .site-title, & .site-title a { color: var(--lcars-orange); }
 
-  /* Links in the header are buttons on the panel: black on colour. */
+  /* Links in the header are buttons on the panel: black on colour,
+     packed close like an LCARS button bank so the three fit on one row
+     on a 320px phone, with more room once there's space for it. */
+  & .site-header nav { column-gap: var(--space-1); }
   & .site-header nav a {
-    padding-inline: var(--space-4);
+    padding-inline: var(--space-3);
     border-radius: var(--radius-pill);
     background: var(--lcars-blue);
     color: #000000;
@@ -87,6 +90,10 @@
   & .site-header nav a:nth-child(3n + 2) { background: var(--lcars-lavender); }
   & .site-header nav a:nth-child(3n) { background: var(--lcars-orange); }
   & .site-header nav a:hover { background: #ffcc66; }
+  @media (min-width: 30rem) {
+    & .site-header nav { column-gap: var(--space-5); }
+    & .site-header nav a { padding-inline: var(--space-4); }
+  }
   & .style-picker select { border-radius: var(--radius-pill); border-color: var(--lcars-lavender); }
 
   /* A section heading runs into a bar to the edge of the column. */
