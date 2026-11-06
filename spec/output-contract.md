@@ -81,7 +81,16 @@ In addition to the universal invariants, every post page must:
 
 ## Error pages
 
-- `/404.html` exists and is valid HTML5.
+- `/404.html` exists and is valid HTML5. GitHub Pages serves it, with a 404
+  status, for every address that has no page, at any depth, so every link
+  and asset in it is root-relative or absolute, never relative. It's
+  `noindex`, has no canonical and is left out of the sitemap (Pages also
+  serves it at `/404.html` itself, with a 200). Its text links the home
+  page, `/notes/` and, when the vault has one, `/follow/`. The service
+  worker never keeps it: it stores 200 responses only, so offline a
+  reader gets the offline page, not a kept 404, for an address that may
+  since have been published. Enforced by `tests/harness/not_found.rs`
+  (ADR 2026-11-06-not-found-page).
 - `/offline.html` exists, is valid HTML5 and `noindex`, and is left out of
   the sitemap. The service worker shows it for a page that wasn't kept
   when the reader is offline. Like the 404, it has no canonical.
