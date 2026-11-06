@@ -1,7 +1,9 @@
 # 2026-11-05 — Dependabot proposes Lighthouse updates
 
 - Date: 2026-11-05
-- Status: Accepted (JC chose "Skip Nix, add Lighthouse to Dependabot", 2026-11-05)
+- Status: Accepted (JC chose "Skip Nix, add Lighthouse to Dependabot", 2026-11-05);
+  the Nu checker is no longer hand-bumped either, see
+  [2026-11-06-dependabot-nu-checker](2026-11-06-dependabot-nu-checker.md)
 - Decided by: JC, asking whether Nix should manage every dependency;
   Claude recommended closing this gap instead
   ([ADR 2026-11-05-nix-still-not-worth-it](2026-11-05-nix-still-not-worth-it.md)).

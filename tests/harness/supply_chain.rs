@@ -1,5 +1,6 @@
 //! Supply chain (spec/build-invariants.md, ADR 2026-10-06-rust-build-zero-dependencies, ADR 2026-10-14-supply-chain-pinned-actions): no crates,
-//! every GitHub Action pinned to a full commit SHA, and no `-latest` runners.
+//! every GitHub Action pinned to a full commit SHA, no `-latest` runners, and
+//! Dependabot watching every npm lockfile (ADR 2026-11-06-dependabot-nu-checker).
 
 use std::path::Path;
 
@@ -68,5 +69,37 @@ fn runners_name_an_os_release() {
         moving.is_empty(),
         "name an OS release (e.g. ubuntu-24.04), not a -latest label:\n{}",
         moving.join("\n")
+    );
+}
+
+#[test]
+fn dependabot_watches_every_npm_lockfile() {
+    // Each CI-only npm tool lives in scripts/<tool>/ with its own lockfile.
+    // Dependabot only proposes bumps for the directories its config lists, so
+    // a tool added without an entry would silently age.
+    let config = std::fs::read_to_string(repo().join(".github/dependabot.yml")).unwrap();
+    let npm_dirs: Vec<&str> = config
+        .split("- package-ecosystem:")
+        .skip(1)
+        .filter(|entry| entry.split_whitespace().next() == Some("npm"))
+        .filter_map(|entry| entry.lines().find_map(|l| l.trim().strip_prefix("directory:")))
+        .map(str::trim)
+        .collect();
+    let mut tools: Vec<_> = std::fs::read_dir(repo().join("scripts"))
+        .unwrap()
+        .map(|e| e.unwrap().path())
+        .filter(|p| p.join("package-lock.json").is_file())
+        .collect();
+    tools.sort();
+    assert!(!tools.is_empty(), "expected npm tools under scripts/");
+    let missing: Vec<String> = tools
+        .iter()
+        .map(|p| format!("/scripts/{}", p.file_name().unwrap().to_str().unwrap()))
+        .filter(|dir| !npm_dirs.contains(&dir.as_str()))
+        .collect();
+    assert!(
+        missing.is_empty(),
+        "add an npm entry to .github/dependabot.yml for:\n{}",
+        missing.join("\n")
     );
 }
