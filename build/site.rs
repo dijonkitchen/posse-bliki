@@ -179,6 +179,8 @@ pub struct Config {
     pub tagline: &'static str,
     pub base_url: &'static str,
     pub language: &'static str,
+    /// The full name; other sites see it after the nickname
+    /// (ADR 2026-11-06-profile-name).
     pub author_name: &'static str,
     /// Short name readers see in bylines, "JC"; the full name stays in the markup (ADR 2026-10-16-site-title-heads-home).
     pub author_nickname: &'static str,
@@ -243,6 +245,7 @@ impl Config {
                 "author".into(),
                 Json::Obj(vec![
                     ("name".into(), json::s(self.author_name)),
+                    ("nickname".into(), json::s(self.author_nickname)),
                     ("note".into(), json::s(self.author_note)),
                     ("photo".into(), json::s(self.author_photo)),
                     ("email_user".into(), json::s(self.author_email_user)),
@@ -862,11 +865,18 @@ fn coded_mailto(site: &Config) -> String {
         .collect()
 }
 
+/// The name other sites and readers show for the author, "JC (Jonathan
+/// Chen)": the nickname people know, with the full name people search for
+/// (ADR 2026-11-06-profile-name).
+pub fn author_display_name(site: &Config) -> String {
+    format!("{} ({})", site.author_nickname, site.author_name)
+}
+
 fn author_label(site: &Config) -> String {
     format!(
         "<span class=\"p-nickname\">{}</span><data class=\"p-name\" value=\"{}\"></data>",
         e(site.author_nickname),
-        e(site.author_name)
+        e(&author_display_name(site))
     )
 }
 
@@ -1249,7 +1259,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         let title = format!("{} blogroll", site.title);
         write(
             &out.join(BLOGROLL_OPML.trim_start_matches('/')),
-            &blogroll::opml(&title, site.author_name, &format!("{}/", base_url), &sites),
+            &blogroll::opml(&title, &author_display_name(site), &format!("{}/", base_url), &sites),
         )?;
     }
 
@@ -1326,7 +1336,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         (
             "authors".into(),
             Json::Arr(vec![Json::Obj(vec![
-                ("name".into(), json::s(site.author_name)),
+                ("name".into(), json::s(&author_display_name(site))),
                 ("url".into(), json::s(site.author_url)),
             ])]),
         ),

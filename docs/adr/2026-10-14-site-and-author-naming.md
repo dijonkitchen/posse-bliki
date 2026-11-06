@@ -1,7 +1,7 @@
 # 2026-10-14 — Site and author naming
 
 - Date: 2026-10-14
-- Status: Accepted; the shown author name is superseded by [2026-10-16-site-title-heads-home](2026-10-16-site-title-heads-home.md)
+- Status: Accepted; the shown author name is superseded by [2026-10-16-site-title-heads-home](2026-10-16-site-title-heads-home.md), and the name in markup and feeds by [2026-11-06-profile-name](2026-11-06-profile-name.md)
 - Decided by: JC, suggesting "JC (Jonathan Chen)" for the author and a
   title that matches the domain, "Dijon Kitchen", with napkin logic and
   "Philosophy as a service" in the subtitle.
