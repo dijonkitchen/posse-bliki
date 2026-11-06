@@ -86,7 +86,8 @@ are pass/fail checks. Locally every page scores 100 in all four.
 
 Lighthouse is locked, with every transitive package, in
 `scripts/lighthouse/package-lock.json` and installed with `npm ci`, so CI
-runs exactly the reviewed versions.
+runs exactly the reviewed versions. Dependabot proposes Lighthouse updates
+monthly (ADR 2026-11-05-dependabot-lighthouse-updates).
 
 ## PRPL
 
