@@ -23,6 +23,7 @@ it's the short version of what you'd hear.
 ## Work
 
 - Senior software engineer at Spring Health, trying to help people with the deeper causes to their problems
+- My work history is on my [bio](bio.md)
 
 ## Making
 
