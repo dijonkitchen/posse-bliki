@@ -25,10 +25,9 @@ When I'm not crafting code, my focus off screens is spent fixing my
 kids' toys, hiking new neighborhoods, wondering about the meaning of
 life, and rolling around hugging people in jiu-jitsu.
 
-This page is a quick summary. 
-For a full résumé or to talk about work, 
-contact me at `${my-initials}` [at]
-[MY_DOMAIN_NAME](https://en.wikipedia.org/wiki/Domain_name).
+This page is a quick summary.
+For a full résumé or to talk about work,
+[email me](mailto:).
 
 
 ## Experience

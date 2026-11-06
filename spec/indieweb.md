@@ -9,7 +9,7 @@ Conformance to each item is enforced by a test in `tests/`.
 | **microformats2 h-entry** | <https://microformats.org/wiki/h-entry> | every post page |
 | **microformats2 h-card** | <https://microformats.org/wiki/h-card> | home page |
 | **microformats2 h-feed** | <https://microformats.org/wiki/h-feed> | home, `/notes/`, `/tags/<tag>/` |
-| **rel=me** | <https://microformats.org/wiki/rel-me> | home page, footer |
+| **rel=me** | <https://microformats.org/wiki/rel-me> | home page: GitHub and email (in HTML character codes, ADR 2026-11-06-coded-email); footer |
 | **rel=author** | <https://microformats.org/wiki/rel-author> | post pages |
 | **rel=canonical** | every page |
 | **u-syndication** | <https://indieweb.org/u-syndication> | post pages with `syndication:` front-matter |

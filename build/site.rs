@@ -188,6 +188,10 @@ pub struct Config {
     /// The home h-card's `u-photo`, a path under `content/images/`
     /// (ADR 2026-11-06-h-card-photo).
     pub author_photo: &'static str,
+    /// The part of the author's email address before the `@`; the domain is
+    /// the site's. Never written out whole in the repo, and only published
+    /// in HTML character codes (ADR 2026-11-06-coded-email).
+    pub author_email_user: &'static str,
     pub author_url: &'static str,
     pub rel_me: &'static [&'static str],
     pub webmention_endpoint: &'static str,
@@ -213,6 +217,7 @@ pub fn default_config() -> Config {
         author_nickname: "JC",
         author_note: "Full-stack, entrepreneurial engineer that has built businesses from zero to one.",
         author_photo: "/images/jc.jpg",
+        author_email_user: "jc",
         author_url: "https://www.dijonkitchen.org",
         rel_me: &["https://github.com/dijonkitchen"],
         webmention_endpoint: "https://webmention.io/www.dijonkitchen.org/webmention",
@@ -240,6 +245,7 @@ impl Config {
                     ("name".into(), json::s(self.author_name)),
                     ("note".into(), json::s(self.author_note)),
                     ("photo".into(), json::s(self.author_photo)),
+                    ("email_user".into(), json::s(self.author_email_user)),
                     ("url".into(), json::s(self.author_url)),
                     (
                         "rel_me".into(),
@@ -579,6 +585,10 @@ fn page(
         site.rel_me
             .iter()
             .map(|u| format!("<link rel=\"me\" href=\"{}\">\n", e(u)))
+            .chain(std::iter::once(format!(
+                "<link rel=\"me\" href=\"{}\">\n",
+                coded_mailto(site)
+            )))
             .collect()
     } else {
         String::new()
@@ -833,6 +843,25 @@ base-uri 'none'; form-action 'none'\">\n";
 
 /// The author as readers see it, "JC", with the full name kept for mf2
 /// parsers as `p-name` (ADR 2026-10-16-site-title-heads-home).
+/// The author's address: `author_email_user` at the site's domain, without
+/// a leading `www.` (ADR 2026-11-06-coded-email).
+fn author_email(site: &Config) -> String {
+    let host = site.base_url.split("://").nth(1).unwrap_or(site.base_url);
+    let host = host.split('/').next().unwrap_or(host);
+    format!("{}@{}", site.author_email_user, host.trim_start_matches("www."))
+}
+
+/// `mailto:` and the author's address, every character as an HTML numeric
+/// character reference. Browsers and HTML parsers (IndieLogin's included)
+/// decode it; most spam harvesters search the raw source and miss it
+/// (ADR 2026-11-06-coded-email).
+fn coded_mailto(site: &Config) -> String {
+    format!("mailto:{}", author_email(site))
+        .chars()
+        .map(|c| format!("&#{};", c as u32))
+        .collect()
+}
+
 fn author_label(site: &Config) -> String {
     format!(
         "<span class=\"p-nickname\">{}</span><data class=\"p-name\" value=\"{}\"></data>",
@@ -1096,6 +1125,9 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
                 ),
             );
         }
+        // `[text](mailto:)` with no address emails the author, so content
+        // never spells the address out (ADR 2026-11-06-coded-email).
+        let html = html.replace("href=\"mailto:\"", &format!("href=\"{}\"", coded_mailto(site)));
         n.content_html = prepare_images(&html, content, &n.rel)?;
     }
     for n in &notes {

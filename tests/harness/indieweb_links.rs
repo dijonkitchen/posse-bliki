@@ -17,6 +17,62 @@ fn home_has_rel_me() {
     );
 }
 
+/// The author's address, built from the config the way the site builds it,
+/// so the address isn't written out whole here either
+/// (ADR 2026-11-06-coded-email).
+fn author_email() -> String {
+    let user = crate::support::config()
+        .get("author")
+        .and_then(|a| a.str_at("email_user"))
+        .expect("config has no author.email_user");
+    let host = config_str("base_url")
+        .split("://")
+        .nth(1)
+        .expect("base_url has a scheme");
+    let host = host.split('/').next().unwrap();
+    format!("{user}@{}", host.trim_start_matches("www."))
+}
+
+fn coded(s: &str) -> String {
+    s.chars().map(|c| format!("&#{};", c as u32)).collect()
+}
+
+/// Email works for IndieLogin as rel=me, next to GitHub.
+#[test]
+fn home_rel_me_includes_the_email_address() {
+    let mailto = format!("mailto:{}", author_email());
+    let me = parsed(&site().join("index.html")).rel("me").to_vec();
+    assert!(me.contains(&mailto), "home rel=me has no {mailto}: {me:?}");
+    assert!(
+        me.iter().any(|u| u.starts_with("https://github.com/")),
+        "home rel=me lost GitHub: {me:?}"
+    );
+}
+
+/// The address appears only in HTML character codes, which browsers and
+/// parsers decode and most harvesters miss.
+#[test]
+fn no_built_file_spells_out_the_email_address() {
+    let email = author_email();
+    for ext in ["html", "xml", "json", "txt", "opml", "webmanifest"] {
+        for p in files_with_ext(site(), ext) {
+            let text = std::fs::read_to_string(&p).unwrap_or_default();
+            assert!(!text.contains(&email), "{} spells out {email}", rel(&p, site()));
+        }
+    }
+}
+
+/// `[text](mailto:)` in content becomes a coded link to the author.
+#[test]
+fn contact_links_are_coded() {
+    let href = format!("href=\"{}\"", coded(&format!("mailto:{}", author_email())));
+    for page in ["bio/index.html", "about/index.html"] {
+        let text = read(&site().join(page));
+        assert!(text.contains(&href), "{page} has no coded email link");
+        assert!(!text.contains("href=\"mailto:\""), "{page} has an empty mailto: link");
+    }
+}
+
 #[test]
 fn every_page_advertises_webmention() {
     for (p, text) in html_files() {
