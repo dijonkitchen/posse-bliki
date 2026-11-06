@@ -47,7 +47,7 @@ make lint                            # rustfmt check + clippy, warnings are erro
 make test                            # harness + unit tests (cargo test)
 make build                           # build site → public/
 make serve                           # build + serve at :8080 with watch
-make validate                        # Nu HTML Checker on built pages (Java, CI job `html`)
+make validate                        # Nu HTML Checker on built pages (Java + Node, CI job `html`)
 make help                            # list all targets
 ```
 

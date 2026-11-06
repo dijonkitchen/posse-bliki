@@ -24,8 +24,12 @@ Tested by running the build with no network and verifying success.
   moving `-latest` label.
 - Workflows grant the `GITHUB_TOKEN` the least it needs per job; the job
   that runs repository code cannot publish the site.
+- Each CI-only npm tool (Lighthouse, the Nu HTML Checker) is locked in its
+  own `scripts/<tool>/package-lock.json`, installed with `npm ci
+  --ignore-scripts`, and listed in `.github/dependabot.yml` so updates are
+  proposed (ADR 2026-11-06-dependabot-nu-checker).
 
-Tested by `tests/harness/supply_chain.rs` (all but the last).
+Tested by `tests/harness/supply_chain.rs` (all but the token rule).
 
 ## Idempotent
 
