@@ -56,9 +56,10 @@ In addition to the universal invariants, every post page must:
 
 ## Home (`/`)
 
-- Contains exactly one `h-card` with `p-name` (author's full name),
+- Contains exactly one `h-card` with `p-name` (the nickname and full name,
+  "JC (Jonathan Chen)", ADR 2026-11-06-profile-name),
   `p-nickname` (the short name shown first, see ADR 2026-10-14-site-and-author-naming), `u-url` (site),
-  shown as a "By JC" byline in the footer, not a heading; the full name is a
+  shown as a "By JC" byline in the footer, not a heading; the name is a
   `<data>` value.
   `p-note` is a one-line bio, also a `<data>` value
   (ADR 2026-11-06-h-card-bio-note).
