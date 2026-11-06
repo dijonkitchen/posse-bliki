@@ -73,6 +73,27 @@ fn contact_links_are_coded() {
     }
 }
 
+/// About says why to email, crediting the standing invitations it borrows
+/// from, and Bio points there (ADR 2026-11-06-standing-invitation).
+#[test]
+fn about_gives_a_standing_invitation_to_email() {
+    let about = read(&site().join("about/index.html"));
+    for source in [
+        "https://www.kalzumeus.com/standing-invitation/",
+        "https://sive.rs/contact",
+    ] {
+        assert!(
+            about.contains(&format!("href=\"{source}\"")),
+            "About doesn't credit {source}"
+        );
+    }
+    let bio = read(&site().join("bio/index.html"));
+    assert!(
+        bio.contains("href=\"/about/\""),
+        "Bio doesn't point to About's invitation"
+    );
+}
+
 #[test]
 fn every_page_advertises_webmention() {
     for (p, text) in html_files() {
