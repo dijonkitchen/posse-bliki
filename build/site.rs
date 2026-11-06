@@ -629,7 +629,7 @@ fn page(
 </nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
 <option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}{follow}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n{blogroll}<a href=\"/colophon/\">Colophon</a>\n\
-</p>\n</footer>\n</body>\n</html>\n",
+</p>\n{WEBRING}</footer>\n</body>\n</html>\n",
         lang = e(site.language),
         tagline = e(site.tagline),
         wm = e(site.webmention_endpoint),
@@ -792,6 +792,15 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         &content,
     ))
 }
+
+/// The IndieWeb Webring's previous/next links, from JC's webring dashboard.
+/// The ring checks the home page for them; every footer has them so a
+/// reader can hop on from any page (ADR 2026-11-06-indieweb-webring).
+const WEBRING: &str = "<p class=\"webring\">\n\
+<a href=\"https://xn--sr8hvo.ws/previous\" aria-label=\"Previous site in the IndieWeb Webring\">\u{2190}</a>\n\
+An <a href=\"https://xn--sr8hvo.ws\">IndieWeb Webring</a> <span aria-hidden=\"true\">\u{1f578}\u{1f48d}</span>\n\
+<a href=\"https://xn--sr8hvo.ws/next\" aria-label=\"Next site in the IndieWeb Webring\">\u{2192}</a>\n\
+</p>\n";
 
 /// Paints the phone's browser bars in the page colour, light and dark, so the
 /// page reads full bleed (ADR 2026-10-16-browser-bars-match-page). These are

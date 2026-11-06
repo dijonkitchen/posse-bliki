@@ -72,3 +72,27 @@ fn canonical_matches_url() {
         assert_eq!(*url, expected, "{}", rel(&f, root));
     }
 }
+
+/// The IndieWeb Webring checks the home page for its previous/next links
+/// and marks the site inactive without them (ADR 2026-11-06-indieweb-webring).
+#[test]
+fn every_footer_links_the_webring() {
+    let ring = [
+        r#"href="https://xn--sr8hvo.ws/previous""#,
+        r#"href="https://xn--sr8hvo.ws""#,
+        r#"href="https://xn--sr8hvo.ws/next""#,
+    ];
+    let missing: Vec<String> = html_files()
+        .iter()
+        .filter(|(_, h)| {
+            let footer = h.split("<footer class=\"site-footer\">").nth(1).unwrap_or("");
+            !ring.iter().all(|l| footer.contains(l))
+        })
+        .map(|(p, _)| rel(p, site()))
+        .collect();
+    assert!(
+        missing.is_empty(),
+        "pages without the webring links in the footer:\n{}",
+        missing.join("\n")
+    );
+}
