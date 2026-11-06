@@ -48,3 +48,8 @@ Once an alias is added, **never remove it**.
 `/subscribe/`, the Substack's sign-up page, redirects to `/follow/`, an
 alias in `content/follow.md` (ADR 2026-11-05-follow-with-a-feed-reader).
 Tested in `tests/harness/follow.rs`.
+
+`/notes/how-this-bliki-works/`, a starter note split between the README
+and the colophon, redirects to `/colophon/`, an alias in
+`content/colophon.md` (ADR 2026-11-06-how-this-bliki-works-split). Tested
+in `tests/harness/aliases.rs`.

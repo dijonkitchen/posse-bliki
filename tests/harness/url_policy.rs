@@ -10,7 +10,7 @@ fn pages_emitted_at_trailing_slash_directories() {
         "about/index.html",
         "colophon/index.html",
         "notes/index.html",
-        "notes/how-this-bliki-works/index.html",
+        "notes/bliki/index.html",
     ];
     let missing: Vec<&str> = expected.into_iter().filter(|p| !root.join(p).is_file()).collect();
     assert!(missing.is_empty(), "missing expected pages: {missing:?}");

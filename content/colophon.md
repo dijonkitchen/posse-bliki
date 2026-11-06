@@ -1,6 +1,8 @@
 ---
 title: Colophon
 summary: How this site is built and why.
+aliases:
+  - /notes/how-this-bliki-works/
 ---
 
 This site is built on a deliberately small stack chosen for longevity:
@@ -22,9 +24,16 @@ This site is built on a deliberately small stack chosen for longevity:
 
 The architecture is **spec + harness + replaceable build**. The build
 code is small and can be rewritten in any language; what's permanent is
-the contract in `spec/` and the test harness in `tests/`. See
-[how-this-bliki-works](notes/how-this-bliki-works.md) for the day-to-day side and the repo's
-`docs/adr/` for the reasoning.
+the contract in `spec/` and the test harness in `tests/`. The
+[repo](https://github.com/dijonkitchen/posse-bliki)'s README covers the
+day-to-day side of writing and publishing, and its `docs/adr/` the reasoning.
+
+Every post is published here first, following
+[POSSE](https://indieweb.org/POSSE): Publish on your Own Site, Syndicate
+Elsewhere. A copy on Mastodon, Bluesky or anywhere else links back here as
+the original, and the post lists it under "Also on". Replies to a copy can
+come back as [webmentions](https://www.w3.org/TR/webmention/) and show
+under the post.
 
 Dates here use the [Holocene calendar](https://en.wikipedia.org/wiki/Holocene_calendar):
 the year plus 10,000, so 2026 is 12026. It's a small nod to the

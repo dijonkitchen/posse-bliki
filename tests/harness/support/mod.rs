@@ -122,12 +122,15 @@ pub fn html_files() -> &'static [(PathBuf, String)] {
     })
 }
 
-/// `index.html` of each post, excluding the `/notes/` list page itself.
+/// `index.html` of each post, excluding the `/notes/` list page itself
+/// and alias redirects.
 pub fn post_html_files() -> Vec<PathBuf> {
     let notes = site().join("notes");
     files_with_ext(&notes, "html")
         .into_iter()
         .filter(|p| p.file_name().is_some_and(|n| n == "index.html") && p.parent() != Some(notes.as_path()))
+        // A renamed note's old slug is an alias redirect, not a post.
+        .filter(|p| !read(p).contains("http-equiv=\"refresh\""))
         .collect()
 }
 
