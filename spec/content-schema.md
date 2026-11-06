@@ -68,6 +68,13 @@ Notes are Markdown only, and a raw tag in a note's prose (outside code) fails
 the harness. Videos are links to the video's page, not embeds
 (ADR 2026-10-28-videos-as-links).
 
+## Emailing the author
+
+A link to `mailto:` with no address, `[email me](mailto:)`, links to the
+author's address, which the build writes in HTML character codes so the
+address never appears in the repo or as plain text on the site
+(ADR 2026-11-06-coded-email).
+
 ## Links between notes
 
 Notes link with standard Markdown links to the file, relative to the linking

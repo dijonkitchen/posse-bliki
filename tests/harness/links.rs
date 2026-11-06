@@ -6,7 +6,7 @@ use std::fs;
 use std::path::{Component, Path, PathBuf};
 
 use crate::support::{
-    build, content_dir, files_with_ext, hrefs, html_files, read, rel, site, strip_fragment, temp_dir, vault_copy,
+    build, content_dir, files_with_ext, hrefs, html, html_files, read, rel, site, strip_fragment, temp_dir, vault_copy,
 };
 
 /// The file a static host would serve for URL path `href`.
@@ -47,7 +47,11 @@ fn no_broken_internal_links() {
     let root = site();
     let mut failures = Vec::new();
     for (p, text) in html_files() {
-        for href in hrefs(text).into_iter().map(strip_fragment) {
+        for raw in hrefs(text) {
+            // Decode character references first, as a browser does: the
+            // email link is written in them (ADR 2026-11-06-coded-email).
+            let decoded = html::decode(raw).unwrap_or_else(|e| panic!("{}: href {raw}: {e}", rel(p, root)));
+            let href = strip_fragment(&decoded);
             if href.is_empty() || external(href) {
                 continue;
             }

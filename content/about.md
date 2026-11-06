@@ -64,7 +64,8 @@ This bliki shows the interconnected network of philosophy, business, life, techn
 
 ## Feedback
 
-I'd love to hear any interesting thoughts of your own. Contact me at `${my-initials}` [at] [MY_DOMAIN_NAME](https://en.wikipedia.org/wiki/Domain_name).
+I'd love to hear any interesting thoughts of your own.
+[Email me](mailto:).
 
 ## Support
 
