@@ -434,6 +434,10 @@ main { padding-block-end: var(--space-7); }
   padding-block-start: var(--space-5);
   border-block-start: 1px solid var(--border-subtle);
 }
+.site-footer .webring {
+  padding-block-start: var(--space-2);
+  border-block-start: 0;
+}
 
 /* --- notes (h-entry) --- */
 .h-entry > header { margin-bottom: var(--space-6); }
