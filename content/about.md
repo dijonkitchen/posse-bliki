@@ -9,6 +9,8 @@ aliases:
 ---
 
 This is a long-lived home for my notes, writing, and half-formed ideas.
+Looking to work together? My [bio](bio.md) has my experience and how to
+reach me.
 
 The canonical version of every post lives **here**. Copies may appear on
 Mastodon, Bluesky, or elsewhere, but those are syndicated — see the
