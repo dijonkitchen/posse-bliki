@@ -36,6 +36,27 @@ fn home_has_h_card() {
     assert!(!card.prop("url").is_empty(), "h-card.u-url missing");
 }
 
+/// indiewebify.me looks for a short bio as the h-card's `p-note`
+/// (ADR 2026-11-06-h-card-bio-note).
+#[test]
+fn home_h_card_has_a_bio_note() {
+    let home = parsed(&site().join("index.html"));
+    let cards = home.items_of_type("h-card");
+    let card = cards.first().expect("home page has no h-card");
+    let note = crate::support::config()
+        .get("author")
+        .and_then(|a| a.str_at("note"))
+        .expect("config has no author.note");
+    assert!(!note.trim().is_empty(), "config author.note is empty");
+    assert!(
+        card.prop("note")
+            .iter()
+            .any(|v| matches!(v, Value::Text(t) if t == note)),
+        "h-card.p-note is not the configured bio: {:?}",
+        card.prop("note")
+    );
+}
+
 #[test]
 fn home_has_h_feed() {
     assert!(

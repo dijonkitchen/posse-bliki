@@ -182,6 +182,9 @@ pub struct Config {
     pub author_name: &'static str,
     /// Short name readers see in bylines, "JC"; the full name stays in the markup (ADR 2026-10-16-site-title-heads-home).
     pub author_nickname: &'static str,
+    /// A one-line bio for the home h-card's `p-note`, in JC's own words
+    /// from the bio page (ADR 2026-11-06-h-card-bio-note).
+    pub author_note: &'static str,
     pub author_url: &'static str,
     pub rel_me: &'static [&'static str],
     pub webmention_endpoint: &'static str,
@@ -205,6 +208,7 @@ pub fn default_config() -> Config {
         language: "en",
         author_name: "Jonathan Chen",
         author_nickname: "JC",
+        author_note: "Full-stack, entrepreneurial engineer that has built businesses from zero to one.",
         author_url: "https://www.dijonkitchen.org",
         rel_me: &["https://github.com/dijonkitchen"],
         webmention_endpoint: "https://webmention.io/www.dijonkitchen.org/webmention",
@@ -230,6 +234,7 @@ impl Config {
                 "author".into(),
                 Json::Obj(vec![
                     ("name".into(), json::s(self.author_name)),
+                    ("note".into(), json::s(self.author_note)),
                     ("url".into(), json::s(self.author_url)),
                     (
                         "rel_me".into(),
@@ -572,9 +577,10 @@ fn page(
     // The home page's representative h-card, for IndieWeb tools (ADR 2026-10-16-home-shows-recent-posts).
     let card = if home {
         format!(
-            "<span class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{}/\">{}</a></span> \u{b7}\n",
+            "<span class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{}/\">{}</a><data class=\"p-note\" value=\"{}\"></data></span> \u{b7}\n",
             e(site.base_url),
-            author_label(site)
+            author_label(site),
+            e(site.author_note)
         )
     } else {
         String::new()
