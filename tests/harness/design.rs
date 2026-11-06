@@ -697,7 +697,7 @@ fn heading_rules_are_not_outranked() {
 }
 
 /// A style that sets notes on a panel, clear of its background, does the
-/// same for lists of notes (the home page, /notes/, tags), whose <main>
+/// same for lists of notes (the home page, /notes/), whose <main>
 /// holds a section.h-feed rather than an article.
 #[test]
 fn styles_panel_lists_like_notes() {

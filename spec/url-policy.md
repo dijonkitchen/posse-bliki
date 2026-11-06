@@ -27,7 +27,6 @@ URLs are forever. Changes here require a redirect from every old URL — see
 | `/sitemap.xml` | Sitemap |
 | `/robots.txt` | Generated |
 | `/.well-known/security.txt` | Generated, RFC 9116: `Contact`, `Expires` 180 days after the build date, `Canonical` (ADR 2026-10-28-security-txt) |
-| `/tags/<tag>/` | Tag list page |
 | `/notes/` | Notes list page |
 | `/404.html` | 404 page |
 
@@ -44,6 +43,12 @@ Once an alias is added, **never remove it**.
 `/all` and `/all.html`, the Jekyll site's list of every post, redirect to
 `/notes/` the same way (ADR 2026-10-16-old-all-page). Tested in
 `tests/harness/aliases.rs`.
+
+The two tag pages this site built before it dropped tags redirect the same way
+(ADR 2026-11-06-drop-tags):
+`/tags/podcast/` to `/notes/`,
+and `/tags/meta/` to `/colophon/`, where "How this bliki works" went.
+Tested in `tests/harness/aliases.rs`.
 
 `/subscribe/`, the Substack's sign-up page, redirects to `/follow/`, an
 alias in `content/follow.md` (ADR 2026-11-05-follow-with-a-feed-reader).

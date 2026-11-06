@@ -48,7 +48,6 @@ In addition to the universal invariants, every post page must:
   - `.p-author` `h-card` referencing the site author
   - `.u-url` matching the page's canonical URL
   - `.p-summary` if `summary` was set
-  - `.p-category` per tag
   - `.u-syndication` per syndication URL
   - a hidden, empty link to each configured syndication target
   - received webmentions, when given (see [indieweb.md](indieweb.md))
@@ -72,7 +71,7 @@ In addition to the universal invariants, every post page must:
   `p-summary` excerpt (its `summary`, else the start of its text; ADR
   2026-10-16-home-post-excerpts).
 
-## List pages (`/notes/`, `/tags/<tag>/`)
+## List pages (`/notes/`)
 
 - Contain an `h-feed` of `h-entry` items.
 

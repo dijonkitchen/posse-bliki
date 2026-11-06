@@ -1,11 +1,10 @@
 //! Text transforms applied to note bodies before Markdown rendering:
-//! slugs, `[[wikilinks]]`, inline `#tags` (both skipping code), relative
-//! `.md` links (after rendering), and the
+//! slugs, `[[wikilinks]]` (skipping code), relative `.md` links (after
+//! rendering), and the
 //! small regex-equivalents the build needs (HTML stripping, href scanning).
 
 use std::collections::HashMap;
 
-use crate::unicode;
 use crate::util::{percent_decode, py_repr_str, py_strip};
 
 /// `_slugify`: lower, strip, `[^a-z0-9]+` → `-`, strip `-`.
@@ -182,60 +181,6 @@ pub fn resolve_md_links(html: &str, rel: &str, rel_to_url: &HashMap<String, Stri
     Ok(out)
 }
 
-/// `(?:^|(?<=\s))#(?P<tag>[a-z0-9][a-z0-9-]*)\b` at `i`: returns (len, tag).
-fn tag_at(c: &[char], i: usize) -> Option<(usize, String)> {
-    if c.get(i) != Some(&'#') {
-        return None;
-    }
-    if !(i == 0 || unicode::is_space(c[i - 1])) {
-        return None;
-    }
-    let tag_char = |ch: char| ch.is_ascii_lowercase() || ch.is_ascii_digit() || ch == '-';
-    let start = i + 1;
-    match c.get(start) {
-        Some(&ch) if ch.is_ascii_lowercase() || ch.is_ascii_digit() => {}
-        _ => return None,
-    }
-    let mut end = start + 1;
-    while end < c.len() && tag_char(c[end]) {
-        end += 1;
-    }
-    // backtrack until a word boundary follows
-    while end > start {
-        let before = unicode::is_word(c[end - 1]);
-        let after = c.get(end).is_some_and(|&ch| unicode::is_word(ch));
-        if before != after {
-            return Some((end - i, c[start..end].iter().collect()));
-        }
-        end -= 1;
-    }
-    None
-}
-
-/// Turn inline `#tag`s into links and collect them (code is skipped).
-pub fn extract_inline_tags(text: &str) -> (String, Vec<String>) {
-    let c: Vec<char> = text.chars().collect();
-    let mut out = String::with_capacity(text.len());
-    let mut found = Vec::new();
-    let mut i = 0;
-    while i < c.len() {
-        if let Some(n) = code_at(&c, i) {
-            out.extend(&c[i..i + n]);
-            i += n;
-            continue;
-        }
-        if let Some((n, tag)) = tag_at(&c, i) {
-            out.push_str(&format!("[#{}](/tags/{}/)", tag, tag));
-            found.push(tag);
-            i += n;
-            continue;
-        }
-        out.push(c[i]);
-        i += 1;
-    }
-    (out, found)
-}
-
 /// `re.sub(r"<[^>]+>", "", html)`
 pub fn strip_html(html: &str) -> String {
     let c: Vec<char> = html.chars().collect();
@@ -363,13 +308,6 @@ mod tests {
         assert!(resolve_wikilinks("[[bar]]", &m, "c.md")
             .unwrap_err()
             .contains("unresolved wikilink [[bar]] (slug 'bar')"));
-    }
-
-    #[test]
-    fn tags() {
-        let (t, f) = extract_inline_tags("#a x #b-c\n`#no` d#e #f- #G");
-        assert_eq!(t, "[#a](/tags/a/) x [#b-c](/tags/b-c/)\n`#no` d#e [#f](/tags/f/)- #G");
-        assert_eq!(f, vec!["a", "b-c", "f"]);
     }
 
     #[test]

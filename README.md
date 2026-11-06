@@ -27,7 +27,7 @@ AGENTS.md        Operating contract for any agent/human editing this repo
    turns off wikilinks and makes new links relative paths (*Settings →
    Files and links*); keep it that way.
 2. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
-   you when you type `[[`) and use `#tags` freely.
+   you when you type `[[`).
 3. `git commit && git push`. CI runs the harness and deploys.
 
 Front matter handles the rest: `draft: true` keeps a note out of the build,
@@ -62,7 +62,7 @@ with zero crate dependencies — see
   `/feed.xml` repeat the RSS for readers subscribed to the old Substack
   and Jekyll feeds
 - `/sitemap.xml`, `/robots.txt`, `/404.html`
-- Tag pages, notes index, alias redirects
+- Notes index, alias redirects
 
 ## Hosting
 

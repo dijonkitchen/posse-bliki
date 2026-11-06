@@ -21,14 +21,6 @@
     "summary": {
       "type": "string"
     },
-    "tags": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^[a-z0-9][a-z0-9-]*$"
-      },
-      "uniqueItems": true
-    },
     "draft": {
       "type": "boolean"
     },

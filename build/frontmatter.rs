@@ -901,18 +901,8 @@ fn resolve_float(s: &str) -> Option<f64> {
 // Schema validation (hand-written equivalent of spec/content-schema.json)
 // ---------------------------------------------------------------------------
 
-const PROPERTIES: &[&str] = &[
-    "title",
-    "date",
-    "updated",
-    "summary",
-    "tags",
-    "draft",
-    "aliases",
-    "syndication",
-];
+const PROPERTIES: &[&str] = &["title", "date", "updated", "summary", "draft", "aliases", "syndication"];
 const DATE_PATTERN: &str = r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:?\d{2})?)?$";
-const TAG_PATTERN: &str = "^[a-z0-9][a-z0-9-]*$";
 const ALIAS_PATTERN: &str = "^/.+";
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -967,16 +957,6 @@ pub fn is_date_like(s: &str) -> bool {
         return (t.len() == 4 && digits(t, 4)) || (t.len() == 5 && digits(t, 2) && t[2] == b':' && digits(&t[3..], 2));
     }
     false
-}
-
-pub fn is_tag(s: &str) -> bool {
-    let s = strip_dollar_nl(s);
-    let mut cs = s.chars();
-    match cs.next() {
-        Some(c) if c.is_ascii_lowercase() || c.is_ascii_digit() => {}
-        _ => return false,
-    }
-    cs.all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
 }
 
 fn is_alias(s: &str) -> bool {
@@ -1128,7 +1108,6 @@ pub fn validate(fm: &FrontMatter) -> Result<(), String> {
             "title" => check_string(v, path, true, None, false, &mut errs),
             "date" | "updated" => check_string(v, path, false, Some((DATE_PATTERN, is_date_like)), false, &mut errs),
             "summary" => check_string(v, path, false, None, false, &mut errs),
-            "tags" => check_array(v, "tags", Some((TAG_PATTERN, is_tag)), false, &mut errs),
             "draft" => {
                 if type_name(v) != "boolean" {
                     errs.push((path, format!("{} is not of type 'boolean'", v.repr())));
@@ -1181,7 +1160,7 @@ mod tests {
 
     #[test]
     fn yaml_basics() {
-        let y = "title: \"Hi: there\"\ndate: 2020-01-02\ntags: [a, 'b', c-d]\naliases:\n  - /x/\n  - /y/\ndraft: yes\nsummary: plain text # comment\n";
+        let y = "title: \"Hi: there\"\ndate: 2020-01-02\naliases: [/a/, '/b/', /c-d/]\nsyndication:\n  - https://x.example/\n  - https://y.example/\ndraft: yes\nsummary: plain text # comment\n";
         let v = parse_yaml(y).unwrap().unwrap();
         let m = match v {
             Value::Map(m) => m,
@@ -1190,14 +1169,17 @@ mod tests {
         assert_eq!(get(&m, "title"), Some(&Value::Str("Hi: there".into())));
         assert_eq!(get(&m, "date"), Some(&Value::Str("2020-01-02".into())));
         assert_eq!(
-            get(&m, "tags"),
+            get(&m, "aliases"),
             Some(&Value::List(vec![
-                Value::Str("a".into()),
-                Value::Str("b".into()),
-                Value::Str("c-d".into())
+                Value::Str("/a/".into()),
+                Value::Str("/b/".into()),
+                Value::Str("/c-d/".into())
             ]))
         );
-        assert_eq!(get(&m, "aliases").unwrap().repr(), "['/x/', '/y/']");
+        assert_eq!(
+            get(&m, "syndication").unwrap().repr(),
+            "['https://x.example/', 'https://y.example/']"
+        );
         assert_eq!(get(&m, "draft"), Some(&Value::Bool(true)));
         assert_eq!(get(&m, "summary"), Some(&Value::Str("plain text".into())));
         assert!(validate(&m).is_ok());
@@ -1205,14 +1187,27 @@ mod tests {
 
     #[test]
     fn schema_errors() {
-        let m = match parse_yaml("title: 12\ntags: [Bad, Bad]\nfoo: 1\n").unwrap().unwrap() {
+        let m = match parse_yaml("title: 12\naliases: [bad, bad]\nfoo: 1\n").unwrap().unwrap() {
             Value::Map(m) => m,
             _ => panic!(),
         };
         let e = validate(&m).unwrap_err();
         assert_eq!(
             e,
-            "[]: Additional properties are not allowed ('foo' was unexpected); ['tags']: ['Bad', 'Bad'] has non-unique elements; ['tags', 0]: 'Bad' does not match '^[a-z0-9][a-z0-9-]*$'; ['tags', 1]: 'Bad' does not match '^[a-z0-9][a-z0-9-]*$'; ['title']: 12 is not of type 'string'"
+            "[]: Additional properties are not allowed ('foo' was unexpected); ['aliases']: ['bad', 'bad'] has non-unique elements; ['aliases', 0]: 'bad' does not match '^/.+'; ['aliases', 1]: 'bad' does not match '^/.+'; ['title']: 12 is not of type 'string'"
+        );
+    }
+
+    #[test]
+    fn tags_are_not_a_field() {
+        // ADR 2026-11-06-drop-tags.
+        let m = match parse_yaml("title: x\ntags: [podcast]\n").unwrap().unwrap() {
+            Value::Map(m) => m,
+            _ => panic!(),
+        };
+        assert_eq!(
+            validate(&m).unwrap_err(),
+            "[]: Additional properties are not allowed ('tags' was unexpected)"
         );
     }
 

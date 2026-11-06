@@ -71,3 +71,17 @@ fn old_how_this_bliki_works_note_redirects_to_colophon() {
     );
     assert!(html.contains("rel=\"canonical\""));
 }
+
+#[test]
+fn old_tag_pages_redirect() {
+    // ADR 2026-11-06-drop-tags.
+    for (tag, to) in [("meta", "/colophon/"), ("podcast", "/notes/")] {
+        let path = format!("tags/{tag}/index.html");
+        let html = read(&site().join(&path));
+        assert!(
+            html.contains(&format!("http-equiv=\"refresh\" content=\"0; url={to}\"")),
+            "{path}"
+        );
+        assert!(html.contains("rel=\"canonical\""), "{path}");
+    }
+}
