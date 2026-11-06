@@ -82,7 +82,10 @@ site-wide, and gets only the fixed pages (ADR 2026-10-29-lighthouse-changed-page
 | SEO | 100 |
 
 Performance has headroom because shared CI runners are noisy; the others
-are pass/fail checks. Locally every page scores 100 in all four.
+are pass/fail checks. A `noindex` page (the 404 and offline pages, alias
+redirects) has no SEO minimum, since Lighthouse's SEO category fails any
+page kept out of search on purpose; it's held to the other three
+(ADR 2026-11-06-not-found-page). Locally every page scores 100 in all four.
 
 Lighthouse is locked, with every transitive package, in
 `scripts/lighthouse/package-lock.json` and installed with `npm ci`, so CI
