@@ -30,6 +30,23 @@ fm3._domainkey          CNAME   fm3.dijonkitchen.org.dkim.fmhosted.com.
 ; Reports only for now; tighten to quarantine, then reject, after clean reports.
 _dmarc                  TXT     "v=DMARC1; p=none; rua=mailto:dmarc@dijonkitchen.org"
 
+; Mail, calendar and contacts app discovery (RFC 6186, RFC 6764, JMAP), as
+; Fastmail lists them (ADR 2026-11-06-fastmail-srv-records). "0 0 0 ." means
+; the plain-text service isn't offered, so apps use the TLS one.
+; priority weight port target
+_submission._tcp        SRV     0 0 0 .
+_submissions._tcp       SRV     0 1 465 smtp.fastmail.com.
+_imap._tcp              SRV     0 0 0 .
+_imaps._tcp             SRV     0 1 993 imap.fastmail.com.
+_pop3._tcp              SRV     0 0 0 .
+_pop3s._tcp             SRV     10 1 995 pop.fastmail.com.
+_jmap._tcp              SRV     0 1 443 api.fastmail.com.
+_autodiscover._tcp      SRV     0 1 443 autodiscover.fastmail.com.
+_carddav._tcp           SRV     0 0 0 .
+_carddavs._tcp          SRV     0 1 443 carddav.fastmail.com.
+_caldav._tcp            SRV     0 0 0 .
+_caldavs._tcp           SRV     0 1 443 caldav.fastmail.com.
+
 ; Ownership checks.
 @                                       TXT     "google-site-verification=bitAFl3JsXWi27bpiFdEpNB-F0-tQkO0DhK_Yy25z8M"
 _github-pages-challenge-dijonkitchen    TXT     "cd9449927f0827e1600e45c2fd5907"
