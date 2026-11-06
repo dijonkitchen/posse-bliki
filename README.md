@@ -23,9 +23,9 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 
 ## Daily workflow
 
-1. Open `content/` as an Obsidian vault. In *Settings → Files and links*,
-   turn off *Use \[\[Wikilinks\]\]* and set *New link format* to *Relative
-   path to file*.
+1. Open `content/` as an Obsidian vault. Its `.obsidian/app.json` already
+   turns off wikilinks and makes new links relative paths (*Settings →
+   Files and links*); keep it that way.
 2. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`) and use `#tags` freely.
 3. `git commit && git push`. CI runs the harness and deploys.

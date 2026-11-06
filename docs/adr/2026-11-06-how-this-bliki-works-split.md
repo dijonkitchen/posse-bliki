@@ -30,9 +30,10 @@ By November it was a poor fit in three ways:
   spec/content-schema.md already cover the same ground, and more exactly.
   The note said every deploy sends new posts to Bridgy, but the
   syndicate job only runs once the `SEND_WEBMENTIONS` variable is set
-  (ADR 2026-10-11-webmentions-at-deploy-time). The only thing that wasn't
-  written down anywhere else was the Obsidian setting that makes new links
-  relative paths (ADR 2026-10-16-relative-markdown-links).
+  (ADR 2026-10-11-webmentions-at-deploy-time). The only thing the docs
+  didn't mention was the Obsidian setting that makes new links relative
+  paths (ADR 2026-10-16-relative-markdown-links), which the vault's
+  `.obsidian/app.json` already applies.
 
 The colophon ("How this site is built and why") overlapped only on the
 tool names in its table. About tells readers to see the colophon for how
@@ -43,7 +44,8 @@ syndication works, but the colophon only named the tools.
 Give each part of the note to the place its audience already looks, and
 delete the note:
 
-- **The README** gains the Obsidian link setting and one paragraph naming
+- **The README** says the vault's `.obsidian/app.json` sets the link
+  format and that it should stay that way, and adds one paragraph naming
   the front-matter fields an author uses day to day (`draft`, a future
   `date`, `aliases`, `syndication`), pointing to spec/content-schema.md
   for the full list. The spec stays the single source of truth for those
@@ -69,6 +71,10 @@ delete the note:
 
 - The feeds, the home page and the notes list stop showing a how-to as a
   post. The `meta` tag page goes away, because no other note used the tag.
+  So `/tags/meta/` stops resolving for now. Whether tags stay at all, and
+  how old tag URLs redirect if they don't, is a separate decision. An
+  alias can't cover it today, because aliases are written after tag pages
+  and would overwrite a future `#meta` page without any warning.
 - The authoring guide lives in one place, next to the code it describes,
   so it changes in the same PR as the behaviour it documents.
 - The colophon stays short: one paragraph more, and no author steps.
