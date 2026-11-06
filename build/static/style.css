@@ -443,6 +443,9 @@ main { padding-block-end: var(--space-7); }
 .h-entry > header { margin-bottom: var(--space-6); }
 .meta, .p-summary, .now-updated { color: var(--text-2); }
 .meta, .now-updated { font-size: var(--size-sm); }
+/* Small enough that the bio's text starts on a phone's first screen
+   (ADR 2026-11-06-h-card-photo). */
+.bio-photo img { inline-size: 10rem; }
 .meta a { color: inherit; }
 /* Feed addresses are written out in full to copy into a reader; let them
    break anywhere rather than push a phone screen sideways. */
