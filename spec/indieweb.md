@@ -24,7 +24,6 @@ Conformance to each item is enforced by a test in `tests/`.
 |---|---|---|
 | **Webmention** (receive) | <https://webmention.io> | `<link rel=webmention>` on every page |
 | **Webmention** (display) | webmention.io jf2 export | fetched at deploy, rendered by `--webmentions` |
-| **Pingback** (receive) | <https://webmention.io> | `<link rel=pingback>` on every page |
 | **Webmention** (send) | <https://brid.gy> (Mastodon, Bluesky) | deploy workflow, for new posts |
 | **ActivityPub** | <https://fed.brid.gy> | deploy workflow; follow `@<domain>@web.brid.gy` |
 | **WebSub** | <https://websub.rocks/hub> | optional `<link rel=hub>` if enabled |
@@ -69,6 +68,9 @@ Enforced by `tests/harness/webmentions.rs` and the Rust unit tests in
 - **IndieAuth** server — not needed unless we run Micropub. Use
   <https://indielogin.com> as a relying-party-only flow if logging in
   somewhere is required; the home `h-card` + `rel=me` is enough for now.
+- **Pingback** — pages don't advertise `<link rel=pingback>`. Webmention
+  began as a simplified Pingback and replaces it, without XML-RPC
+  (ADR 2026-11-06-drop-pingback).
 
 ## Verifying conformance
 

@@ -1,4 +1,4 @@
-//! rel=me, rel=author, rel=canonical, webmention and pingback
+//! rel=me, rel=author, rel=canonical and webmention; no pingback
 //! (spec/indieweb.md, spec/output-contract.md).
 
 use std::path::Path;
@@ -103,9 +103,11 @@ fn every_page_advertises_webmention() {
             "{}: missing rel=webmention",
             rel(p, site())
         );
+        // Pingback is retired in favour of Webmention
+        // (ADR 2026-11-06-drop-pingback).
         assert!(
-            !rels.rel("pingback").is_empty(),
-            "{}: missing rel=pingback",
+            rels.rel("pingback").is_empty(),
+            "{}: still advertises rel=pingback",
             rel(p, site())
         );
     }
