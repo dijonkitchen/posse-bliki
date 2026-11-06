@@ -23,10 +23,18 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 
 ## Daily workflow
 
-1. Open `content/` as an Obsidian vault.
+1. Open `content/` as an Obsidian vault. Its `.obsidian/app.json` already
+   turns off wikilinks and makes new links relative paths (*Settings →
+   Files and links*); keep it that way.
 2. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`) and use `#tags` freely.
 3. `git commit && git push`. CI runs the harness and deploys.
+
+Front matter handles the rest: `draft: true` keeps a note out of the build,
+a `date` in the future holds it back until that day, `aliases:` keeps old
+URLs redirecting (never remove one), and `syndication:` lists a post's
+copies elsewhere. [`spec/content-schema.md`](spec/content-schema.md) has
+every field.
 
 ## Local commands
 

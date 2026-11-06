@@ -61,3 +61,13 @@ fn old_all_page_redirects_to_notes() {
         assert!(html.contains("rel=\"canonical\""), "{path}");
     }
 }
+
+#[test]
+fn old_how_this_bliki_works_note_redirects_to_colophon() {
+    let html = read(&site().join("notes/how-this-bliki-works/index.html"));
+    assert!(
+        html.contains("http-equiv=\"refresh\" content=\"0; url=/colophon/\""),
+        "/notes/how-this-bliki-works/ doesn't redirect to /colophon/"
+    );
+    assert!(html.contains("rel=\"canonical\""));
+}
