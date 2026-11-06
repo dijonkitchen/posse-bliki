@@ -979,15 +979,26 @@ fn render_redirect(site: &Config, links: FooterLinks, target: &str, canonical: &
     base(site, links, "Redirecting\u{2026}", &meta, Some(canonical), &content)
 }
 
+/// GitHub Pages serves this for every missing address, at any depth, so its
+/// links stay root-relative (ADR 2026-11-06-not-found-page).
 fn render_404(site: &Config, links: FooterLinks) -> String {
-    let content = "\n<article>\n<h1>Not found</h1>\n<p>That page isn't here. Try the <a href=\"/\">home page</a> or the <a href=\"/notes/\">notes index</a>.</p>\n</article>\n";
+    let follow = if links.follow {
+        "<li><a href=\"/follow/\">Follow</a> in a feed reader to get new posts</li>\n"
+    } else {
+        ""
+    };
+    let content = format!(
+        "\n<article>\n<h1>Page not found</h1>\n<p>There's no page at this address. It may have a typo, or the link that \
+brought you here may be broken. Try one of these:</p>\n<ul>\n<li>The <a href=\"/\">home page</a> for the latest \
+posts</li>\n<li>All <a href=\"/notes/\">notes</a>, newest first</li>\n{follow}</ul>\n</article>\n"
+    );
     base(
         site,
         links,
-        &format!("Not found \u{2014} {}", e(site.title)),
-        &description_meta(site.tagline),
+        &format!("Page not found \u{2014} {}", e(site.title)),
+        "\n<meta name=\"robots\" content=\"noindex\">\n",
         None,
-        content,
+        &content,
     )
 }
 
