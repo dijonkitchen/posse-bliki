@@ -1,7 +1,7 @@
 # 2026-05-10 — Obsidian as editor, no required plugins
 
 - Date: 2026-05-10
-- Status: Accepted
+- Status: Accepted; its tag syntax is dropped by [2026-11-06-drop-tags](2026-11-06-drop-tags.md)
 
 ## Context
 

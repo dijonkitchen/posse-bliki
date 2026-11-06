@@ -43,7 +43,7 @@ Spec: <https://www.jsonfeed.org/version/1.1/>
 - Top-level: `version`, `title`, `home_page_url`, `feed_url`,
   `language`, `authors`, `items`.
 - Each item: `id` (canonical URL), `url`, `title`, `content_html`,
-  `date_published` (RFC 3339), `tags`, optional `summary`.
+  `date_published` (RFC 3339), optional `summary`.
 
 ## Blogroll — `/blogroll/` and `/blogroll.opml`
 

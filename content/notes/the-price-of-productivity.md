@@ -2,8 +2,6 @@
 title: "The Price of Productivity"
 date: 2024-12-06
 summary: "Technology's extraction of value"
-tags:
-  - podcast
 aliases:
   - /p/the-price-of-productivity-84c/
 ---

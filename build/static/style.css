@@ -454,28 +454,6 @@ main { padding-block-end: var(--space-7); }
 .e-content > :first-child { margin-top: 0; }
 .e-content h1 { font-size: var(--size-2xl); margin-top: var(--space-6); }
 
-/* Tags: static pill tags, at least 44px tall so they are easy to hit. */
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  max-width: none;
-}
-.tags a {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--target-min);
-  padding-inline: 14px;
-  border: 2px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  background: var(--surface-card);
-  color: var(--text-1);
-  font-size: var(--size-sm);
-  text-decoration: none;
-  transition: background-color var(--duration-fast) var(--ease-out);
-}
-.tags a:hover { background: var(--surface-selected); border-color: var(--text-1); }
-
 .h-entry > footer {
   margin-top: var(--space-7);
   color: var(--text-2);

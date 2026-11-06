@@ -1,8 +1,6 @@
 ---
 title: "The Selfish Meme of Productivity"
 date: 2025-02-04
-tags:
-  - podcast
 aliases:
   - /p/the-selfish-meme-of-productivity/
 ---

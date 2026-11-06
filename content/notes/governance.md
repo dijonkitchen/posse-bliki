@@ -2,8 +2,6 @@
 title: "Governance"
 date: 2024-12-21
 summary: "Parental leadership at scale"
-tags:
-  - podcast
 aliases:
   - /p/governance-e38/
 ---

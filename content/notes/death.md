@@ -2,8 +2,6 @@
 title: "Death"
 date: 2024-12-14
 summary: "Survive or thrive"
-tags:
-  - podcast
 aliases:
   - /p/death-b2f/
 ---

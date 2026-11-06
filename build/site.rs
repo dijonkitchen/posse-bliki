@@ -293,7 +293,6 @@ struct Note {
     out_path: PathBuf,
     content_html: String,
     backlinks: Vec<usize>,
-    tags: Vec<String>,
     date: Option<Date>,
     updated: Option<Date>,
 }
@@ -433,7 +432,6 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
             out_path: PathBuf::new(),
             content_html: String::new(),
             backlinks: Vec::new(),
-            tags: Vec::new(),
             date,
             updated,
         });
@@ -539,6 +537,10 @@ const BIO: &str = "bio";
 /// `content/follow.md`, how to follow the site in a feed reader
 /// (ADR 2026-11-05-follow-with-a-feed-reader).
 const FOLLOW: &str = "follow";
+
+/// The `/tags/<tag>/` pages built before tags were dropped, and where each
+/// now redirects (ADR 2026-11-06-drop-tags).
+const OLD_TAG_PAGES: &[(&str, &str)] = &[("meta", "/colophon/"), ("podcast", "/notes/")];
 
 /// The optional pages every page links to, when the vault has them.
 #[derive(Clone, Copy)]
@@ -769,16 +771,6 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         .summary()
         .map(|s| format!("<p class=\"p-summary\">{}</p>", e(s)))
         .unwrap_or_default();
-    let tags = if n.tags.is_empty() {
-        String::new()
-    } else {
-        let links: Vec<String> = n
-            .tags
-            .iter()
-            .map(|t| format!("<a class=\"p-category\" href=\"/tags/{}/\">#{}</a>", e(t), e(t)))
-            .collect();
-        format!("<p class=\"tags\">{}</p>", links.join(" "))
-    };
     let synd = n.str_list("syndication");
     let synd = if synd.is_empty() {
         String::new()
@@ -803,7 +795,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         "\n<article class=\"h-entry\">\n<header>\n<h1 class=\"p-name\">{title}</h1>\n<p class=\"meta\">\n\
 <a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{human}</time></a>\n\
 {updated}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
-</p>\n{summary}\n{tags}\n</header>\n<div class=\"e-content\">\n{html}\n</div>\n{synd}{posse}{mentions}\n</article>\n{back}\n",
+</p>\n{summary}\n</header>\n<div class=\"e-content\">\n{html}\n</div>\n{synd}{posse}{mentions}\n</article>\n{back}\n",
         title = e(n.title()),
         canon = e(canonical),
         iso = d.iso(),
@@ -1115,12 +1107,6 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     // render markdown
     for n in notes.iter_mut() {
         let body = text::resolve_wikilinks(&n.body, &slug_to_url, &n.rel)?;
-        let (body, inline_tags) = text::extract_inline_tags(&body);
-        let mut tags = n.str_list("tags");
-        tags.extend(inline_tags);
-        tags.sort();
-        tags.dedup();
-        n.tags = tags;
         let mut html = text::resolve_md_links(&markdown::render(&body), &n.rel, &rel_to_url)?;
         if n.slug == BIO && n.kind == Kind::Page {
             // Content can't hold raw HTML, so the build adds the photo; it
@@ -1139,13 +1125,6 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         // never spells the address out (ADR 2026-11-06-coded-email).
         let html = html.replace("href=\"mailto:\"", &format!("href=\"{}\"", coded_mailto(site)));
         n.content_html = prepare_images(&html, content, &n.rel)?;
-    }
-    for n in &notes {
-        for t in &n.tags {
-            if !frontmatter::is_tag(t) {
-                return Err(format!("{}: invalid tag {}", n.rel, py_repr_str(t)));
-            }
-        }
     }
 
     // backlinks
@@ -1204,30 +1183,6 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         )?,
     )?;
 
-    // tag pages
-    let mut by_tag: Vec<(String, Vec<usize>)> = Vec::new();
-    for &p in &posts {
-        for t in &notes[p].tags {
-            match by_tag.iter_mut().find(|(k, _)| k == t) {
-                Some((_, v)) => v.push(p),
-                None => by_tag.push((t.clone(), vec![p])),
-            }
-        }
-    }
-    by_tag.sort_by(|a, b| a.0.cmp(&b.0));
-    for (tag, tag_posts) in &by_tag {
-        let url = format!("/tags/{}/", tag);
-        let html = render_list(
-            site,
-            &notes,
-            &format!("#{}", tag),
-            &format!("Posts tagged #{} on {}, newest first.", tag, site.title),
-            tag_posts,
-            &canonical(&url),
-        )?;
-        write(&out.join("tags").join(tag).join("index.html"), &html)?;
-    }
-
     // alias redirects
     for n in &notes {
         for alias in n.str_list("aliases") {
@@ -1248,6 +1203,12 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     let notes_index = render_redirect(site, footer_links(&notes), "/notes/", &canonical("/notes/"));
     write(&out.join("all/index.html"), &notes_index)?;
     write(&out.join("all.html"), &notes_index)?;
+    for (tag, to) in OLD_TAG_PAGES {
+        write(
+            &out.join("tags").join(tag).join("index.html"),
+            &render_redirect(site, footer_links(&notes), to, &canonical(to)),
+        )?;
+    }
 
     // 404
     write(&out.join("404.html"), &render_404(site, footer_links(&notes)))?;
@@ -1320,10 +1281,6 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
             if let Some(s) = n.summary() {
                 item.push(("summary".to_string(), json::s(s)));
             }
-            item.push((
-                "tags".to_string(),
-                Json::Arr(n.tags.iter().map(|t| json::s(t)).collect()),
-            ));
             Json::Obj(item)
         })
         .collect();
@@ -1355,9 +1312,6 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         })
         .collect();
     urls.push((canonical("/notes/"), date::EPOCH.iso()));
-    for (tag, _) in &by_tag {
-        urls.push((canonical(&format!("/tags/{}/", tag)), date::EPOCH.iso()));
-    }
     let mut sm = String::from(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">",
     );
