@@ -1,8 +1,9 @@
 # 2026-10-23 — Dependabot bumps the Rust toolchain; Renovate stays out
 
 - Date: 2026-10-23
-- Status: Accepted; Lighthouse is no longer bumped by hand, see
-  [2026-11-05-dependabot-lighthouse-updates](2026-11-05-dependabot-lighthouse-updates.md)
+- Status: Accepted; Lighthouse and the Nu checker are no longer bumped by
+  hand, see [2026-11-05-dependabot-lighthouse-updates](2026-11-05-dependabot-lighthouse-updates.md)
+  and [2026-11-06-dependabot-nu-checker](2026-11-06-dependabot-nu-checker.md)
 - Decided by: JC, comparing Dependabot, Renovate and other update bots,
   then asking to verify Dependabot's toolchain support and close the
   Renovate onboarding PR (#3).

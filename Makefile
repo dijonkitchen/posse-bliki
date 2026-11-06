@@ -12,10 +12,10 @@ WEBMENTIONS ?=
 # Unicode Character Database release `make tables` reads (see build/unicode.rs)
 UNICODE_VERSION ?= 15.1.0
 TABLES_DATA ?= target/tables-data
-# Nu HTML Checker for `make validate` (ADR 2026-10-11-nu-html-checker-in-ci): pinned release from npm, checked by hash
-VNU_VERSION := 26.9.16
-VNU_SHA512  := 843772e456ea003f9e3998d481837389d4b38b9e2ffd595e07f6ac3b2cd81823dc9ac03d2b86afebea0a4be64ff43235376b3fcfa6d7ee4f24739c16af796c62
-VNU_JAR     := target/vnu/vnu-$(VNU_VERSION).jar
+# Nu HTML Checker for `make validate` (ADR 2026-10-11-nu-html-checker-in-ci): locked with its hash in
+# scripts/vnu/package-lock.json, where Dependabot proposes bumps (ADR 2026-11-06-dependabot-nu-checker)
+VNU_DIR := scripts/vnu
+VNU_JAR := $(VNU_DIR)/node_modules/vnu-jar/build/dist/vnu.jar
 
 help: ## Show available targets
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "  \033[36m%-8s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -41,17 +41,15 @@ ci: lint test build ## Full local CI: same checks .github/workflows/ci.yml runs
 # The checker reads pages as file: URLs, where the CSP's 'self' matches
 # nothing, so it flags every stylesheet and script. tests/harness/csp.rs
 # checks the policy instead (ADR 2026-10-28-csp-meta-tag).
-validate: build $(VNU_JAR) ## Check every built page with the Nu HTML Checker (needs Java)
+validate: build $(VNU_JAR) ## Check every built page with the Nu HTML Checker (needs Java and Node)
 	java -jar $(VNU_JAR) --skip-non-html --Werror \
 		--filterpattern '.*(Trailing slash on void elements|Resource violates Content Security Policy).*' $(OUT)
 
-$(VNU_JAR):
-	mkdir -p target/vnu
-	curl -fsSL -o target/vnu/vnu.tgz https://registry.npmjs.org/vnu-jar/-/vnu-jar-$(VNU_VERSION).tgz
-	echo "$(VNU_SHA512)  target/vnu/vnu.tgz" | shasum -a 512 -c -
-	tar -xzf target/vnu/vnu.tgz -C target/vnu package/build/dist/vnu.jar
-	mv target/vnu/package/build/dist/vnu.jar $@
-	rm -rf target/vnu/package target/vnu/vnu.tgz
+# npm ci checks the download against the lockfile's hash, and reinstalls when
+# a bump changes the lockfile. --ignore-scripts skips the package's
+# postinstall, which would download a Java runtime; CI installs Java itself.
+$(VNU_JAR): $(VNU_DIR)/package-lock.json
+	npm ci --prefix $(VNU_DIR) --ignore-scripts --no-audit --no-fund
 
 lighthouse: ## Lighthouse budget on the built site (CI-only; needs Node + Chrome, ADR 2026-10-14-mobile-first)
 	scripts/lighthouse.sh
@@ -65,4 +63,4 @@ tables: ## Regenerate build/entities.rs and build/unicode.rs (downloads the sour
 	cargo fmt
 
 clean: ## Remove build artifacts
-	rm -rf public target _lighthouse
+	rm -rf public target _lighthouse $(VNU_DIR)/node_modules

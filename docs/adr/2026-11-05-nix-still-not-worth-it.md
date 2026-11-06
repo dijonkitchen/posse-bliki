@@ -1,7 +1,10 @@
 # 2026-11-05 — Nix is still not worth it
 
 - Date: 2026-11-05
-- Status: Accepted (JC chose "Skip Nix, add Lighthouse to Dependabot", 2026-11-05)
+- Status: Accepted (JC chose "Skip Nix, add Lighthouse to Dependabot", 2026-11-05);
+  the Nu HTML Checker row is out of date: it is now locked in
+  `scripts/vnu/package-lock.json` and Dependabot bumps it, see
+  [2026-11-06-dependabot-nu-checker](2026-11-06-dependabot-nu-checker.md)
 - Decided by: JC, asking "worth using nix to manage all deps?" with a
   link to a CI run on #72; Claude recommended against it.
 

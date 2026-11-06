@@ -1,0 +1,8 @@
+{
+  "name": "posse-bliki-vnu",
+  "private": true,
+  "description": "CI-only Nu HTML Checker (make validate, ADR 2026-10-11-nu-html-checker-in-ci). Locked by package-lock.json, so Dependabot can propose updates (ADR 2026-11-06-dependabot-nu-checker); installed with npm ci.",
+  "dependencies": {
+    "vnu-jar": "26.9.16"
+  }
+}

@@ -1,7 +1,8 @@
 # 2026-10-11 — Nu HTML Checker in CI
 
 - Date: 2026-10-11
-- Status: Accepted
+- Status: Accepted; how vnu is pinned and downloaded is superseded by
+  [2026-11-06-dependabot-nu-checker](2026-11-06-dependabot-nu-checker.md)
 - Decided by: JC, asking for an independent validator in its own PR.
 
 ## Context
