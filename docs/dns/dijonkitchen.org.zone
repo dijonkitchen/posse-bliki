@@ -30,9 +30,13 @@ fm3._domainkey          CNAME   fm3.dijonkitchen.org.dkim.fmhosted.com.
 ; Reports only for now; tighten to quarantine, then reject, after clean reports.
 _dmarc                  TXT     "v=DMARC1; p=none; rua=mailto:dmarc@dijonkitchen.org"
 
-; Mail, calendar and contacts app discovery (RFC 6186, RFC 6764, JMAP), as
-; Fastmail lists them (ADR 2026-11-06-fastmail-srv-records). "0 0 0 ." means
-; the plain-text service isn't offered, so apps use the TLS one.
+; Mail, calendar and contacts app discovery, as Fastmail lists them
+; (ADR 2026-11-06-fastmail-srv-records):
+; https://www.fastmail.help/hc/en-us/articles/360060591153-Manual-DNS-configuration
+; Labels: RFC 6186 section 3 (mail), RFC 8314 section 7.3 (_submissions),
+; RFC 6764 section 3 (CalDAV/CardDAV), RFC 8620 section 2.2 (JMAP).
+; A target of "." means the service is "decidedly not available" (RFC 2782),
+; so apps skip the plain-text services and use the TLS ones.
 ; priority weight port target
 _submission._tcp        SRV     0 0 0 .
 _submissions._tcp       SRV     0 1 465 smtp.fastmail.com.
