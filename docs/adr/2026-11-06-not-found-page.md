@@ -48,6 +48,15 @@ How Pages and the site treat the page shapes what it can do:
   tell a missing page from one that isn't saved. Not keeping 404s means
   a post published at an address later is never answered offline by an
   old "not found".
+- **No Lighthouse SEO budget for `noindex` pages.** A PR that changes
+  the 404 gets it audited (ADR 2026-10-29-lighthouse-changed-pages), and
+  Lighthouse's SEO category scores any `noindex` page 54: it fails
+  "Page is blocked from indexing", and "no meta description" with it.
+  Both are the point of the page, so `scripts/lighthouse.sh` holds a
+  page carrying `noindex` to the performance, accessibility and best
+  practices budgets only, the same line the harness draws for
+  descriptions (spec/performance.md). The offline page and alias
+  redirects get the same treatment the next time a PR changes them.
 - `tests/harness/not_found.rs` checks the links work at any depth, the
   page links home, the notes and follow, it stays out of search, and
   the worker keeps 200s only.
@@ -69,6 +78,9 @@ How Pages and the site treat the page shapes what it can do:
   elsewhere.
 - **Suggest a close match with JavaScript.** It would need the list of
   every page shipped to the reader and would do nothing with JS off.
+- **Leave the 404 indexable** to keep its Lighthouse SEO score at 100.
+  Crawlers skip it at missing addresses anyway (404 status), but the
+  copy at `/404.html` answers 200 and could show up in results.
 - **Keep the 404 in the worker's shell** so offline readers see "not
   found" for missing pages. The worker can't know an unsaved page is
   missing, so it would show "not found" for pages that exist.

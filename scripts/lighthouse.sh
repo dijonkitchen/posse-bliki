@@ -56,6 +56,18 @@ done
 failed=0
 for page in $PAGES; do
   name=$(printf '%s' "$page" | tr '/' '_')
+  # Lighthouse's SEO category fails any page kept out of search on purpose,
+  # such as the 404 and offline pages, so those are held to every budget
+  # but SEO (ADR 2026-11-06-not-found-page).
+  file="$OUT$page"
+  case "$file" in
+    */) file="${file}index.html" ;;
+  esac
+  seo="$BUDGET_SEO"
+  if grep -q 'content="noindex"' "$file"; then
+    seo=0
+    echo "$page: noindex, so no SEO budget"
+  fi
   reports=""
   i=1
   while [ "$i" -le "$RUNS" ]; do
@@ -105,7 +117,7 @@ for page in $PAGES; do
     console.log(page + ": " + line.join(", "));
     process.exit(ok ? 0 : 1);
   ' "$page" "$RUNS" \
-    "$BUDGET_PERFORMANCE" "$BUDGET_ACCESSIBILITY" "$BUDGET_BEST_PRACTICES" "$BUDGET_SEO" \
+    "$BUDGET_PERFORMANCE" "$BUDGET_ACCESSIBILITY" "$BUDGET_BEST_PRACTICES" "$seo" \
     $reports \
     || failed=1
 done
