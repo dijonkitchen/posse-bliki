@@ -46,3 +46,7 @@ Feel free to reach out too!
 
 Thanks, Derek, and everyone in the
 [/now movement](https://nownownow.com/) for the nudge.
+
+This is just my now. For the long now, see the
+[Long Now Foundation](https://longnow.org), which also inspired this
+site's [Holocene years](colophon.md).
