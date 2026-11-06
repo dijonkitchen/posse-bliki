@@ -185,6 +185,9 @@ pub struct Config {
     /// A one-line bio for the home h-card's `p-note`, in JC's own words
     /// from the bio page (ADR 2026-11-06-h-card-bio-note).
     pub author_note: &'static str,
+    /// The home h-card's `u-photo`, a path under `content/images/`
+    /// (ADR 2026-11-06-h-card-photo).
+    pub author_photo: &'static str,
     pub author_url: &'static str,
     pub rel_me: &'static [&'static str],
     pub webmention_endpoint: &'static str,
@@ -209,6 +212,7 @@ pub fn default_config() -> Config {
         author_name: "Jonathan Chen",
         author_nickname: "JC",
         author_note: "Full-stack, entrepreneurial engineer that has built businesses from zero to one.",
+        author_photo: "/images/jc.jpg",
         author_url: "https://www.dijonkitchen.org",
         rel_me: &["https://github.com/dijonkitchen"],
         webmention_endpoint: "https://webmention.io/www.dijonkitchen.org/webmention",
@@ -235,6 +239,7 @@ impl Config {
                 Json::Obj(vec![
                     ("name".into(), json::s(self.author_name)),
                     ("note".into(), json::s(self.author_note)),
+                    ("photo".into(), json::s(self.author_photo)),
                     ("url".into(), json::s(self.author_url)),
                     (
                         "rel_me".into(),
@@ -518,6 +523,10 @@ const BLOGROLL_OPML: &str = "/blogroll.opml";
 /// `content/now.md`, a now page after Derek Sivers's (ADR 2026-11-01-now-page).
 const NOW: &str = "now";
 
+/// `content/bio.md`, the work bio, which opens with the h-card's photo
+/// (ADR 2026-11-06-h-card-photo).
+const BIO: &str = "bio";
+
 /// `content/follow.md`, how to follow the site in a feed reader
 /// (ADR 2026-11-05-follow-with-a-feed-reader).
 const FOLLOW: &str = "follow";
@@ -577,10 +586,12 @@ fn page(
     // The home page's representative h-card, for IndieWeb tools (ADR 2026-10-16-home-shows-recent-posts).
     let card = if home {
         format!(
-            "<span class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{}/\">{}</a><data class=\"p-note\" value=\"{}\"></data></span> \u{b7}\n",
+            "<span class=\"h-card\">By <a class=\"u-url u-uid\" rel=\"me\" href=\"{}/\">{}</a><data class=\"p-note\" value=\"{}\"></data><data class=\"u-photo\" value=\"{}{}\"></data></span> \u{b7}\n",
             e(site.base_url),
             author_label(site),
-            e(site.author_note)
+            e(site.author_note),
+            e(site.base_url),
+            e(site.author_photo)
         )
     } else {
         String::new()
@@ -1071,7 +1082,20 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         tags.sort();
         tags.dedup();
         n.tags = tags;
-        let html = text::resolve_md_links(&markdown::render(&body), &n.rel, &rel_to_url)?;
+        let mut html = text::resolve_md_links(&markdown::render(&body), &n.rel, &rel_to_url)?;
+        if n.slug == BIO && n.kind == Kind::Page {
+            // Content can't hold raw HTML, so the build adds the photo; it
+            // goes through prepare_images like any other for its size and
+            // the missing-image check (ADR 2026-11-06-h-card-photo).
+            html.insert_str(
+                0,
+                &format!(
+                    "<p class=\"bio-photo\"><img src=\"{}\" alt=\"{}\"></p>\n",
+                    e(site.author_photo),
+                    e(site.author_nickname)
+                ),
+            );
+        }
         n.content_html = prepare_images(&html, content, &n.rel)?;
     }
     for n in &notes {

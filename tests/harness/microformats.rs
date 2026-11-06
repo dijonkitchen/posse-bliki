@@ -57,6 +57,61 @@ fn home_h_card_has_a_bio_note() {
     );
 }
 
+/// The h-card's photo is the author's avatar in readers, webmention
+/// displays and Bridgy Fed (ADR 2026-11-06-h-card-photo).
+#[test]
+fn home_h_card_has_a_photo_the_site_serves() {
+    let home = parsed(&site().join("index.html"));
+    let cards = home.items_of_type("h-card");
+    let card = cards.first().expect("home page has no h-card");
+    let author = crate::support::config().get("author").expect("config has no author");
+    let photo = author.str_at("photo").expect("config has no author.photo");
+    let url = format!("{}{photo}", crate::support::config_str("base_url"));
+    assert!(
+        card.prop("photo")
+            .iter()
+            .any(|v| matches!(v, Value::Text(t) if *t == url)),
+        "h-card.u-photo is not {url}: {:?}",
+        card.prop("photo")
+    );
+    let file = site().join(photo.trim_start_matches('/'));
+    let bytes = std::fs::read(&file).unwrap_or_else(|_| panic!("{photo} is not in the built site"));
+    let (w, h) = posse_bliki_build::image::size(&bytes).unwrap_or_else(|| panic!("{photo} is not an image"));
+    assert_eq!(
+        w, h,
+        "{photo} is {w}x{h}; avatars are cropped square, so make it square"
+    );
+}
+
+/// The bio page opens with the same photo, sized so the page doesn't
+/// jump when it loads (ADR 2026-11-06-h-card-photo).
+#[test]
+fn bio_page_opens_with_the_photo() {
+    let photo = crate::support::config()
+        .get("author")
+        .and_then(|a| a.str_at("photo"))
+        .expect("config has no author.photo");
+    let html = read(&site().join("bio/index.html"));
+    let img = html
+        .split("<img ")
+        .nth(1)
+        .map(|t| &t[..t.find('>').unwrap_or(t.len())])
+        .expect("bio page has no image");
+    assert!(
+        img.contains(&format!("src=\"{photo}\"")),
+        "bio's first image isn't {photo}: {img}"
+    );
+    assert!(img.contains("alt=\"JC\""), "bio photo needs alt text: {img}");
+    assert!(
+        img.contains("width=\"") && img.contains("height=\""),
+        "bio photo needs its size: {img}"
+    );
+    assert!(
+        !img.contains("loading=\"lazy\""),
+        "bio photo is on the first screen: {img}"
+    );
+}
+
 #[test]
 fn home_has_h_feed() {
     assert!(

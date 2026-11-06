@@ -61,7 +61,10 @@ In addition to the universal invariants, every post page must:
   shown as a "By JC" byline in the footer, not a heading; the full name is a
   `<data>` value.
   `p-note` is a one-line bio, also a `<data>` value
-  (ADR 2026-11-06-h-card-bio-note). `rel=me` profile links are `<link>`s in the `<head>`
+  (ADR 2026-11-06-h-card-bio-note).
+  `u-photo` is the absolute URL of a square photo in `content/images/`,
+  also a `<data>` value, so browsers don't download it
+  (ADR 2026-11-06-h-card-photo). `rel=me` profile links are `<link>`s in the `<head>`
   (ADR 2026-10-16-home-shows-recent-posts).
 - The site title is the page's `<h1>`, in the header (ADR 2026-10-16-site-title-heads-home).
 - Contains an `h-feed` listing recent posts as `h-entry` items, each with a

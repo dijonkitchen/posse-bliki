@@ -14,6 +14,7 @@ The machine-readable schema lives at [`content-schema.json`](content-schema.json
 | `content/blogroll.md` | page, also `/blogroll.opml` | `page.html` | no (see [feeds.md](feeds.md)) |
 | `content/now.md` | page, a [now page](https://nownownow.com/about) | `page.html` | no (see below) |
 | `content/follow.md` | page, how to follow in a feed reader | `page.html` | no (see [feeds.md](feeds.md)) |
+| `content/bio.md` | page, the work bio; opens with the author's photo | `page.html` | no (ADR 2026-11-06-h-card-photo) |
 | `content/notes/**/*.md` | post | `post.html` | yes |
 
 Images go in `content/images/` and are linked as `/images/<file>`
