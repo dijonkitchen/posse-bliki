@@ -28,6 +28,8 @@ life, and rolling around hugging people in jiu-jitsu.
 This page is a quick summary.
 For a full résumé or to talk about work,
 [email me](mailto:).
+You won't bother me:
+[About](about.md) has my standing invitation.
 
 
 ## Experience

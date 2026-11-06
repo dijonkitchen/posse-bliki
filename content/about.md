@@ -66,6 +66,20 @@ This bliki shows the interconnected network of philosophy, business, life, techn
 I'd love to hear any interesting thoughts of your own.
 [Email me](mailto:).
 
+Consider it a standing invitation,
+after [Patrick McKenzie's](https://www.kalzumeus.com/standing-invitation/)
+and [Derek Sivers's](https://sive.rs/contact):
+
+- **You won't bother me.**
+  A question, a disagreement, something you wrote, or just hello:
+  all welcome.
+- **Keep it short.**
+  Two lines is plenty.
+  The worst that can happen is I'm busy that day and slow to reply.
+- **Email beats DMs.**
+  It's on my own domain,
+  so it reaches me whichever apps I'm on, or not.
+
 ## Support
 
 Support an effective cause that's probably higher than mine:
