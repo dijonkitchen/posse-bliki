@@ -25,22 +25,24 @@ When I'm not crafting code, my focus off screens is spent fixing my
 kids' toys, hiking new neighborhoods, wondering about the meaning of
 life, and rolling around hugging people in jiu-jitsu.
 
-This page is a summary. For a full résumé, a PDF copy, or to talk about
-work, contact me at `${my-initials}` [at]
+This page is a quick summary. 
+For a full résumé or to talk about work, 
+contact me at `${my-initials}` [at]
 [MY_DOMAIN_NAME](https://en.wikipedia.org/wiki/Domain_name).
+
 
 ## Experience
 
 ### Senior Software Engineer, Spring Health
 
-2024 to present · Customer growth, insights, and intelligence data
+2024 to present · SF · NYC · Hybrid
 
-I lead and execute on software engineering for a $2.5B mental wellness
-startup on a mission to eliminate every barrier to mental health.
+Removing barriers to mental health via
+customer growth, insights, data exchange, and intelligence profiles.
 
 ### Software Engineer, Robin Healthcare
 
-2020 to 2023
+2020 to 2023 · Berkeley, CA · Remote
 
 Making healthcare more personable, efficient, and value-based with
 video, transcripts, and AI.
@@ -59,13 +61,13 @@ Streamlining collaboration and communication in logistics.
 
 ### Co-founder and Product Engineer, Cortlandt Labs
 
-2016 to 2017 · New York, New York
+2016 to 2017 · New York, NY
 
 Turning founders' dreams into reality.
 
 ### VP, Alternative Investments, Credit Suisse
 
-2010 to 2015 · New York City
+2010 to 2015 · NYC
 
 Evaluating the valuation and risk of business investments.
 
@@ -75,31 +77,16 @@ Evaluating the valuation and risk of business investments.
 
 Pre-merger strategy and healthcare acquisition analysis.
 
-### Investment Analyst, Mde Group
+### Investment Analyst, MDE Group
 
-2007 to 2008 · Morristown, New Jersey
+2007 to 2008 · Morristown, NJ
 
 Hedge fund and investment research.
 
-## Top skills
-
-Ruby on Rails, TypeScript, and software development.
 
 ## Education
 
-- **Bradfield School of Computer Science**: Computer Science.
-- **Dev Bootcamp**: Web Development Intensive.
-- **Rutgers Business School**: BSc, BA, Finance and Philosophy.
-- **Renzo Gracie Academy**: Brazilian jiu-jitsu, 2023.
-
-## Certifications
-
-- Chartered Financial Analyst (CFA) Level 1 candidate.
-
-## More about me
-
-Why I write, and what this site is for, is on the
-[About page](about.md). My first month as an engineer in San Francisco is in [work](notes/work.md), and the long
-way I came to software is in [me](notes/me.md). My code is on
-[GitHub](https://github.com/dijonkitchen), including
-[the source of this site](https://github.com/dijonkitchen/posse-bliki).
+- **Renzo Gracie Academy**: Brazilian jiu-jitsu
+- **Bradfield School of Computer Science**: Software systems beneath the abstraction
+- **Dev Bootcamp**: Web Development Intensive
+- **Rutgers Business School**: BSc Finance, BA Philosophy.
