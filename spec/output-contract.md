@@ -44,7 +44,9 @@ In addition to the universal invariants, every post page must:
 - Contain exactly one `<article class="h-entry">`.
 - That `h-entry` contains:
   - `.p-name` with the title
-  - `.dt-published` `<time datetime="…">` from front-matter `date`
+  - `.dt-published` `<time datetime="…">` from front-matter `date`;
+    an evergreen note has `.dt-updated` from `updated` instead
+    (ADR 2026-11-07-evergreen-notes)
   - `.e-content` wrapping the rendered body
   - `.p-author` `h-card` referencing the site author
   - `.u-url` matching the page's canonical URL
@@ -68,13 +70,17 @@ In addition to the universal invariants, every post page must:
   (ADR 2026-11-06-h-card-photo). `rel=me` profile links are `<link>`s in the `<head>`
   (ADR 2026-10-16-home-shows-recent-posts).
 - The site title is the page's `<h1>`, in the header (ADR 2026-10-16-site-title-heads-home).
-- Contains an `h-feed` listing recent posts as `h-entry` items, each with a
+- Contains an `h-feed` headed "Recent notes" listing the 10 most recently
+  tended notes as `h-entry` items, each with a
   `p-summary` excerpt (its `summary`, else the start of its text; ADR
   2026-10-16-home-post-excerpts).
+  Order and dates follow [content-schema.md](content-schema.md#evergreen-notes-and-the-order-of-lists).
 
 ## List pages (`/notes/`)
 
-- Contain an `h-feed` of `h-entry` items.
+- Contain an `h-feed` of `h-entry` items: every post and evergreen note,
+  most recently tended first
+  (see [content-schema.md](content-schema.md#evergreen-notes-and-the-order-of-lists)).
 
 ## Dates
 

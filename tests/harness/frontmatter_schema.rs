@@ -36,8 +36,10 @@ fn frontmatter_validates() {
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
 
+/// A note needs `date` to be a post, or `updated` to be an evergreen note
+/// (ADR 2026-11-07-evergreen-notes).
 #[test]
-fn posts_have_date() {
+fn notes_have_date_or_updated() {
     let content = content_dir();
     for md in files_with_ext(&content.join("notes"), "md") {
         let fm = front_matter(&read(&md));
@@ -45,8 +47,8 @@ fn posts_have_date() {
             continue;
         }
         assert!(
-            frontmatter::get(&fm, "date").is_some(),
-            "{} is a post but has no `date`",
+            frontmatter::get(&fm, "date").is_some() || frontmatter::get(&fm, "updated").is_some(),
+            "{} has neither `date` (a post) nor `updated` (an evergreen note)",
             rel(&md, &content)
         );
     }

@@ -8,7 +8,8 @@ external bridges (Bridgy Fed, echofeed, IFTTT) at one of them.
 - `<rss version="2.0">` with the `atom` and `content` namespaces declared.
 - Channel: `<title>`, `<link>` (canonical site URL), `<description>`,
   `<language>`, `<lastBuildDate>` (RFC 822), `<atom:link rel="self">`.
-- Up to 50 most recent posts (excluding drafts), newest first. Why: feed
+- Up to 50 most recent posts (excluding drafts and evergreen notes),
+  newest first by `date`. Why: feed
   readers fetch the whole file on every poll, so it stays small; the JSON
   Feed and the notes index carry everything.
   With full text, 50 posts come to about 100 KB, or 30 KB gzipped.
@@ -61,6 +62,7 @@ Spec: <https://www.jsonfeed.org/version/1.1/>
 
 - Top-level: `version`, `title`, `home_page_url`, `feed_url`,
   `language`, `authors`, `items`.
+- Every post (excluding drafts and evergreen notes), newest first by `date`.
 - Each item: `id` (canonical URL), `url`, `title`, `content_html`,
   `date_published` (RFC 3339), optional `summary`.
 

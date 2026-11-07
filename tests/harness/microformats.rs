@@ -134,12 +134,24 @@ fn every_post_has_h_entry() {
     }
 }
 
+/// Every post has a publish date. An evergreen note, which no feed carries,
+/// has only the date it was updated (ADR 2026-11-07-evergreen-notes).
 #[test]
 fn h_entry_has_required_properties() {
+    let json = posse_bliki_build::json::parse(&read(&site().join("feed.json"))).expect("feed.json");
+    let in_feed: Vec<&str> = json
+        .get("items")
+        .expect("items")
+        .as_arr()
+        .iter()
+        .map(|i| i.str_at("url").expect("url"))
+        .collect();
     for f in post_html_files() {
         let doc = parsed(&f);
         let entry = doc.items_of_type("h-entry")[0];
-        for prop in ["name", "published", "content", "url", "author"] {
+        let url = entry.texts("url").first().copied().unwrap_or_default();
+        let date = if in_feed.contains(&url) { "published" } else { "updated" };
+        for prop in ["name", date, "content", "url", "author"] {
             assert!(
                 !entry.prop(prop).is_empty(),
                 "{}: h-entry missing p-/u-/dt-/e- {prop}",

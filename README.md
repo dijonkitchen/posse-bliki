@@ -33,7 +33,10 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 Front matter handles the rest: `draft: true` keeps a note out of the build,
 a `date` in the future holds it back until that day, `aliases:` keeps old
 URLs redirecting (never remove one), and `syndication:` lists a post's
-copies elsewhere. [`spec/content-schema.md`](spec/content-schema.md) has
+copies elsewhere.
+Set `updated` when you rework a note, and it moves to the top of Home and Notes.
+A note with `updated` and no `date` is an evergreen note:
+listed with the rest, but never sent to the feeds or syndicated. [`spec/content-schema.md`](spec/content-schema.md) has
 every field.
 
 ## Local commands
