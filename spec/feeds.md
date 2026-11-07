@@ -102,10 +102,28 @@ tells a newcomer nothing.
 
 ## robots.txt
 
-Tiny:
+Search engines and every other crawler may read everything. Crawlers
+whose operators say what they gather may train AI models are asked to
+read nothing (ADR 2026-11-06-no-ai-training). Each is named by the token
+its operator documents, in one group, per
+[RFC 9309](https://www.rfc-editor.org/rfc/rfc9309):
 
 ```
 User-agent: *
 Allow: /
+
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: Amazonbot
+User-agent: CCBot
+Disallow: /
+
 Sitemap: <site.base_url>/sitemap.xml
 ```
+
+The same companies' search agents (Googlebot, Applebot, OAI-SearchBot,
+Claude-SearchBot, Amzn-SearchBot) are never named, so they stay in the
+`*` group. Tested in `tests/harness/robots.rs`.
