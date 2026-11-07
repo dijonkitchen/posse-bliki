@@ -26,7 +26,7 @@ Conformance to each item is enforced by a test in `tests/`.
 | **Webmention** (display) | webmention.io jf2 export | fetched at deploy, rendered by `--webmentions` |
 | **Pingback** (receive) | <https://webmention.io> | `<link rel=pingback>` on every page |
 | **Webmention** (send) | <https://brid.gy> (Mastodon, Bluesky) | deploy workflow, for new posts |
-| **ActivityPub** | <https://fed.brid.gy> | deploy workflow; follow `@<domain>@web.brid.gy` |
+| **ActivityPub** | <https://fed.brid.gy> | deploy workflow; the bare domain redirects webfinger and host-meta to Bridgy Fed (`apex/_redirects`, ADR 2026-11-07-fediverse-handle-on-own-domain), so follow `@dijonkitchen.org@dijonkitchen.org` |
 | **WebSub** | <https://websub.rocks/hub> | optional `<link rel=hub>` if enabled |
 
 ## Webmentions at deploy time
