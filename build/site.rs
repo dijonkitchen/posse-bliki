@@ -764,6 +764,21 @@ fn backlinks_block(notes: &[Note], n: &Note) -> String {
     )
 }
 
+/// The site a syndication copy lives on, as its host without `www.`
+/// (`bsky.app`, `x.com`): the whole URL doesn't fit on a phone screen.
+fn site_name(url: &str) -> &str {
+    let rest = url.split_once("://").map_or(url, |(_, r)| r);
+    let host = rest.split(['/', '?', '#']).next().unwrap_or(rest);
+    let host = host.rsplit_once('@').map_or(host, |(_, h)| h);
+    let host = host.split(':').next().unwrap_or(host);
+    let host = host.strip_prefix("www.").unwrap_or(host);
+    if host.is_empty() {
+        url
+    } else {
+        host
+    }
+}
+
 fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Result<String, String> {
     let links = footer_links(notes);
     let d = n.post_date()?;
@@ -787,7 +802,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     } else {
         let links: Vec<String> = synd
             .iter()
-            .map(|s| format!("<a class=\"u-syndication\" href=\"{}\">{}</a>", e(s), e(s)))
+            .map(|s| format!("<a class=\"u-syndication\" href=\"{}\">{}</a>", e(s), e(site_name(s))))
             .collect();
         format!("\n<footer>\n<p>Also on: {}</p>\n</footer>\n", links.join(", "))
     };

@@ -4,7 +4,7 @@
 use std::path::Path;
 
 use crate::support::mf2::{self, Value};
-use crate::support::{html, post_html_files, read, rel, site};
+use crate::support::{build, html, post_html_files, read, rel, site, temp_dir, vault_copy};
 
 fn parsed(path: &Path) -> mf2::Parsed {
     mf2::parse(&html::parse(&read(path)).expect("valid HTML"))
@@ -192,6 +192,37 @@ fn home_posts_show_an_excerpt() {
                 .any(|v| matches!(v, Value::Text(t) if !t.is_empty())),
             "home post {:?} has no p-summary",
             entry.prop("name")
+        );
+    }
+}
+
+/// Each `syndication` URL is a `u-syndication` link named by its site's
+/// host, since the whole URL overflows a phone screen.
+#[test]
+fn syndication_links_are_named_by_their_site() {
+    let vault = vault_copy("syndication");
+    let urls = [
+        "https://bsky.app/profile/dijonkitchen.org/post/3mf5r4c4bns2b",
+        "https://www.threads.com/@dijonkitchen/post/abc",
+    ];
+    std::fs::write(
+        vault.join("notes/copied.md"),
+        format!(
+            "---\ntitle: Copied\ndate: 2026-05-09\nsyndication:\n  - {}\n  - {}\n---\n\nbody\n",
+            urls[0], urls[1]
+        ),
+    )
+    .unwrap();
+    let out = temp_dir("syndication-out");
+    build(&vault, &out, &[]).expect("build with syndication links");
+    let page = out.join("notes/copied/index.html");
+    let doc = parsed(&page);
+    assert_eq!(doc.items_of_type("h-entry")[0].texts("syndication"), urls);
+    let html = read(&page);
+    for (url, name) in urls.iter().zip(["bsky.app", "threads.com"]) {
+        assert!(
+            html.contains(&format!("href=\"{url}\">{name}</a>")),
+            "{url} should be a link reading {name}"
         );
     }
 }
