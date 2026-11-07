@@ -15,7 +15,7 @@ The machine-readable schema lives at [`content-schema.json`](content-schema.json
 | `content/now.md` | page, a [now page](https://nownownow.com/about) | `page.html` | no (see below) |
 | `content/follow.md` | page, how to follow in a feed reader | `page.html` | no (see [feeds.md](feeds.md)) |
 | `content/bio.md` | page, the work bio; opens with the author's photo | `page.html` | no (ADR 2026-11-06-h-card-photo) |
-| `content/notes/**/*.md` | post | `post.html` | yes |
+| `content/notes/**/*.md` | post, or an evergreen note (see below) | `post.html` | yes |
 
 Images go in `content/images/` and are linked as `/images/<file>`
 (see [performance.md](performance.md)).
@@ -36,8 +36,8 @@ contain one; keep the note `draft: true` until it's filled in.
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `title` | string | yes | Maps to `<title>` and `p-name`. |
-| `date` | ISO-8601 date | yes for posts | Maps to `dt-published`. Pages may omit. |
-| `updated` | ISO-8601 date | no | Maps to `dt-updated`. |
+| `date` | ISO-8601 date | yes for posts | Maps to `dt-published`. Pages and evergreen notes omit it. |
+| `updated` | ISO-8601 date | yes for evergreen notes | Maps to `dt-updated`. Moves the note up Home and Notes. |
 | `summary` | string | no | Maps to `p-summary` and `<meta name=description>` (else an excerpt of the text is used). |
 | `draft` | bool | no | If `true`, excluded from build entirely. |
 | `aliases` | string[] | no | Old slugs that should redirect to this page. |
@@ -47,6 +47,29 @@ Unknown fields are an error — fail loudly, fix in the schema if you want a new
 There is no `tags` field: notes relate through links, not tags
 (ADR 2026-11-06-drop-tags).
 Remove it from a note promoted from Obsidian.
+
+## Evergreen notes and the order of lists
+
+A note in `content/notes/` needs `date`, `updated`, or both
+(ADR 2026-11-07-evergreen-notes):
+
+- With `date`, it is a post:
+  listed on Home and `/notes/`, and carried by the RSS and JSON feeds,
+  so the deploy syndicates it.
+- With `updated` and no `date`, it is an evergreen note:
+  listed on Home and `/notes/` like a post, but in no feed, so never syndicated.
+  Its page has `dt-updated` ("Updated <date>") and no `dt-published`.
+  It is held back until its `updated` date, like a scheduled post.
+- With neither, the build fails.
+
+Home and `/notes/` list notes most recently tended first:
+by the later of `date` and `updated`, then by slug.
+Each entry shows its publish date,
+then " · updated <date>" when `updated` is later;
+an evergreen note shows only "Updated <date>".
+The feeds stay in `date` order.
+Set `updated` by hand when a note has changed enough to resurface;
+the build never reads git dates.
 
 ## Scheduled posts
 

@@ -480,6 +480,8 @@ main { padding-block-end: var(--space-7); }
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+/* "published · updated": the dot already spaces them. */
+.h-feed time + time { margin-inline-start: 0; }
 
 .h-card { color: var(--text-2); }
 

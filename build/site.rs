@@ -320,8 +320,35 @@ impl Note {
     }
 
     fn post_date(&self) -> Result<Date, String> {
-        self.date
-            .ok_or_else(|| format!("{}: post has no `date` (required for dt-published)", self.rel))
+        self.date.ok_or_else(|| {
+            format!(
+                "{}: note has no `date` (required for dt-published); give it `updated` instead to make it an evergreen note",
+                self.rel
+            )
+        })
+    }
+
+    /// A note in `notes/` with `updated` but no `date`: listed with the
+    /// other notes but never posted to the feeds (ADR 2026-11-07-evergreen-notes).
+    fn evergreen(&self) -> bool {
+        self.kind == Kind::Post && self.date.is_none() && self.updated.is_some()
+    }
+
+    /// The day a note goes live: its `date`, or an evergreen note's `updated`.
+    fn goes_live(&self) -> Option<Date> {
+        if self.evergreen() {
+            self.updated
+        } else {
+            self.date
+        }
+    }
+
+    /// When the note was last tended: the later of `date` and `updated`.
+    fn tended(&self) -> Option<Date> {
+        match (self.date, self.updated) {
+            (Some(d), Some(u)) => Some(d.max(u)),
+            (d, u) => d.or(u),
+        }
     }
 }
 
@@ -766,17 +793,34 @@ fn backlinks_block(notes: &[Note], n: &Note) -> String {
 
 fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Result<String, String> {
     let links = footer_links(notes);
-    let d = n.post_date()?;
-    let updated = n
-        .updated
-        .map(|u| {
+    let canon = e(canonical);
+    // An evergreen note has no publish date, so its permalink carries the
+    // date it was last updated (ADR 2026-11-07-evergreen-notes).
+    let dates = match (n.evergreen(), n.updated) {
+        (true, Some(u)) => format!(
+            "<a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-updated\" datetime=\"{}\">Updated {}</time></a>\n",
+            u.iso(),
+            u.human()
+        ),
+        _ => {
+            let d = n.post_date()?;
+            let updated = n
+                .updated
+                .map(|u| {
+                    format!(
+                        " \u{b7} <time class=\"dt-updated\" datetime=\"{}\">updated {}</time>",
+                        u.iso(),
+                        u.human()
+                    )
+                })
+                .unwrap_or_default();
             format!(
-                " \u{b7} <time class=\"dt-updated\" datetime=\"{}\">updated {}</time>",
-                u.iso(),
-                u.human()
+                "<a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{}\">{}</time></a>\n{updated}",
+                d.iso(),
+                d.human()
             )
-        })
-        .unwrap_or_default();
+        }
+    };
     let summary = n
         .summary()
         .map(|s| format!("<p class=\"p-summary\">{}</p>", e(s)))
@@ -803,13 +847,9 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
         .map_or(String::new(), |m| webmention::render(m));
     let content = format!(
         "\n<article class=\"h-entry\">\n<header>\n<h1 class=\"p-name\">{title}</h1>\n<p class=\"meta\">\n\
-<a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{iso}\">{human}</time></a>\n\
-{updated}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
+{dates}\n \u{b7} <span class=\"p-author h-card\"><a class=\"u-url\" rel=\"author\" href=\"{base}/\">{author}</a></span>\n\
 </p>\n{summary}\n</header>\n<div class=\"e-content\">\n{html}\n</div>\n{synd}{posse}{mentions}\n</article>\n{back}\n",
         title = e(n.title()),
-        canon = e(canonical),
-        iso = d.iso(),
-        human = d.human(),
         base = e(site.base_url),
         author = author_label(site),
         html = n.content_html,
@@ -947,11 +987,33 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     ))
 }
 
-fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonical: &str) -> Result<String, String> {
+/// A listed note's dates: when it was published, and when it was updated
+/// if that came later, so a note that moved up the list says why. An
+/// evergreen note shows only when it was updated (ADR 2026-11-07-evergreen-notes).
+fn list_dates(n: &Note) -> Result<String, String> {
+    let time = |class: &str, d: Date, label: &str| {
+        format!(
+            "<time class=\"{class}\" datetime=\"{}\">{label}{}</time>",
+            d.iso(),
+            d.human()
+        )
+    };
+    Ok(match (n.evergreen(), n.date, n.updated) {
+        (true, _, Some(u)) => time("dt-updated", u, "Updated "),
+        (_, Some(d), Some(u)) if u > d => format!(
+            "{}\n \u{b7}\u{a0}{}",
+            time("dt-published", d, ""),
+            time("dt-updated", u, "updated ")
+        ),
+        _ => time("dt-published", n.post_date()?, ""),
+    })
+}
+
+fn render_home(site: &Config, notes: &[Note], n: &Note, listed: &[usize], canonical: &str) -> Result<String, String> {
     let mut recent = String::new();
-    for &p in posts.iter().take(10) {
+    for &p in listed.iter().take(10) {
         let pn = &notes[p];
-        let d = pn.post_date()?;
+        let dates = list_dates(pn)?;
         // Title words alone say little ("raw", "meld"), so each post shows a
         // short excerpt (ADR 2026-10-16-home-post-excerpts).
         let excerpt = match pn.summary() {
@@ -964,11 +1026,10 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
             format!("<p class=\"p-summary\">{}</p>\n", e(&excerpt))
         };
         recent.push_str(&format!(
-            "\n<li class=\"h-entry\">\n<a class=\"u-url p-name\" href=\"{}\">{}</a>\n<time class=\"dt-published\" datetime=\"{}\">{}</time>\n{}</li>\n",
+            "\n<li class=\"h-entry\">\n<a class=\"u-url p-name\" href=\"{}\">{}</a>\n{}\n{}</li>\n",
             e(&pn.url),
             e(pn.title()),
-            d.iso(),
-            d.human(),
+            dates,
             excerpt
         ));
     }
@@ -978,7 +1039,7 @@ fn render_home(site: &Config, notes: &[Note], n: &Note, posts: &[usize], canonic
         format!("\n<article>\n{}\n</article>\n", n.content_html)
     };
     let content = format!(
-        "{intro}\n<section class=\"h-feed\">\n<h2 class=\"p-name\">Recent posts</h2>\n<ul>\n{recent}\n</ul>\n\
+        "{intro}\n<section class=\"h-feed\">\n<h2 class=\"p-name\">Recent notes</h2>\n<ul>\n{recent}\n</ul>\n\
 <p><a href=\"/notes/\">All notes</a></p>\n</section>\n"
     );
     let meta = match n.summary() {
@@ -1001,23 +1062,22 @@ fn render_list(
     notes: &[Note],
     list_title: &str,
     description: &str,
-    posts: &[usize],
+    listed: &[usize],
     canonical: &str,
 ) -> Result<String, String> {
     let mut items = String::new();
-    for &p in posts {
+    for &p in listed {
         let pn = &notes[p];
-        let d = pn.post_date()?;
+        let dates = list_dates(pn)?;
         let summary = pn
             .summary()
             .map(|s| format!(" \u{2014} <span class=\"p-summary\">{}</span>", e(s)))
             .unwrap_or_default();
         items.push_str(&format!(
-            "\n<li class=\"h-entry\">\n<a class=\"u-url p-name\" href=\"{}\">{}</a>\n<time class=\"dt-published\" datetime=\"{}\">{}</time>\n{}\n</li>\n",
+            "\n<li class=\"h-entry\">\n<a class=\"u-url p-name\" href=\"{}\">{}</a>\n{}\n{}\n</li>\n",
             e(&pn.url),
             e(pn.title()),
-            d.iso(),
-            d.human(),
+            dates,
             summary
         ));
     }
@@ -1057,7 +1117,7 @@ fn render_404(site: &Config, links: FooterLinks) -> String {
     let content = format!(
         "\n<article>\n<h1>Page not found</h1>\n<p>There's no page at this address. It may have a typo, or the link that \
 brought you here may be broken. Try one of these:</p>\n<ul>\n<li>The <a href=\"/\">home page</a> for the latest \
-posts</li>\n<li>All <a href=\"/notes/\">notes</a>, newest first</li>\n{follow}</ul>\n</article>\n"
+notes</li>\n<li>All <a href=\"/notes/\">notes</a>, most recently updated first</li>\n{follow}</ul>\n</article>\n"
     );
     base(
         site,
@@ -1088,7 +1148,7 @@ fn render_offline(site: &Config, links: FooterLinks) -> String {
 pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), String> {
     let mut notes: Vec<Note> = load_notes(content)?
         .into_iter()
-        .filter(|n| !n.draft() && n.date.is_none_or(|d| d <= site.today))
+        .filter(|n| !n.draft() && n.goes_live().is_none_or(|d| d <= site.today))
         .collect();
 
     // unique slugs
@@ -1162,10 +1222,21 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     let base_url = site.base_url.trim_end_matches('/');
     let canonical = |url: &str| format!("{}{}", base_url, url);
 
-    let mut posts: Vec<usize> = (0..notes.len()).filter(|&i| notes[i].kind == Kind::Post).collect();
+    // The feeds carry dated posts, newest first. Home and /notes/ list every
+    // note, evergreen ones too, most recently tended first, so a note moves
+    // up when it is updated (ADR 2026-11-07-evergreen-notes).
+    let mut posts: Vec<usize> = (0..notes.len())
+        .filter(|&i| notes[i].kind == Kind::Post && !notes[i].evergreen())
+        .collect();
     posts.sort_by(|&a, &b| {
         let ka = (notes[a].date.unwrap_or(date::MIN), &notes[a].slug);
         let kb = (notes[b].date.unwrap_or(date::MIN), &notes[b].slug);
+        kb.cmp(&ka)
+    });
+    let mut listed: Vec<usize> = (0..notes.len()).filter(|&i| notes[i].kind == Kind::Post).collect();
+    listed.sort_by(|&a, &b| {
+        let ka = (notes[a].tended().unwrap_or(date::MIN), &notes[a].slug);
+        let kb = (notes[b].tended().unwrap_or(date::MIN), &notes[b].slug);
         kb.cmp(&ka)
     });
 
@@ -1173,7 +1244,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     for n in &notes {
         let c = canonical(&n.url);
         let html = match n.kind {
-            Kind::Home => render_home(site, &notes, n, &posts, &c)?,
+            Kind::Home => render_home(site, &notes, n, &listed, &c)?,
             Kind::Post => render_post(site, &notes, n, &c)?,
             Kind::Page => render_page(site, &notes, n, &c)?,
         };
@@ -1187,8 +1258,8 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
             site,
             &notes,
             "Notes",
-            &format!("Every post on {}, newest first.", site.title),
-            &posts,
+            &format!("Every note on {}, most recently updated first.", site.title),
+            &listed,
             &canonical("/notes/"),
         )?,
     )?;
