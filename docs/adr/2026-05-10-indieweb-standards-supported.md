@@ -1,7 +1,7 @@
 # 2026-05-10 — IndieWeb standards in scope
 
 - Date: 2026-05-10
-- Status: Accepted
+- Status: Accepted; Pingback dropped by [2026-11-06-drop-pingback](2026-11-06-drop-pingback.md)
 
 ## Context
 

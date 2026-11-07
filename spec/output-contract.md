@@ -25,7 +25,8 @@ in `tests/`.
 - `<link rel="canonical">` matches the page's canonical URL on `site.base_url`.
 - `<link rel="alternate" type="application/rss+xml" href="/index.xml">`.
 - `<link rel="alternate" type="application/feed+json" href="/feed.json">`.
-- `<link rel="webmention">` and `<link rel="pingback">` (configured target).
+- `<link rel="webmention">` (configured target). No `<link rel="pingback">`:
+  Webmention replaces it (ADR 2026-11-06-drop-pingback).
 - All internal links resolve to a real emitted file.
 - No `<script>` except `<script src="/style-picker.js"
   data-styles="…">`, last in `<head>`, where `data-styles` lists the

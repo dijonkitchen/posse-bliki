@@ -32,7 +32,6 @@ fn universal_invariants() {
         "<link rel=\"alternate\" type=\"application/rss+xml\"",
         "<link rel=\"alternate\" type=\"application/feed+json\"",
         "<link rel=\"webmention\"",
-        "<link rel=\"pingback\"",
     ];
     for (p, text) in html_files() {
         for needle in needles {

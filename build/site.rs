@@ -197,7 +197,6 @@ pub struct Config {
     pub author_url: &'static str,
     pub rel_me: &'static [&'static str],
     pub webmention_endpoint: &'static str,
-    pub pingback: &'static str,
     /// POSSE targets each post links to and is sent to as a webmention
     /// once deployed: `(target, webmention endpoint)`.
     pub syndicate_to: &'static [(&'static str, &'static str)],
@@ -223,7 +222,6 @@ pub fn default_config() -> Config {
         author_url: "https://www.dijonkitchen.org",
         rel_me: &["https://github.com/dijonkitchen"],
         webmention_endpoint: "https://webmention.io/www.dijonkitchen.org/webmention",
-        pingback: "https://webmention.io/www.dijonkitchen.org/xmlrpc",
         syndicate_to: &[
             ("https://brid.gy/publish/mastodon", "https://brid.gy/publish/webmention"),
             ("https://brid.gy/publish/bluesky", "https://brid.gy/publish/webmention"),
@@ -258,10 +256,7 @@ impl Config {
             ),
             (
                 "webmention".into(),
-                Json::Obj(vec![
-                    ("endpoint".into(), json::s(self.webmention_endpoint)),
-                    ("pingback".into(), json::s(self.pingback)),
-                ]),
+                Json::Obj(vec![("endpoint".into(), json::s(self.webmention_endpoint))]),
             ),
             (
                 "syndicate_to".into(),
@@ -648,7 +643,7 @@ fn page(
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n{THEME_COLOR}<title>{title}</title>\n{meta}\n{canon}\n\
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
-<link rel=\"webmention\" href=\"{wm}\">\n<link rel=\"pingback\" href=\"{pb}\">\n{rel_me}\
+<link rel=\"webmention\" href=\"{wm}\">\n{rel_me}\
 <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"32x32\">\n\
 <link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\">\n\
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
@@ -665,7 +660,6 @@ fn page(
         lang = e(site.language),
         tagline = e(site.tagline),
         wm = e(site.webmention_endpoint),
-        pb = e(site.pingback),
     );
     indent::indent(&html)
 }
