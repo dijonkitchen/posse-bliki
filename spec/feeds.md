@@ -5,16 +5,32 @@ external bridges (Bridgy Fed, echofeed, IFTTT) at one of them.
 
 ## RSS 2.0 — `/index.xml`
 
-- `<rss version="2.0">` with the `atom` namespace declared.
+- `<rss version="2.0">` with the `atom` and `content` namespaces declared.
 - Channel: `<title>`, `<link>` (canonical site URL), `<description>`,
   `<language>`, `<lastBuildDate>` (RFC 822), `<atom:link rel="self">`.
 - Up to 50 most recent posts (excluding drafts), newest first. Why: feed
   readers fetch the whole file on every poll, so it stays small; the JSON
   Feed and the notes index carry everything.
+  With full text, 50 posts come to about 100 KB, or 30 KB gzipped.
 - Each `<item>`: `<title>`, `<link>` (canonical post URL),
   `<guid isPermaLink="true">` = link, `<pubDate>` (RFC 822 from
-  front-matter `date`), `<description>` (plain text: the `summary`, or the
-  first 200 characters of the body with markup stripped, XML-escaped).
+  front-matter `date`), `<description>`, then `<content:encoded>`.
+- `<description>` is plain text:
+  the `summary`, or else the body's opening words with markup stripped,
+  at most 200 characters,
+  cut at a word with `…` marking the cut.
+- `<content:encoded>` is the whole post as HTML, XML-escaped,
+  the same HTML the JSON Feed's `content_html` carries.
+  Every root-relative `href` and `src` (`/notes/x/`) is made absolute against the site,
+  and every fragment link (`#fn1`) against the post,
+  because RSS has no way to say what a relative URL is relative to.
+  Why: readers get the whole post in their feed reader,
+  as they did from Substack and Jekyll,
+  and this site keeps the original (ADR 2026-11-07-full-text-rss).
+- Description first, then the full text, as the
+  [RSS Best Practices Profile](https://www.rssboard.org/rss-profile#namespace-elements-content-encoded)
+  recommends for a feed with summaries.
+  Tested in `tests/harness/rss.rs`.
 - Well-formed XML with the fields above (tested in `tests/harness/rss.rs`
   with the strict XML checker in `tests/harness/support/xml.rs`). Why: feed
   readers reject a feed that isn't well-formed outright, so one bad
@@ -24,7 +40,10 @@ external bridges (Bridgy Fed, echofeed, IFTTT) at one of them.
   guids, `isPermaLink` only `true` or `false`, real RFC 822 dates (the
   weekday matches the date), an ISO 639 `<language>` (the validator's own
   code list), no markup in descriptions, and no unknown un-namespaced
-  elements. The service blocks automated requests, so the harness checks
+  elements.
+  In `content:encoded`: strict HTML, absolute links and images,
+  and no scripts, frames, plugins, styles or event handlers.
+  The service blocks automated requests, so the harness checks
   these rules itself (ADR 2026-10-11-nu-html-checker-in-ci).
 
 ### Old feed URLs — `/feed` and `/feed.xml`

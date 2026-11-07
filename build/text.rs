@@ -231,6 +231,36 @@ pub fn excerpt(html: &str, max: usize) -> String {
     out
 }
 
+/// `html` with each root-relative `href` and `src` (`/notes/x/`) and each
+/// fragment-only `href` (`#x`) made absolute against `base` and the page's
+/// `url`, for feeds, where readers would resolve them against the feed
+/// (spec/feeds.md).
+pub fn absolute_urls(html: &str, base: &str, url: &str) -> String {
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(p) = rest.find(['h', 's']) {
+        out.push_str(&rest[..p]);
+        rest = &rest[p..];
+        let attr = ["href=\"", "src=\""].into_iter().find(|a| rest.starts_with(a));
+        let Some(attr) = attr else {
+            let c = rest.chars().next().unwrap();
+            out.push(c);
+            rest = &rest[c.len_utf8()..];
+            continue;
+        };
+        out.push_str(attr);
+        rest = &rest[attr.len()..];
+        if rest.starts_with('/') && !rest.starts_with("//") {
+            out.push_str(base);
+        } else if attr == "href=\"" && rest.starts_with('#') {
+            out.push_str(base);
+            out.push_str(url);
+        }
+    }
+    out.push_str(rest);
+    out
+}
+
 /// `re.findall(r'href="([^"#]+)(?:#[^"]*)?"', html)`
 pub fn hrefs(html: &str) -> Vec<String> {
     let mut out = Vec::new();
@@ -259,6 +289,25 @@ pub fn hrefs(html: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn absolute_urls_in_feeds() {
+        let b = "https://example.org";
+        assert_eq!(
+            absolute_urls(
+                r#"<a href="/notes/x/">x</a> <img src="/images/a.png" alt="">"#,
+                b,
+                "/notes/y/"
+            ),
+            r#"<a href="https://example.org/notes/x/">x</a> <img src="https://example.org/images/a.png" alt="">"#
+        );
+        assert_eq!(
+            absolute_urls(r##"<a href="#fn1">1</a>"##, b, "/notes/y/"),
+            r##"<a href="https://example.org/notes/y/#fn1">1</a>"##
+        );
+        let kept = r#"<a href="https://x.org/">x</a> <a href="//cdn.example/">c</a> <a href="mailto:a@b">m</a> <p>hrefs and srcs</p>"#;
+        assert_eq!(absolute_urls(kept, b, "/notes/y/"), kept);
+    }
 
     #[test]
     fn excerpts() {
