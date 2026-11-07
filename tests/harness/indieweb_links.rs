@@ -154,12 +154,14 @@ fn canonical_matches_url() {
 
 /// The IndieWeb Webring checks the home page for its previous/next links
 /// and marks the site inactive without them (ADR 2026-11-06-indieweb-webring).
+/// The random link sits beside them (ADR 2026-11-07-webring-random-link).
 #[test]
 fn every_footer_links_the_webring() {
     let ring = [
         r#"href="https://xn--sr8hvo.ws/previous""#,
         r#"href="https://xn--sr8hvo.ws""#,
         r#"href="https://xn--sr8hvo.ws/next""#,
+        r#"href="https://xn--sr8hvo.ws/random""#,
     ];
     let missing: Vec<String> = html_files()
         .iter()

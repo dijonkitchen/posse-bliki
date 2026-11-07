@@ -868,10 +868,15 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
 /// The IndieWeb Webring's previous/next links, from JC's webring dashboard.
 /// The ring checks the home page for them; every footer has them so a
 /// reader can hop on from any page (ADR 2026-11-06-indieweb-webring).
+/// The die is the ring's random link: previous and next go to the same two
+/// neighbours all month, so it's the way to a different member each click.
+/// The ring's checker notes it as an unknown link but still counts the site
+/// active (ADR 2026-11-07-webring-random-link).
 const WEBRING: &str = "<p class=\"webring\">\n\
 <a href=\"https://xn--sr8hvo.ws/previous\" aria-label=\"Previous site in the IndieWeb Webring\">\u{2190}</a>\n\
 An <a href=\"https://xn--sr8hvo.ws\">IndieWeb Webring</a> <span aria-hidden=\"true\">\u{1f578}\u{1f48d}</span>\n\
 <a href=\"https://xn--sr8hvo.ws/next\" aria-label=\"Next site in the IndieWeb Webring\">\u{2192}</a>\n\
+<a href=\"https://xn--sr8hvo.ws/random\" aria-label=\"Random site in the IndieWeb Webring\">\u{1f3b2}</a>\n\
 </p>\n";
 
 /// Paints the phone's browser bars in the page colour, light and dark, so the

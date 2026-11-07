@@ -25,7 +25,7 @@ Directories, search engines and webrings
 that help people find personal sites like these.
 
 - [IndieWeb](https://indieweb.org/): the community behind owning your own site, and the wiki where most of these ideas are written down.
-- [IndieWeb Webring 🕸💍](https://xn--sr8hvo.ws/): a ring of personal sites; the arrows in my footer go round it.
+- [IndieWeb Webring 🕸💍](https://xn--sr8hvo.ws/): a ring of personal sites; the arrows in my footer go round it, and the die jumps to a random one.
 - [Kagi Small Web](https://kagi.com/smallweb): personal blogs, one recent post at a time.
 - [Marginalia Search](https://marginalia-search.com/): an independent search engine for sites that deserve an audience and rarely get one.
 - [Wiby](https://wiby.me/): a search engine for simple, old-web-style pages.

@@ -1,7 +1,7 @@
 # 2026-11-06 — Join the IndieWeb Webring, linked from every footer
 
 - Date: 2026-11-06
-- Status: Accepted
+- Status: Accepted; random link added by [2026-11-07-webring-random-link](2026-11-07-webring-random-link.md)
 - Decided by: JC, signing up to the IndieWeb Webring (xn--sr8hvo.ws, 🕸💍)
   and sending the links from its dashboard.
 

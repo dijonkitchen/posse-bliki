@@ -16,7 +16,7 @@ Conformance to each item is enforced by a test in `tests/`.
 | **RSS 2.0** | every page advertises via `<link rel=alternate>` |
 | **JSON Feed 1.1** | every page advertises via `<link rel=alternate>` |
 | **Sitemap** | `/sitemap.xml`, advertised in `robots.txt` |
-| **Webring** | <https://xn--sr8hvo.ws> (IndieWeb Webring) | previous/next links in every footer; the ring checks the home page (ADR 2026-11-06-indieweb-webring) |
+| **Webring** | <https://xn--sr8hvo.ws> (IndieWeb Webring) | previous/next links in every footer; the ring checks the home page (ADR 2026-11-06-indieweb-webring); a random link beside them (ADR 2026-11-07-webring-random-link) |
 
 ## Wired up via external services (no server needed)
 
