@@ -23,6 +23,9 @@ e.g. `ADR 2026-10-14-www-as-canonical-host`.
 ## Format
 
 Short. One page each. The four sections are: **Context**, **Decision**,
-**Consequences**, **Alternatives considered**. Date and status at the top.
+**Consequences**, **Alternatives considered**. Date, status and
+"Decided by" at the top. "Decided by" says who made the call and how, so a
+proposal nobody chose can't pass as a decision
+(ADR 2026-11-06-scaffold-adrs-decided).
 When a new ADR supersedes an old one, update the old one's status line to
 link it; that line is the only edit an accepted ADR gets.
