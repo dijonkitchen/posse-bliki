@@ -4,6 +4,7 @@
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
+use posse_bliki_build::date::Date;
 use posse_bliki_build::json::{self, Json};
 
 use crate::support::mf2::{self, Value};
@@ -117,21 +118,24 @@ fn bad_webmentions_file_fails_the_build() {
     .is_err());
 }
 
-fn pending(previous: &std::path::Path) -> std::process::Output {
+fn pending(previous: &std::path::Path, today: &str) -> std::process::Output {
     bliki(&[
         "--out",
         site().to_str().unwrap(),
         "--pending-webmentions",
         previous.to_str().unwrap(),
+        "--today",
+        today,
     ])
 }
 
-#[test]
-fn pending_lists_new_posts_per_target() {
+/// The deploy feed without its newest item, as the previous deploy's
+/// feed would be, and that item's URL and date.
+fn previous_without_newest(name: &str) -> (PathBuf, String, String) {
     let feed = json::parse(&read(&site().join("feed.json"))).unwrap();
     let items = feed.get("items").unwrap().as_arr();
-    let new = items[0].str_at("url").unwrap();
-    // The previous deploy's feed: the same feed without its newest item.
+    let new = items[0].str_at("url").unwrap().to_string();
+    let date = items[0].str_at("date_published").unwrap()[..10].to_string();
     let Json::Obj(fields) = &feed else {
         panic!("feed is not an object")
     };
@@ -142,9 +146,15 @@ fn pending_lists_new_posts_per_target() {
             _ => (k.clone(), v.clone()),
         })
         .collect();
-    let prev = temp_dir("pending").join("previous.json");
+    let prev = temp_dir(name).join("previous.json");
     std::fs::write(&prev, json::dumps(&Json::Obj(previous))).unwrap();
-    let proc = pending(&prev);
+    (prev, new, date)
+}
+
+#[test]
+fn pending_lists_new_posts_per_target() {
+    let (prev, new, date) = previous_without_newest("pending");
+    let proc = pending(&prev, &date);
     assert!(proc.status.success());
     let expected: Vec<String> = syndicate_to()
         .iter()
@@ -157,8 +167,18 @@ fn pending_lists_new_posts_per_target() {
 }
 
 #[test]
+fn pending_skips_a_new_post_dated_over_two_weeks_back() {
+    let (prev, _, date) = previous_without_newest("pending-old");
+    let d = Date::parse(&date).unwrap();
+    let today = Date::from_days_since_epoch(d.days_from_epoch() + 15).iso();
+    let proc = pending(&prev, &today);
+    assert!(proc.status.success());
+    assert!(proc.stdout.is_empty());
+}
+
+#[test]
 fn pending_is_empty_when_nothing_is_new() {
-    let proc = pending(&site().join("feed.json"));
+    let proc = pending(&site().join("feed.json"), "2026-11-07");
     assert!(proc.status.success());
     assert!(proc.stdout.is_empty());
 }
@@ -167,6 +187,6 @@ fn pending_is_empty_when_nothing_is_new() {
 fn pending_fails_on_a_feed_that_is_not_json() {
     let prev = temp_dir("pending-bad").join("previous.json");
     std::fs::write(&prev, "<html>Not found</html>").unwrap();
-    let proc = pending(&prev);
+    let proc = pending(&prev, "2026-11-07");
     assert!(!proc.status.success() && proc.stdout.is_empty());
 }

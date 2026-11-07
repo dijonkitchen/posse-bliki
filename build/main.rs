@@ -136,7 +136,7 @@ fn main() -> ExitCode {
     if let Some(previous) = &args.pending {
         let lines = read(previous)
             .and_then(|prev| Ok((prev, read(&args.out.join("feed.json"))?)))
-            .and_then(|(prev, cur)| webmention::pending(&prev, &cur, cfg.syndicate_to));
+            .and_then(|(prev, cur)| webmention::pending(&prev, &cur, cfg.syndicate_to, cfg.today));
         return match lines {
             Ok(lines) => {
                 for l in lines {

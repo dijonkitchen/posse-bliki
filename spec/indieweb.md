@@ -57,6 +57,15 @@ more than 5 posts are new. The workflow's `syndicate` job posts those
 lines after the deploy, only while the `SEND_WEBMENTIONS` repository
 variable is `true`.
 
+A new post dated more than 14 days before the build's today (`--today`,
+else today in UTC) is left out of that list.
+Such a post was first published on another site and brought here later
+(see "Posts first published elsewhere" in [content-schema.md](content-schema.md)),
+so Bridgy Publish shouldn't post it to Mastodon and Bluesky as if it were new.
+Two weeks is Bridgy Fed's own limit: it doesn't bridge older posts
+([Bridgy Fed docs](https://fed.brid.gy/docs))
+(ADR 2026-11-07-silo-posts-as-notes).
+
 Enforced by `tests/harness/webmentions.rs` and the Rust unit tests in
 `build/webmention.rs`.
 

@@ -56,6 +56,33 @@ its date publishes it; the deploy workflow rebuilds daily, so it goes live
 that morning (UTC) with no push (ADR 2026-10-20-scheduled-posts). A link to a
 scheduled note from a published one is a broken link, as for a draft.
 
+## Posts first published elsewhere
+
+A post JC first published on another site, such as 𝕏, Threads or Bluesky,
+comes over as an ordinary note
+(ADR 2026-11-07-silo-posts-as-notes).
+The IndieWeb calls this [PESOS](https://indieweb.org/PESOS).
+
+- Only JC's own threads and posts that still hold up come over,
+  picked by hand.
+  Reposts and replies to other people stay where they are.
+- A thread becomes one note, its posts joined into paragraphs.
+- The note gets a `title`, like any post.
+- `date` is the day the original was posted,
+  so the note sorts among the notes of its time,
+  not at the top of the home page.
+- `syndication` lists the original's URL,
+  so the page links it under "Also on"
+  ([u-syndication](https://indieweb.org/u-syndication)).
+- Shortened links (`t.co` and the like) are replaced by the address they lead to,
+  since the shortener may not outlive the site that made it.
+- A post that only links to a note already here isn't brought over.
+  Its URL goes in that note's `syndication` instead.
+- A few at a time:
+  no more than 5 new notes in one deploy,
+  so feed readers get a handful, not a flood.
+  The build doesn't send webmentions for them (see [indieweb.md](indieweb.md)).
+
 ## Date format
 
 Always `YYYY-MM-DD` (or full ISO-8601 with time). Obsidian's daily-note format

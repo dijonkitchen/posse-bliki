@@ -180,11 +180,17 @@ pub fn render(mentions: &[Mention]) -> String {
 /// re-syndicate the archive.
 pub const MAX_NEW: usize = 5;
 
+/// A new post dated more than this many days before the build isn't sent:
+/// it was first published somewhere else and brought here later (ADR
+/// 2026-11-07-silo-posts-as-notes). Two weeks is Bridgy Fed's own limit.
+pub const MAX_AGE_DAYS: i64 = 14;
+
 /// Webmentions to send: one line per new post and syndication target,
 /// `endpoint<TAB>source<TAB>target`. A post is new when its URL is in the
-/// `current` feed.json but not the `previous` one.
-pub fn pending(previous: &str, current: &str, targets: &[(&str, &str)]) -> Result<Vec<String>, String> {
-    let urls = |text: &str, which: &str| -> Result<Vec<String>, String> {
+/// `current` feed.json but not the `previous` one, and it is sent only if
+/// its `date_published` is at most `MAX_AGE_DAYS` before `today`.
+pub fn pending(previous: &str, current: &str, targets: &[(&str, &str)], today: Date) -> Result<Vec<String>, String> {
+    let items = |text: &str, which: &str| -> Result<Vec<(String, Option<Date>)>, String> {
         let feed = json::parse(text).map_err(|m| format!("{} feed: {}", which, m))?;
         let items = feed
             .get("items")
@@ -192,13 +198,16 @@ pub fn pending(previous: &str, current: &str, targets: &[(&str, &str)]) -> Resul
         Ok(items
             .as_arr()
             .iter()
-            .filter_map(|i| i.str_at("url").map(String::from))
+            .filter_map(|i| {
+                let date = i.str_at("date_published").and_then(Date::parse);
+                i.str_at("url").map(|u| (u.to_string(), date))
+            })
             .collect())
     };
-    let seen: Vec<String> = urls(previous, "previous")?.iter().map(|u| url_key(u)).collect();
-    let new: Vec<String> = urls(current, "current")?
+    let seen: Vec<String> = items(previous, "previous")?.iter().map(|(u, _)| url_key(u)).collect();
+    let new: Vec<(String, Option<Date>)> = items(current, "current")?
         .into_iter()
-        .filter(|u| !seen.contains(&url_key(u)))
+        .filter(|(u, _)| !seen.contains(&url_key(u)))
         .collect();
     if new.len() > MAX_NEW {
         return Err(format!(
@@ -207,8 +216,9 @@ pub fn pending(previous: &str, current: &str, targets: &[(&str, &str)]) -> Resul
             MAX_NEW
         ));
     }
+    let recent = |d: &Option<Date>| d.is_some_and(|d| today.days_from_epoch() - d.days_from_epoch() <= MAX_AGE_DAYS);
     let mut out = Vec::new();
-    for source in new {
+    for (source, _) in new.iter().filter(|(_, d)| recent(d)) {
         for (target, endpoint) in targets {
             out.push(format!("{}\t{}\t{}", endpoint, source, target));
         }
@@ -232,14 +242,23 @@ mod tests {
         );
     }
 
+    fn day(s: &str) -> Date {
+        Date::parse(s).unwrap()
+    }
+
     #[test]
     fn pending_lists_only_new_posts() {
-        let prev = r#"{"items": [{"url": "https://example.com/notes/a/"}]}"#;
-        let cur = r#"{"items": [{"url": "https://example.com/notes/b/"}, {"url": "https://example.com/notes/a/"}]}"#;
+        let prev =
+            r#"{"items": [{"url": "https://example.com/notes/a/", "date_published": "2026-10-01T00:00:00+00:00"}]}"#;
+        let cur = r#"{"items": [
+          {"url": "https://example.com/notes/b/", "date_published": "2026-11-07T00:00:00+00:00"},
+          {"url": "https://example.com/notes/a/", "date_published": "2026-10-01T00:00:00+00:00"}
+        ]}"#;
         let got = pending(
             prev,
             cur,
             &[("https://brid.gy/publish/mastodon", "https://brid.gy/publish/webmention")],
+            day("2026-11-07"),
         )
         .unwrap();
         assert_eq!(
@@ -249,12 +268,24 @@ mod tests {
     }
 
     #[test]
+    fn pending_skips_back_dated_posts() {
+        let cur = r#"{"items": [
+          {"url": "https://example.com/notes/two-weeks/", "date_published": "2026-10-24T00:00:00+00:00"},
+          {"url": "https://example.com/notes/imported/", "date_published": "2019-03-02T00:00:00+00:00"},
+          {"url": "https://example.com/notes/one-day-too-old/", "date_published": "2026-10-23T00:00:00+00:00"},
+          {"url": "https://example.com/notes/undated/"}
+        ]}"#;
+        let got = pending(r#"{"items": []}"#, cur, &[("t", "e")], day("2026-11-07")).unwrap();
+        assert_eq!(got, vec!["e\thttps://example.com/notes/two-weeks/\tt"]);
+    }
+
+    #[test]
     fn pending_refuses_a_flood() {
         let cur: Vec<String> = (0..=MAX_NEW)
             .map(|i| format!("{{\"url\": \"https://example.com/notes/{}/\"}}", i))
             .collect();
         let cur = format!("{{\"items\": [{}]}}", cur.join(","));
-        assert!(pending(r#"{"items": []}"#, &cur, &[("t", "e")]).is_err());
+        assert!(pending(r#"{"items": []}"#, &cur, &[("t", "e")], day("2026-11-07")).is_err());
     }
 
     #[test]
