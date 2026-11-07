@@ -149,6 +149,8 @@ const ICONS: &[(&str, &[u8])] = &[
 /// Longest `<meta name="description">` written from a page's own text;
 /// search results show about this much (spec/performance.md).
 const DESCRIPTION_MAX: usize = 160;
+/// Longest RSS `<description>` cut from a post's text (spec/feeds.md).
+const RSS_DESCRIPTION_MAX: usize = 200;
 /// Self-hosted fonts and their licences (spec/design.md), copied to `fonts/`.
 const FONTS: &[(&str, &[u8])] = &[
     (
@@ -1234,7 +1236,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // RSS
     let mut rss = format!(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\">\n<channel>\n\
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<rss version=\"2.0\" xmlns:atom=\"http://www.w3.org/2005/Atom\" xmlns:content=\"http://purl.org/rss/1.0/modules/content/\">\n<channel>\n\
 <title>{}</title>\n<link>{}/</link>\n<description>{}</description>\n<language>{}</language>\n\
 <atom:link href=\"{}/index.xml\" rel=\"self\" type=\"application/rss+xml\"/>",
         e(site.title),
@@ -1247,20 +1249,22 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     if let Some(&first) = posts.first() {
         rss.push_str(&format!("\n<lastBuildDate>{}</lastBuildDate>", e(&rfc(first))));
     }
-    // spec/feeds.md: the RSS feed carries at most the 50 newest posts.
+    // spec/feeds.md: the RSS feed carries at most the 50 newest posts, each
+    // with a plain summary and the whole post (ADR 2026-11-07-full-text-rss).
     for &p in posts.iter().take(50) {
         let n = &notes[p];
         let description = match n.summary() {
             Some(s) => s.to_string(),
-            None => text::strip_html(&n.content_html).chars().take(200).collect(),
+            None => text::excerpt(&n.content_html, RSS_DESCRIPTION_MAX),
         };
         rss.push_str(&format!(
-            "\n<item>\n<title>{t}</title>\n<link>{b}{u}</link>\n<guid isPermaLink=\"true\">{b}{u}</guid>\n<pubDate>{d}</pubDate>\n<description>{desc}</description>\n</item>",
+            "\n<item>\n<title>{t}</title>\n<link>{b}{u}</link>\n<guid isPermaLink=\"true\">{b}{u}</guid>\n<pubDate>{d}</pubDate>\n<description>{desc}</description>\n<content:encoded>{full}</content:encoded>\n</item>",
             t = e(n.title()),
             b = e(site.base_url),
             u = e(&n.url),
             d = e(&rfc(p)),
             desc = e(&description),
+            full = e(&text::absolute_urls(&n.content_html, site.base_url, &n.url)),
         ));
     }
     rss.push_str("\n</channel>\n</rss>\n");

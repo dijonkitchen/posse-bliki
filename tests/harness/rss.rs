@@ -1,7 +1,7 @@
 //! RSS 2.0 feed is well-formed and contains the expected items (spec/feeds.md).
 
 use crate::support::html::Element;
-use crate::support::{config_str, iso639, read, site, xml};
+use crate::support::{config_str, html, iso639, read, site, xml};
 
 fn channel() -> Element {
     let root = xml::parse(&read(&site().join("index.xml"))).expect("index.xml is well-formed XML");
@@ -241,6 +241,135 @@ fn rss_items_follow_rss_2() {
             !has_markup(&desc),
             "{title}: description contains HTML markup: {desc:?}"
         );
+    }
+}
+
+const CONTENT_NS: &str = "http://purl.org/rss/1.0/modules/content/";
+/// Longest description cut from a post's text (spec/feeds.md).
+const DESCRIPTION_MAX: usize = 200;
+
+/// Each JSON Feed item, which holds every post, as (url, content_html, summary).
+fn json_posts() -> Vec<(String, String, Option<String>)> {
+    let json = posse_bliki_build::json::parse(&read(&site().join("feed.json"))).expect("feed.json");
+    json.get("items")
+        .expect("items")
+        .as_arr()
+        .iter()
+        .map(|i| {
+            (
+                i.str_at("url").expect("url").to_string(),
+                i.str_at("content_html").expect("content_html").to_string(),
+                i.str_at("summary").map(String::from),
+            )
+        })
+        .collect()
+}
+
+/// An HTML fragment, parsed strictly.
+fn fragment(html: &str) -> Element {
+    html::parse(&format!("<!DOCTYPE html>\n{html}")).unwrap_or_else(|e| panic!("not valid HTML: {e}"))
+}
+
+/// The words of an HTML fragment, one space apart.
+fn words(html: &str) -> String {
+    fragment(html).text().split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// Full text (ADR 2026-11-07-full-text-rss): every item carries the whole
+/// post in `content:encoded`, after its plain `description`, as the RSS
+/// Best Practices Profile recommends.
+#[test]
+fn rss_items_carry_the_whole_post() {
+    let root = xml::parse(&read(&site().join("index.xml"))).expect("index.xml is well-formed XML");
+    assert_eq!(
+        root.attr("xmlns:content"),
+        Some(CONTENT_NS),
+        "<rss> doesn't declare the content namespace"
+    );
+    let posts = json_posts();
+    let ch = root.child("channel").expect("no <channel>");
+    for item in ch.elements().filter(|e| e.name == "item") {
+        let title = text(item, "title");
+        let at = |name: &str| item.elements().position(|e| e.name == name);
+        let (desc, full) = (at("description"), at("content:encoded"));
+        assert!(full.is_some(), "{title}: no content:encoded");
+        assert!(desc < full, "{title}: description must come before content:encoded");
+        let link = text(item, "link");
+        let (_, html, _) = posts
+            .iter()
+            .find(|(url, _, _)| *url == link)
+            .unwrap_or_else(|| panic!("{title}: not in feed.json"));
+        assert_eq!(
+            words(&text(item, "content:encoded")),
+            words(html),
+            "{title}: content:encoded is not the whole post"
+        );
+    }
+}
+
+/// The full text passes what the W3C Feed Validation Service warns about in
+/// feed HTML: every link and image is absolute, because RSS gives a reader
+/// no base to resolve a relative URL against, and there is nothing a reader
+/// would strip as unsafe (scripts, frames, plugins, styles, event handlers).
+#[test]
+fn rss_full_text_is_safe_for_readers() {
+    let unsafe_elements = [
+        "script", "iframe", "frame", "object", "embed", "applet", "style", "link", "meta", "form",
+    ];
+    let ch = channel();
+    for item in ch.elements().filter(|e| e.name == "item") {
+        let title = text(item, "title");
+        let doc = fragment(&text(item, "content:encoded"));
+        for el in doc.descendants() {
+            assert!(
+                !unsafe_elements.contains(&el.name.as_str()),
+                "{title}: <{}> in content:encoded",
+                el.name
+            );
+            for (name, value) in &el.attrs {
+                match name.as_str() {
+                    "href" | "src" => assert!(
+                        is_absolute_http_url(value) || value.starts_with("mailto:"),
+                        "{title}: relative URL {name}={value:?} in content:encoded"
+                    ),
+                    "srcset" | "poster" | "cite" | "style" => {
+                        panic!("{title}: {name}= in content:encoded, which this test doesn't check yet")
+                    }
+                    _ => assert!(!name.starts_with("on"), "{title}: {name}= in content:encoded"),
+                }
+            }
+        }
+    }
+}
+
+/// A description is the post's `summary`, or else its opening words, at most
+/// 200 characters and cut at a word, with an ellipsis marking the cut.
+#[test]
+fn rss_descriptions_end_at_a_word() {
+    let ch = channel();
+    let posts = json_posts();
+    for item in ch.elements().filter(|e| e.name == "item") {
+        let title = text(item, "title");
+        let link = text(item, "link");
+        let desc = text(item, "description");
+        let (_, html, summary) = posts.iter().find(|(url, _, _)| *url == link).expect("in feed.json");
+        if let Some(summary) = summary {
+            assert_eq!(&desc, summary, "{title}: description isn't the summary");
+            continue;
+        }
+        assert!(
+            desc.chars().count() <= DESCRIPTION_MAX,
+            "{title}: description is {} characters",
+            desc.chars().count()
+        );
+        let body = words(html);
+        match desc.strip_suffix('\u{2026}') {
+            Some(cut) => assert!(
+                body.starts_with(cut) && body[cut.len()..].starts_with(' '),
+                "{title}: description is cut mid-word: {desc:?}"
+            ),
+            None => assert_eq!(desc, body, "{title}: description isn't the post's text"),
+        }
     }
 }
 
