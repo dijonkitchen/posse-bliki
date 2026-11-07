@@ -3,6 +3,8 @@ title: "control"
 date: 2026-04-22
 aliases:
   - /p/control/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mkn6znfya22n
 ---
 We’d all love control and a mutual web of trust with others in our life and communities. Even if there was conflict, we’d have people to confide in and mediate.
 

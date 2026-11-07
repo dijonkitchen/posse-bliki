@@ -3,6 +3,8 @@ title: "Balance"
 date: 2026-02-12
 aliases:
   - /p/balance/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mf5r4c4bns2b
 ---
 Writing for my ideal customer: myself.
 

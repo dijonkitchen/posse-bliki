@@ -3,6 +3,8 @@ title: "intention"
 date: 2026-04-16
 aliases:
   - /p/intention/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mk3iyteths2c
 ---
 Moving and doing with intention is important. Otherwise, you’d never take a vacation.
 

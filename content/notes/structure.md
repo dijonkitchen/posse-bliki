@@ -3,6 +3,8 @@ title: "Structure"
 date: 2026-03-04
 aliases:
   - /p/structure/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mgs24hx3n22f
 ---
 There is something very satisfying about great architecture.
 

@@ -3,6 +3,8 @@ title: "Cleanse"
 date: 2026-04-01
 aliases:
   - /p/cleanse/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3miyfzrloc22l
 ---
 They say cleanliness is next to godliness.
 

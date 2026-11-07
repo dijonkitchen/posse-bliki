@@ -3,6 +3,8 @@ title: "lemonade"
 date: 2026-04-29
 aliases:
   - /p/lemonade/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mla2fxt5ck23
 ---
 Fighting against the randomness of entropy is hard. Maybe one way is to schedule important things at awkward cadences. While not truly random, they can be forcing functions to redirect your attention.
 
