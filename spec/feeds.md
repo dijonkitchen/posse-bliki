@@ -74,7 +74,11 @@ it (ADR 2026-10-25-blogroll). Why: OPML is the file every feed reader
 imports, so a reader can follow the whole list in one step, and the list
 stays one Markdown file that reads the same on GitHub and in Obsidian.
 
-- Each list item on the page is one site, written
+- The page's reading list is everything before its first `##` heading.
+  Only it is exported. Later sections, such as "Find more of the indie web",
+  are links on the page only, because a feed reader subscribes to every
+  outline it imports (ADR 2026-11-07-indie-web-links-on-the-blogroll).
+- Each list item in the reading list is one site, written
   `- [Name](https://site/) ([feed](https://site/feed.xml)): why I read it.`
   The first link is the site and must be an absolute web address; a link
   reading `feed` is its feed; the rest of the text is its description.
@@ -86,8 +90,8 @@ stays one Markdown file that reads the same on GitHub and in Obsidian.
   with `url`; `description` when the item has one. No dates, so the file
   only changes when the list does.
 - The blogroll page links the file with
-  `<link rel="alternate" type="text/x-opml">` and a visible link under the
-  list, and every page's footer links `/blogroll/`. Without
+  `<link rel="alternate" type="text/x-opml">` and a visible link right under
+  the reading list, and every page's footer links `/blogroll/`. Without
   `blogroll.md` there is no OPML file and no footer link.
 - Tested in `tests/harness/blogroll.rs`.
 

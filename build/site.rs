@@ -971,10 +971,17 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
     } else {
         String::new()
     };
+    // The blogroll's OPML link goes right under the reading list it
+    // exports, before any later section (ADR 2026-11-07-indie-web-links-on-the-blogroll).
+    let (body, after) = if n.slug == BLOGROLL {
+        let (list, rest) = blogroll::split(&n.content_html);
+        (format!("{list}{after}{rest}"), String::new())
+    } else {
+        (n.content_html.clone(), after)
+    };
     let content = format!(
-        "\n<article>\n<h1>{}</h1>\n{updated}{}\n{after}</article>\n{}\n",
+        "\n<article>\n<h1>{}</h1>\n{updated}{body}\n{after}</article>\n{}\n",
         e(n.title()),
-        n.content_html,
         backlinks_block(notes, n)
     );
     Ok(base(

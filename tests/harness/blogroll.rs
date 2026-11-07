@@ -3,7 +3,7 @@
 use std::fs;
 
 use crate::support::html::Element;
-use crate::support::{build, content_dir, html_files, read, rel, site, temp_dir, vault_copy, xml};
+use crate::support::{build, content_dir, hrefs, html_files, read, rel, site, temp_dir, vault_copy, xml};
 
 fn outlines() -> Vec<Element> {
     let root = xml::parse(&read(&site().join("blogroll.opml"))).expect("blogroll.opml is well-formed XML");
@@ -17,8 +17,14 @@ fn outlines() -> Vec<Element> {
 
 #[test]
 fn opml_has_an_outline_per_listed_site() {
+    // Only the reading list, before the first `## ` heading, is exported
+    // (ADR 2026-11-07-indie-web-links-on-the-blogroll).
     let md = read(&content_dir().join("blogroll.md"));
-    let listed = md.lines().filter(|l| l.starts_with("- [")).count();
+    let listed = md
+        .lines()
+        .take_while(|l| !l.starts_with("## "))
+        .filter(|l| l.starts_with("- ["))
+        .count();
     let outlines = outlines();
     assert!(listed > 0, "blogroll.md lists no sites");
     assert_eq!(outlines.len(), listed, "one outline per list item in blogroll.md");
@@ -47,6 +53,38 @@ fn blogroll_page_points_at_its_opml() {
         html.contains(r#"href="/blogroll.opml""#),
         "no visible link to the OPML file"
     );
+}
+
+#[test]
+fn indie_web_links_stay_on_the_page_and_out_of_the_opml() {
+    // A feed reader subscribes to every outline it imports, and these are
+    // directories and search engines, not blogs
+    // (ADR 2026-11-07-indie-web-links-on-the-blogroll).
+    let html = read(&site().join("blogroll/index.html"));
+    let at = html
+        .find(">Find more of the indie web</h2>")
+        .expect("no \"Find more of the indie web\" section on /blogroll/");
+    let (list, section) = html.split_at(at);
+    assert!(
+        list.contains(r#"href="/blogroll.opml""#),
+        "the OPML link should sit under the reading list, above the indie web section"
+    );
+    let section = &section[..section.find("</ul>").expect("no list in the section")];
+    let links: Vec<&str> = hrefs(section)
+        .into_iter()
+        .filter(|h| h.starts_with("https://"))
+        .collect();
+    for want in ["https://indieweb.org/", "https://xn--sr8hvo.ws/"] {
+        assert!(links.contains(&want), "the indie web section should link {want}");
+    }
+    let exported: Vec<String> = outlines()
+        .iter()
+        .flat_map(|o| [o.attr("htmlUrl"), o.attr("url")])
+        .flatten()
+        .map(String::from)
+        .collect();
+    let leaked: Vec<&&str> = links.iter().filter(|l| exported.iter().any(|x| x == **l)).collect();
+    assert!(leaked.is_empty(), "indie web links in blogroll.opml: {leaked:?}");
 }
 
 #[test]

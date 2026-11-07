@@ -52,12 +52,21 @@ fn sentence(text: &str) -> String {
     c.next().map_or(String::new(), |f| f.to_uppercase().chain(c).collect())
 }
 
-/// The sites listed on the rendered blogroll page. In each list item the
-/// first link is the site, a link reading "feed" is its feed, and the
-/// rest of the text describes it.
+/// The rendered page split at its first `<h2`: the reading list, then
+/// any later sections. Only the reading list goes into the OPML, because
+/// a feed reader imports every outline as a subscription, and the later
+/// sections are links to directories and search engines, not blogs
+/// (ADR 2026-11-07-indie-web-links-on-the-blogroll).
+pub fn split(html: &str) -> (&str, &str) {
+    html.split_at(html.find("<h2").unwrap_or(html.len()))
+}
+
+/// The sites in the rendered blogroll page's reading list (see [`split`]).
+/// In each list item the first link is the site, a link reading "feed" is
+/// its feed, and the rest of the text describes it.
 pub fn sites(html: &str) -> Result<Vec<Site>, String> {
     let mut out = Vec::new();
-    for (i, item) in html.split("<li>").skip(1).enumerate() {
+    for (i, item) in split(html).0.split("<li>").skip(1).enumerate() {
         let item = &item[..item.find("</li>").unwrap_or(item.len())];
         let found = links(item);
         let site = found
@@ -138,6 +147,16 @@ mod tests {
         assert_eq!(s[0].description, "Writes about things.");
         assert_eq!(s[1].feed, None);
         assert_eq!(s[1].description, "");
+    }
+
+    #[test]
+    fn sections_after_the_first_heading_are_not_sites() {
+        let html = "<ul><li><a href=\"https://a.example/\">A</a></li></ul>\n\
+<h2 id=\"more\">More</h2>\n<ul><li>no link here</li><li><a href=\"https://d.example/\">D</a></li></ul>";
+        let s = sites(html).unwrap();
+        assert_eq!(s.len(), 1);
+        assert_eq!(s[0].url, "https://a.example/");
+        assert!(split(html).1.starts_with("<h2 id=\"more\">"));
     }
 
     #[test]

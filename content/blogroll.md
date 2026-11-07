@@ -1,6 +1,6 @@
 ---
 title: Blogroll
-summary: Sites I read and keep coming back to, with their feeds, and all of them as one OPML file for your feed reader.
+summary: Sites I read and keep coming back to, with their feeds and all of them as one OPML file for your feed reader, plus places to find more of the indie web.
 ---
 
 Sites I read and keep coming back to. Most have a feed, so you can follow
@@ -18,3 +18,23 @@ them in a feed reader, the same way you can [follow this one](follow.md).
 - [Naval](https://nav.al/) ([feed](https://nav.al/feed)): wealth, happiness and leverage, in short form.
 - [LessWrong](https://www.lesswrong.com/) ([feed](https://www.lesswrong.com/feed.xml)): rationality and changing your mind.
 - [xkcd](https://xkcd.com/) ([feed](https://xkcd.com/atom.xml)): a webcomic of romance, sarcasm, math and language.
+
+## Find more of the indie web
+
+Directories, search engines and webrings
+that help people find personal sites like these.
+
+- [IndieWeb](https://indieweb.org/): the community behind owning your own site, and the wiki where most of these ideas are written down.
+- [IndieWeb Webring 🕸💍](https://xn--sr8hvo.ws/): a ring of personal sites; the arrows in my footer go round it.
+- [Kagi Small Web](https://kagi.com/smallweb): personal blogs, one recent post at a time.
+- [Marginalia Search](https://marginalia-search.com/): an independent search engine for sites that deserve an audience and rarely get one.
+- [Wiby](https://wiby.me/): a search engine for simple, old-web-style pages.
+- [ooh.directory](https://ooh.directory/): Phil Gyford's directory of blogs, by topic.
+- [blogroll.org](https://blogroll.org/): a hand-picked list of blogs.
+- [indieblog.page](https://indieblog.page/): one click to a random post on a personal blog.
+- [personalsit.es](https://personalsit.es/): a gallery of personal sites.
+- [blogs.hn](https://blogs.hn/): tech blogs, mostly found through Hacker News.
+- [nownownow.com](https://nownownow.com/): Derek Sivers's directory of /now pages, which inspired mine.
+- [aboutideasnow.com](https://aboutideasnow.com/): search across people's /about, /ideas and /now pages.
+- [IndieNews](https://news.indieweb.org/): posts about the IndieWeb, sent in from their authors' own sites.
+- [512KB Club](https://512kb.club/), [250KB Club](https://250kb.club/) and [1MB Club](https://1mb.club/): sites that keep their pages small.
