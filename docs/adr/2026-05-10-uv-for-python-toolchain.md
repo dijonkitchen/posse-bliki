@@ -1,7 +1,7 @@
 # 2026-05-10 — uv for Python toolchain
 
 - Date: 2026-05-10
-- Status: Superseded by [2026-10-11-rust-only-toolchain](2026-10-11-rust-only-toolchain.md)
+- Status: Superseded by [2026-10-11-rust-only-toolchain](2026-10-11-rust-only-toolchain.md); proposed in the first scaffold, see [2026-11-06-scaffold-adrs-decided](2026-11-06-scaffold-adrs-decided.md)
 
 ## Context
 

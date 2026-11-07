@@ -1,7 +1,7 @@
 # 2026-05-10 — Spec + harness as the durable artifact, not the build code
 
 - Date: 2026-05-10
-- Status: Accepted
+- Status: Accepted; proposed in the first scaffold, confirmed by JC as recorded in [2026-11-06-scaffold-adrs-decided](2026-11-06-scaffold-adrs-decided.md)
 
 ## Context
 
