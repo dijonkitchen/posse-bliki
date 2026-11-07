@@ -8,23 +8,28 @@ aliases:
   - /reading/
 ---
 
-This is a long-lived home for my notes, writing, and half-formed ideas.
+Welcome to my napkin logic: notes, writing and half-formed ideas, kept
+somewhere they won't get thrown out with the napkin.
+
 Looking to work together? My [bio](bio.md) has my experience and how to
 reach me.
 
-The canonical version of every post lives **here**. Copies may appear on
-Mastodon, Bluesky, or elsewhere, but those are syndicated — see the
-[colophon](colophon.md) for how that works.
+The original of every post lives here. Copies on Mastodon, Bluesky or
+anywhere else are just copies, and the [colophon](colophon.md) explains
+how they get there.
 
 ## New here?
 
-This is a bliki, a personal blog/wiki hybrid where I think out loud,
-gather notes, and publish from my own corner of the web. It follows the
-[POSSE](https://indieweb.org/POSSE) principle: **P**ublish (on your)
-**O**wn **S**ite, **S**yndicate **E**lsewhere.
+This is a [bliki](https://martinfowler.com/bliki/WhatIsaBliki.html), half
+blog and half wiki. I think out loud, gather notes and publish from my own
+corner of the web.
 
-Some pages here are short and unfinished. That's the point of a
-[bliki](https://martinfowler.com/bliki/WhatIsaBliki.html): notes evolve.
+It follows [POSSE](https://indieweb.org/POSSE): **P**ublish (on your)
+**O**wn **S**ite, **S**yndicate **E**lsewhere. Own it first, share it
+after.
+
+Some pages are short and unfinished. That's on purpose. Notes evolve, and
+so do I.
 
 - [How to follow it](follow.md)
 - [How this site is built](colophon.md)
