@@ -52,7 +52,12 @@ _caldav._tcp            SRV     0 0 0 .
 _caldavs._tcp           SRV     0 1 443 caldav.fastmail.com.
 
 ; Ownership checks.
+; Google Search Console. Each token proves one Google account owns the
+; domain. The first predates the 2026-10-11 move to GitHub Pages and its
+; account is unknown; the second is JC's current one (2026-11-07). Remove
+; the first only once no Search Console property depends on it.
 @                                       TXT     "google-site-verification=bitAFl3JsXWi27bpiFdEpNB-F0-tQkO0DhK_Yy25z8M"
+@                                       TXT     "google-site-verification=JcdxaB1Xlf0pHFuH13liYGOF3XJK-yhaqE82byx4BoA"
 _github-pages-challenge-dijonkitchen    TXT     "cd9449927f0827e1600e45c2fd5907"
 ; Bluesky handle @dijonkitchen.org.
 _atproto                                TXT     "did=did:plc:e7pggp5deprxbwszlv254vmv"
