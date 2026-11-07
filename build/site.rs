@@ -514,6 +514,20 @@ fn apply_base_path(dir: &Path, prefix: &str) -> Result<(), String> {
 
 /// Where to report a security problem: GitHub's private vulnerability
 /// reporting for this repository (ADR 2026-10-28-security-txt).
+/// robots.txt tokens whose operators say what they gather may train AI
+/// models (ADR 2026-11-06-no-ai-training). The same companies' search
+/// agents (Googlebot, Applebot, OAI-SearchBot, Claude-SearchBot,
+/// Amzn-SearchBot) stay allowed.
+const AI_TRAINING_AGENTS: &[&str] = &[
+    "GPTBot",
+    "ClaudeBot",
+    "Google-Extended",
+    "Applebot-Extended",
+    "meta-externalagent",
+    "Amazonbot",
+    "CCBot",
+];
+
 const SECURITY_CONTACT: &str = "https://github.com/dijonkitchen/posse-bliki/security/advisories/new";
 /// How far ahead security.txt expires; RFC 9116 asks for under a year.
 const SECURITY_TXT_DAYS: i64 = 180;
@@ -1319,10 +1333,18 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     sm.push_str("\n</urlset>\n");
     write(&out.join("sitemap.xml"), &sm)?;
 
-    // robots.txt
+    // robots.txt: search crawlers welcome, AI training crawlers asked out
+    // (ADR 2026-11-06-no-ai-training).
+    let training_agents: String = AI_TRAINING_AGENTS
+        .iter()
+        .map(|a| format!("User-agent: {a}\n"))
+        .collect();
     write(
         &out.join("robots.txt"),
-        &format!("User-agent: *\nAllow: /\n\nSitemap: {}/sitemap.xml\n", base_url),
+        &format!(
+            "# Search engines and everyone else may crawl everything.\nUser-agent: *\nAllow: /\n\n\
+# AI training crawlers may not.\n{training_agents}Disallow: /\n\nSitemap: {base_url}/sitemap.xml\n"
+        ),
     )?;
 
     // security.txt (RFC 9116), dated off the build's today so the daily

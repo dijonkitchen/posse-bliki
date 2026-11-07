@@ -27,6 +27,7 @@ mod not_found;
 mod now;
 mod offline;
 mod performance;
+mod robots;
 mod rss;
 mod scheduled;
 mod security_txt;
