@@ -7,17 +7,14 @@ $ORIGIN dijonkitchen.org.
 $TTL 600
 
 ; Site: GitHub Pages. www is canonical (ADR 2026-10-14-www-as-canonical-host).
-@       A       185.199.108.153
-@       A       185.199.109.153
-@       A       185.199.110.153
-@       A       185.199.111.153
-@       AAAA    2606:50c0:8000::153
-@       AAAA    2606:50c0:8001::153
-@       AAAA    2606:50c0:8002::153
-@       AAAA    2606:50c0:8003::153
 www     CNAME   dijonkitchen.github.io.
 
-; Only Let's Encrypt (used by GitHub Pages) may issue certificates.
+; Bare domain: a redirect-only Netlify site built from apex/, which sends
+; fediverse lookups to Bridgy Fed and everything else to www
+; (ADR 2026-11-07-fediverse-handle-on-own-domain).
+@       A       75.2.60.5
+
+; Only Let's Encrypt (used by GitHub Pages and Netlify) may issue certificates.
 @       CAA     0 issue "letsencrypt.org"
 
 ; Email: Fastmail.

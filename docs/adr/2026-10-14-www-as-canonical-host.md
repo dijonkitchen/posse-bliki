@@ -1,7 +1,8 @@
 # 2026-10-14 — www as the canonical host
 
 - Date: 2026-10-14
-- Status: Accepted
+- Status: Accepted. The bare domain's records changed in
+  ADR 2026-11-07-fediverse-handle-on-own-domain.
 - Decided by: JC, choosing www over the bare domain "for flexibility in future".
 
 ## Context

@@ -1,0 +1,12 @@
+# The bare domain, dijonkitchen.org, deployed on its own to Netlify.
+# The site itself is www.dijonkitchen.org on GitHub Pages.
+# ADR 2026-11-07-fediverse-handle-on-own-domain says why.
+# Netlify reads the first rule that matches and forwards query strings.
+
+# Fediverse lookups for @dijonkitchen.org@dijonkitchen.org go to Bridgy Fed,
+# as https://fed.brid.gy/docs#fediverse-enhanced asks.
+/.well-known/host-meta*  https://fed.brid.gy/.well-known/host-meta:splat  302
+/.well-known/webfinger*  https://fed.brid.gy/.well-known/webfinger  302
+
+# Everything else goes to the canonical host, as Pages did before.
+/*  https://www.dijonkitchen.org/:splat  301!

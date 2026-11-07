@@ -8,6 +8,7 @@
 mod support;
 
 mod aliases;
+mod apex;
 mod base_path;
 mod blogroll;
 mod csp;
