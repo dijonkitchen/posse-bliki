@@ -3,6 +3,8 @@ title: "Fun and games"
 date: 2026-02-18
 aliases:
   - /p/fun-and-games/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mfre6ztst22y
 ---
 Having an adventure time cooking and making matcha for family. Learned you can’t really trust much that you see. Need to learn about craftsmanship and good primary sources. Just like career advice is biased by the experiences of the giver. You need to try to gain your own first-hand experiences to really learn and know what to do and if something is for you.
 

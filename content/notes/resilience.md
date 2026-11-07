@@ -3,6 +3,8 @@ title: "Resilience"
 date: 2026-03-25
 aliases:
   - /p/resilience/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3migrvl3njc2c
 ---
 Life throws you many roller coasters.
 

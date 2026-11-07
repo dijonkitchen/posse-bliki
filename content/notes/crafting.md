@@ -3,6 +3,8 @@ title: "Crafting"
 date: 2026-02-26
 aliases:
   - /p/crafting/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mgajsqbgtk23
 ---
 As things are abstracted from us, we need to manage more.
 

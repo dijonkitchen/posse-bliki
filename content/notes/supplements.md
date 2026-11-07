@@ -3,6 +3,8 @@ title: "Supplements"
 date: 2026-03-19
 aliases:
   - /p/supplements/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mhv6mana5k2g
 ---
 Supplementing life and body with games, reading, and nutritional supplements.
 

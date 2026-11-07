@@ -3,6 +3,8 @@ title: "TODO: DIY"
 date: 2026-03-11
 aliases:
   - /p/todo-diy/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mhevi2yhys2k
 ---
 In an age where AI agents can do so much for you, there is still room to do things yourself. The agent-principal problem still exists. Perhaps even more from a safety perspective.
 

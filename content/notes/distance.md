@@ -3,6 +3,8 @@ title: "Distance"
 date: 2026-04-08
 aliases:
   - /p/distance/
+syndication:
+  - https://bsky.app/profile/dijonkitchen.org/post/3mjlal2ue2c27
 ---
 It’s kind of an innate human trait, the search for productivity and efficiency through leverage. It’s allowed our species to grow and expand.
 
