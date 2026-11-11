@@ -51,7 +51,9 @@ In addition to the universal invariants, every post page must:
   - `.p-author` `h-card` referencing the site author
   - `.u-url` matching the page's canonical URL
   - `.p-summary` if `summary` was set
-  - `.u-syndication` per syndication URL
+  - `.u-syndication` per syndication URL, after "Also on:",
+    its text the site's host without `www.` (`bsky.app`),
+    since a whole URL overflows a phone screen
   - a hidden, empty link to each configured syndication target
   - received webmentions, when given (see [indieweb.md](indieweb.md))
 - Show backlinks (incoming links from other notes) when any exist.
