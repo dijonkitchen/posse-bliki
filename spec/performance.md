@@ -16,7 +16,8 @@ budget, which `scripts/lighthouse.sh` checks in CI.
   scale and 24px.
 - **Readable output, never minified.** `style.css` ships byte for byte as
   written in `build/static/`, comments included, with no line over 200
-  characters. HTML keeps one `<head>` element per line, as the templates
+  characters, inside every page's `<style>` (less its final newline) and
+  as `/style.css`. HTML keeps one `<head>` element per line, as the templates
   write it, indented two spaces per level of nesting with no blank lines;
   `<pre>`, `<textarea>`, `<script>` and `<style>` contents ship byte for
   byte (ADR 2026-10-28-indented-html). A tag with two or more attributes
@@ -97,15 +98,17 @@ monthly (ADR 2026-11-05-dependabot-lighthouse-updates).
 How the [PRPL pattern](https://web.dev/articles/apply-instant-loading-with-prpl)
 maps onto a static, script-free site:
 
-- **Push / preload** the critical resources: the body font is preloaded,
-  the one stylesheet is same-origin and small, and there are no
-  third-party requests to set up.
+- **Push / preload** the critical resources: the house style and the
+  style picker ship inline in each page, so the first paint needs no
+  request after the page itself
+  (ADR 2026-11-11-inline-house-style-and-script); the body font is
+  preloaded; and there are no third-party requests to set up.
 - **Render** the initial route as soon as possible: every page is complete
   HTML from the server, with no client rendering.
 - **Pre-cache** remaining routes: only the shell. `/sw.js`, a service
   worker that `/style-picker.js` starts once a page has loaded, keeps the
-  pages in the header (home, notes index, now, about), the offline page, `style.css`, the script, the body font and
-  the tab icon on install, then each page, image and style as it is read,
+  pages in the header (home, notes index, now, about), the offline page,
+  the body font and the tab icon on install, then each page, image and style as it is read,
   for reading offline. Online it always asks the network first, so it
   never serves a stale page or slows a first visit
   (ADR 2026-10-29-offline-reading).
@@ -121,6 +124,9 @@ the build:
 
 - GitHub Pages serves everything with `Cache-Control: max-age=600`, which
   Lighthouse flags as a short cache lifetime. Pages has no setting for it.
+  The house style and the script are inline, so only the body font is
+  flagged, and it never holds up the first paint
+  (ADR 2026-11-11-inline-house-style-and-script).
 - The address in `base_url` should be the one Pages serves without a
   redirect; a redirect from the bare domain to `www` (or back) costs every
   first visit a round trip.

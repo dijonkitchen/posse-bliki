@@ -5,12 +5,15 @@
  * the phone layout; `@media (min-width: 40rem)` blocks add to it for wider
  * screens. There is no `max-width` query. This file ships as written, never
  * minified, so anyone can audit and remix it from "view source" (Stallman's
- * reason; ADR 2026-10-14-mobile-first).
+ * reason; ADR 2026-10-14-mobile-first). It ships inline in every page's
+ * head, so the first paint waits on no other file
+ * (ADR 2026-11-11-inline-house-style-and-script).
  *
  * Token values are copied from the system's tokens/*.css. Use the semantic
  * tokens (--text-*, --surface-*, --border-*) in rules below, not the
  * primitives (--blue-700 and friends), so a palette change touches one place.
- * Fonts are self-hosted from /fonts/ (no third-party requests).
+ * Fonts are self-hosted from /fonts/ (no third-party requests). Their URLs
+ * start at the site root, since inline they resolve against each page.
  */
 
 /* --- fonts (SIL OFL 1.1; licences sit beside the files) --- */
@@ -19,21 +22,21 @@
   font-style: normal;
   font-weight: 200 800;
   font-display: swap;
-  src: url("fonts/atkinson-hyperlegible-next-latin.woff2") format("woff2");
+  src: url("/fonts/atkinson-hyperlegible-next-latin.woff2") format("woff2");
 }
 @font-face {
   font-family: "Atkinson Hyperlegible Next";
   font-style: italic;
   font-weight: 200 800;
   font-display: swap;
-  src: url("fonts/atkinson-hyperlegible-next-italic-latin.woff2") format("woff2");
+  src: url("/fonts/atkinson-hyperlegible-next-italic-latin.woff2") format("woff2");
 }
 @font-face {
   font-family: "JetBrains Mono";
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url("fonts/jetbrains-mono-latin.woff2") format("woff2");
+  src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
 }
 /*
  * Fallbacks sized to match Atkinson Hyperlegible Next, so text doesn't jump

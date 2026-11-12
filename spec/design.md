@@ -11,25 +11,28 @@ See [ADR 2026-10-11-a11y-design-system-self-hosted-fonts](../docs/adr/2026-10-11
 
 Each item is enforced by `tests/harness/design.rs`.
 
-- **Stylesheets.** Every page's `<head>` links `/style.css`, then, inside
-  `<noscript>`, each style in `build/static/themes/` as
-  `/themes/<style>.css`. With JavaScript on, the page loads `/style.css`
-  alone and `/style-picker.js` adds only the picked style's sheet, so a
-  style costs nothing until someone picks it
-  (ADR 2026-10-20-zen-garden-styles). No inline `style` attributes, no
-  `<style>` blocks.
+- **Stylesheets.** Every page's `<head>` carries the house style,
+  `build/static/style.css`, byte for byte but for its final newline, in
+  one `<style>`, so the first paint waits on no other file
+  (ADR 2026-11-11-inline-house-style-and-script). `/style.css` is also
+  emitted, to read or copy on its own. Then, inside `<noscript>`, the page
+  links each style in `build/static/themes/` as `/themes/<style>.css`.
+  With JavaScript on, the style picker adds only the picked style's sheet,
+  so a style costs nothing until someone picks it
+  (ADR 2026-10-20-zen-garden-styles). No inline `style` attributes, and
+  no `<style>` block but the house style.
 - **Style picker.** Every page's header has a Style menu (`<select
   id="style">`): Auto, Light, Dark, then each theme in an `<optgroup>`
   (Originals, Editors, CSS Zen Garden, Seasonal, Throwbacks). Picking one
   restyles the page through CSS `:has()`, with no JavaScript;
-  `/style-picker.js` loads the picked style's sheet and remembers the pick
-  across pages. Auto follows `prefers-color-scheme`. A theme's rules all
+  the style picker script loads the picked style's sheet and remembers the
+  pick across pages. Auto follows `prefers-color-scheme`. A theme's rules all
   sit inside `:root:is([data-style="<style>"], :has(#style
   [value="<style>"]:checked))`, it loads nothing itself, ships as written,
   and its text and link tokens meet AAA 7:1 on every surface
-  (ADR 2026-10-18-style-picker). The script runs in `<head>` and sets
-  `<html data-style>` before first paint, so a picked or seasonal style
-  never shifts the page as it arrives
+  (ADR 2026-10-18-style-picker). The script runs inline in `<head>` and
+  sets `<html data-style>` before first paint, so a picked or seasonal
+  style never shifts the page as it arrives
   (ADR 2026-10-30-style-before-first-paint).
 - **Share links.** A link ending `?style=<style>` opens the page in that
   style and saves it as the reader's pick, as if chosen from the menu, so
@@ -54,9 +57,11 @@ Each item is enforced by `tests/harness/design.rs`.
 - **No third-party requests.** Pages and the stylesheet load nothing from
   another origin: no web-font CDNs, no `@import`. Fonts are self-hosted
   under `/fonts/`, with their SIL OFL licences beside them.
-- **Works under a sub-path.** Every `url()` in the stylesheet is relative to
-  the stylesheet and resolves to an emitted file, so the site renders the
-  same at a domain root and at a GitHub Pages project URL.
+- **Works under a sub-path.** Every `url()` in the house style starts at
+  the site root, since inline it resolves against each page, and resolves
+  to an emitted file. Under a sub-path the build prefixes them, so the
+  site renders the same at a domain root and at a GitHub Pages project URL
+  (ADR 2026-11-11-inline-house-style-and-script).
 - **Design tokens.** The stylesheet defines the system's semantic colour
   tokens (`--text-1`, `--text-2`, `--text-link`, `--surface-page`,
   `--surface-sunken`, `--border-strong`, `--border-subtle`, `--focus-halo`,

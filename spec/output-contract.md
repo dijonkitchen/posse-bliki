@@ -17,10 +17,13 @@ in `tests/`.
 - `<meta name="viewport" content="width=device-width, initial-scale=1">`.
 - `<meta http-equiv="Content-Security-Policy">` right after the charset,
   allowing only the site's own scripts, styles, images, fonts, manifest and
-  fetches (`default-src 'none'`, `base-uri 'none'`, `form-action 'none'`). Pages
-  load nothing the policy would block: no inline styles, `<style>`, event
-  handler attributes, embeds, or files from other hosts
-  (ADR 2026-10-28-csp-meta-tag).
+  fetches (`default-src 'none'`, `base-uri 'none'`, `form-action 'none'`),
+  plus the page's one inline `<script>` and one `<style>`, each by the
+  `'sha256-…'` hash of its text, which starts and ends with no whitespace
+  so the Nu HTML Checker can check the hash too
+  (ADR 2026-10-28-csp-meta-tag, ADR 2026-11-11-inline-house-style-and-script). Pages load nothing the
+  policy would block: no other inline scripts or styles, no `style` or
+  event handler attributes, embeds, or files from other hosts.
 - `<title>` is present and non-empty.
 - `<link rel="canonical">` matches the page's canonical URL on `site.base_url`.
 - `<link rel="alternate" type="application/rss+xml" href="/index.xml">`.
@@ -28,12 +31,17 @@ in `tests/`.
 - `<link rel="webmention">` (configured target). No `<link rel="pingback">`:
   Webmention replaces it (ADR 2026-11-06-drop-pingback).
 - All internal links resolve to a real emitted file.
-- No `<script>` except `<script src="/style-picker.js"
-  data-styles="…">`, last in `<head>`, where `data-styles` lists the
-  picker's styles (ADR 2026-10-30-style-before-first-paint). The site is fully functional with JS off; the
-  script only loads and remembers the picked style, and starts `/sw.js`
-  for offline reading (ADR 2026-10-18-style-picker,
-  ADR 2026-10-20-zen-garden-styles, ADR 2026-10-29-offline-reading).
+- No `<script>` except `<script data-root="/" data-styles="…">`, last in
+  `<head>`, holding `build/static/style-picker.js` byte for byte but for
+  its final newline.
+  `data-styles` lists the picker's styles
+  (ADR 2026-10-30-style-before-first-paint), and `data-root` is the site
+  root it resolves `themes/` and `sw.js` against
+  (ADR 2026-11-11-inline-house-style-and-script). The site is fully
+  functional with JS off; the script only loads and remembers the picked
+  style, and starts `/sw.js` for offline reading
+  (ADR 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles,
+  ADR 2026-10-29-offline-reading).
 - Styling follows [design.md](design.md).
 - Loading follows [performance.md](performance.md).
 
@@ -113,5 +121,7 @@ In addition to the universal invariants, every post page must:
 `--base-url` overrides `site.base_url` for one build. When it carries a path
 (a GitHub Pages project site such as `https://dijonkitchen.github.io/posse-bliki`),
 every root-relative link the pages and feeds emit (`/notes/`, `/style.css`,
-alias redirect targets) is prefixed with that path, so the site works there.
+alias redirect targets, the style picker's `data-root`) is prefixed with
+that path, and so are the house style's font URLs before the CSP hashes
+are taken, so the site works there.
 With no path, output is unchanged. Enforced by `tests/harness/base_path.rs`.
