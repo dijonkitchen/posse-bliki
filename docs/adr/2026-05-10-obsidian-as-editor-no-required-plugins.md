@@ -1,7 +1,7 @@
 # 2026-05-10 — Obsidian as editor, no required plugins
 
 - Date: 2026-05-10
-- Status: Accepted; wikilinks replaced by [2026-10-16-relative-markdown-links](2026-10-16-relative-markdown-links.md), its tag syntax dropped by [2026-11-06-drop-tags](2026-11-06-drop-tags.md); see [2026-11-06-scaffold-adrs-decided](2026-11-06-scaffold-adrs-decided.md)
+- Status: Accepted; wikilinks replaced by [2026-10-16-relative-markdown-links](2026-10-16-relative-markdown-links.md), its tag syntax dropped by [2026-11-06-drop-tags](2026-11-06-drop-tags.md); the vault now carries one optional plugin's settings, by [2026-11-12-obsidian-stamps-updated-at](2026-11-12-obsidian-stamps-updated-at.md); see [2026-11-06-scaffold-adrs-decided](2026-11-06-scaffold-adrs-decided.md)
 
 ## Context
 

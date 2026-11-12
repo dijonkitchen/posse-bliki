@@ -26,16 +26,25 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 1. Open `content/` as an Obsidian vault. Its `.obsidian/app.json` already
    turns off wikilinks and makes new links relative paths (*Settings →
    Files and links*); keep it that way.
-2. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
+2. Optional, once on each device: turn on community plugins
+   (*Settings → Community plugins*), then *Browse* for the Linter plugin,
+   install it and turn it on.
+   Its settings are already in the vault,
+   so saving a note with Ctrl+S (Cmd+S on a Mac) stamps `updated_at` with the current UTC time
+   (ADR 2026-11-12-obsidian-stamps-updated-at).
+   Don't run its "Lint all files" command, which would stamp every note.
+3. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`).
-3. `git commit && git push`. CI runs the harness and deploys.
+4. `git commit && git push`. CI runs the harness and deploys.
 
 Front matter handles the rest: `draft: true` keeps a note out of the build,
 a `date` in the future holds it back until that day, `aliases:` keeps old
 URLs redirecting (never remove one), and `syndication:` lists a post's
 copies elsewhere.
-Set `updated` when you rework a note, and it moves to the top of Home and Notes.
-A note with `updated` and no `date` is an evergreen note:
+`updated_at` says when you last reworked a note, as a UTC datetime (`2026-11-12T04:27:28Z`) or a day,
+and moves the note to the top of Home and Notes.
+Obsidian stamps it when you save with Ctrl+S; anywhere else, type it.
+A note with `updated_at` and no `date` is an evergreen note:
 listed with the rest, but never sent to the feeds or syndicated. [`spec/content-schema.md`](spec/content-schema.md) has
 every field.
 

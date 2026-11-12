@@ -26,6 +26,7 @@ mod microformats;
 mod no_tags;
 mod not_found;
 mod now;
+mod obsidian;
 mod offline;
 mod performance;
 mod robots;

@@ -1,0 +1,21 @@
+{
+  "ruleConfigs": {
+    "yaml-timestamp": {
+      "enabled": true,
+      "date-created": false,
+      "date-created-key": "date created",
+      "date-created-source-of-truth": "file system",
+      "date-modified": true,
+      "date-modified-key": "updated_at",
+      "date-modified-source-of-truth": "file system",
+      "format": "YYYY-MM-DDTHH:mm:ss[Z]",
+      "convert-to-utc": true,
+      "update-on-file-contents-updated": "never"
+    }
+  },
+  "lintOnSave": true,
+  "lintOnFileChange": false,
+  "settingsConvertedToConfigKeyValues": true,
+  "textAreaSettingsConvertedToListItemSettings": true,
+  "defaultArrayStyleMovedToCommonStyles": true
+}

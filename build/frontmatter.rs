@@ -901,8 +901,17 @@ fn resolve_float(s: &str) -> Option<f64> {
 // Schema validation (hand-written equivalent of spec/content-schema.json)
 // ---------------------------------------------------------------------------
 
-const PROPERTIES: &[&str] = &["title", "date", "updated", "summary", "draft", "aliases", "syndication"];
+const PROPERTIES: &[&str] = &[
+    "title",
+    "date",
+    "updated_at",
+    "summary",
+    "draft",
+    "aliases",
+    "syndication",
+];
 const DATE_PATTERN: &str = r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:?\d{2})?)?$";
+const UPDATED_AT_PATTERN: &str = r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(Z|\+00:00))?$";
 const ALIAS_PATTERN: &str = "^/.+";
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -1067,6 +1076,12 @@ fn check_array(v: &Value, key: &str, pattern: Option<Pattern>, uri: bool, errs: 
     }
 }
 
+/// `UPDATED_AT_PATTERN`: a day, or a datetime that says it is UTC.
+pub fn is_updated_at_like(s: &str) -> bool {
+    let t = strip_dollar_nl(s);
+    is_date_like(s) && (t.len() == 10 || t.ends_with('Z') || t.ends_with("+00:00"))
+}
+
 fn values_equal(a: &Value, b: &Value) -> bool {
     match (a, b) {
         (Value::Int(x), Value::Float(y)) | (Value::Float(y), Value::Int(x)) => (*x as f64) == *y,
@@ -1106,7 +1121,15 @@ pub fn validate(fm: &FrontMatter) -> Result<(), String> {
         let path = vec![PathElem::Key(prop.to_string())];
         match prop {
             "title" => check_string(v, path, true, None, false, &mut errs),
-            "date" | "updated" => check_string(v, path, false, Some((DATE_PATTERN, is_date_like)), false, &mut errs),
+            "date" => check_string(v, path, false, Some((DATE_PATTERN, is_date_like)), false, &mut errs),
+            "updated_at" => check_string(
+                v,
+                path,
+                false,
+                Some((UPDATED_AT_PATTERN, is_updated_at_like)),
+                false,
+                &mut errs,
+            ),
             "summary" => check_string(v, path, false, None, false, &mut errs),
             "draft" => {
                 if type_name(v) != "boolean" {
