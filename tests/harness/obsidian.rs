@@ -46,7 +46,7 @@ fn linter_stamps_updated_at_in_utc() {
     assert!(is(rule, "convert-to-utc", "true"), "stamps would be in local time");
     assert!(
         is(rule, "date-created", "false"),
-        "a created date would be a field the build doesn't know"
+        "a stamped created_at would make every note a post (ADR 2026-11-13-created-at)"
     );
     // What the format writes for one moment is something the build reads.
     let format = rule.str_at("format").expect("no format");
