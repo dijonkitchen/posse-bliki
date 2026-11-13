@@ -396,7 +396,7 @@ fn missing_self_hosted_image_is_a_build_error() {
     fs::write(content.join("index.md"), "---\ntitle: Home\n---\nHi\n").unwrap();
     fs::write(
         content.join("notes/a.md"),
-        "---\ntitle: A\ndate: 2026-01-01\n---\n![x](/images/nope.png)\n",
+        "---\ntitle: A\ncreated_at: 2026-01-01\n---\n![x](/images/nope.png)\n",
     )
     .unwrap();
     let err = build(&content, &temp_dir("missing-image-out"), &[]).expect_err("build should fail");

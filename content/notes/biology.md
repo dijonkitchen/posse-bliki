@@ -1,6 +1,6 @@
 ---
 title: biology
-date: 2019-09-30
+created_at: 2019-09-30
 aliases:
   - /biology/
   - /p/biology/

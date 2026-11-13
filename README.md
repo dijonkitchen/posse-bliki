@@ -39,14 +39,16 @@ AGENTS.md        Operating contract for any agent/human editing this repo
    you when you type `[[`).
 4. `git commit && git push`. CI runs the harness and deploys.
 
-Front matter handles the rest: `draft: true` keeps a note out of the build,
-a `date` in the future holds it back until that day, `aliases:` keeps old
-URLs redirecting (never remove one), and `syndication:` lists a post's
-copies elsewhere.
+Front matter handles the rest:
+`draft: true` keeps a note out of the build,
+`aliases:` keeps old URLs redirecting (never remove one),
+and `syndication:` lists a post's copies elsewhere.
+`created_at` is the day you made a note, typed by hand.
+It dates a post, and a future one holds the post back until that day.
 `updated_at` says when you last reworked a note, as a UTC datetime (`2026-11-12T04:27:28Z`) or a day,
 and moves the note to the top of Home and Notes.
 Obsidian stamps it as you edit; anywhere else, type it.
-A note with `updated_at` and no `date` is an evergreen note:
+A note with `updated_at` and no `created_at` is an evergreen note:
 listed with the rest, but never sent to the feeds or syndicated. [`spec/content-schema.md`](spec/content-schema.md) has
 every field.
 

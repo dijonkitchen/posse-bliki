@@ -1,6 +1,6 @@
 ---
 title: bias
-date: 2015-10-25
+created_at: 2015-10-25
 aliases:
   - /bias/
 ---

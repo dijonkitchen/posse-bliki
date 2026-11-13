@@ -1,6 +1,6 @@
 ---
 title: classes
-date: 2015-10-19
+created_at: 2015-10-19
 aliases:
   - /classes/
 ---

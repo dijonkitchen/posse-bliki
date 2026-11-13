@@ -1,6 +1,6 @@
 ---
 title: "Structure"
-date: 2026-03-04
+created_at: 2026-03-04
 aliases:
   - /p/structure/
 ---

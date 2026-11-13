@@ -1,6 +1,6 @@
 ---
 title: data
-date: 2015-10-04
+created_at: 2015-10-04
 aliases:
   - /data/
 ---

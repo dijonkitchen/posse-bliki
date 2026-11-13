@@ -1,6 +1,6 @@
 ---
 title: "The Selfish Meme of Productivity"
-date: 2025-02-04
+created_at: 2025-02-04
 aliases:
   - /p/the-selfish-meme-of-productivity/
 ---

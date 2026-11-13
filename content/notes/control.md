@@ -1,6 +1,6 @@
 ---
 title: "control"
-date: 2026-04-22
+created_at: 2026-04-22
 aliases:
   - /p/control/
 ---

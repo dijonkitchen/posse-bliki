@@ -9,13 +9,13 @@ external bridges (Bridgy Fed, echofeed, IFTTT) at one of them.
 - Channel: `<title>`, `<link>` (canonical site URL), `<description>`,
   `<language>`, `<lastBuildDate>` (RFC 822), `<atom:link rel="self">`.
 - Up to 50 most recent posts (excluding drafts and evergreen notes),
-  newest first by `date`. Why: feed
+  newest first by `created_at`. Why: feed
   readers fetch the whole file on every poll, so it stays small; the JSON
   Feed and the notes index carry everything.
   With full text, 50 posts come to about 100 KB, or 30 KB gzipped.
 - Each `<item>`: `<title>`, `<link>` (canonical post URL),
   `<guid isPermaLink="true">` = link, `<pubDate>` (RFC 822 from
-  front-matter `date`), `<description>`, then `<content:encoded>`.
+  front-matter `created_at`), `<description>`, then `<content:encoded>`.
 - `<description>` is plain text:
   the `summary`, or else the body's opening words with markup stripped,
   at most 200 characters,
@@ -62,7 +62,7 @@ Spec: <https://www.jsonfeed.org/version/1.1/>
 
 - Top-level: `version`, `title`, `home_page_url`, `feed_url`,
   `language`, `authors`, `items`.
-- Every post (excluding drafts and evergreen notes), newest first by `date`.
+- Every post (excluding drafts and evergreen notes), newest first by `created_at`.
 - Each item: `id` (canonical URL), `url`, `title`, `content_html`,
   `date_published` (RFC 3339), optional `summary`.
 
@@ -124,7 +124,7 @@ tells a newcomer nothing.
 
 - `urlset` per <https://www.sitemaps.org/protocol.html>.
 - One `<url>` per non-draft page, with `<loc>` and `<lastmod>` (W3C date):
-  the later of the page's `date` and the UTC day of its `updated_at`.
+  the later of the page's `created_at` and the UTC day of its `updated_at`.
 
 ## robots.txt
 

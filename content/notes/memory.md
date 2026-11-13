@@ -1,6 +1,6 @@
 ---
 title: "memory"
-date: 2026-05-07
+created_at: 2026-05-07
 aliases:
   - /p/memory/
 ---

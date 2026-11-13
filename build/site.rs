@@ -290,7 +290,7 @@ struct Note {
     out_path: PathBuf,
     content_html: String,
     backlinks: Vec<usize>,
-    date: Option<Date>,
+    created_at: Option<Date>,
     updated_at: Option<Stamp>,
 }
 
@@ -320,52 +320,54 @@ impl Note {
     }
 
     fn post_date(&self) -> Result<Date, String> {
-        self.date.ok_or_else(|| {
+        self.created_at.ok_or_else(|| {
             format!(
-                "{}: note has no `date` (required for dt-published); give it `updated_at` instead to make it an evergreen note",
+                "{}: note has no `created_at` (required for dt-published); give it `updated_at` instead to make it an evergreen note",
                 self.rel
             )
         })
     }
 
-    /// A note in `notes/` with `updated_at` but no `date`: listed with the
-    /// other notes but never posted to the feeds (ADR 2026-11-07-evergreen-notes).
+    /// A note in `notes/` with `updated_at` but no `created_at`: listed with
+    /// the other notes but never posted to the feeds (ADR 2026-11-07-evergreen-notes).
     fn evergreen(&self) -> bool {
-        self.kind == Kind::Post && self.date.is_none() && self.updated_at.is_some()
+        self.kind == Kind::Post && self.created_at.is_none() && self.updated_at.is_some()
     }
 
-    /// The day a note goes live: its `date`, or the UTC day of an evergreen
-    /// note's `updated_at`.
+    /// The day a note goes live: its `created_at`, or the UTC day of an
+    /// evergreen note's `updated_at`.
     fn goes_live(&self) -> Option<Date> {
         if self.evergreen() {
             self.updated_at.map(|u| u.day)
         } else {
-            self.date
+            self.created_at
         }
     }
 
-    /// The update readers are told about. `date` is a day in no time zone,
+    /// The update readers are told about. `created_at` is a day in no time zone,
     /// so it isn't over everywhere until noon UTC the day after, and a save
     /// before then is part of publishing the note, not an update to it
     /// (ADR 2026-11-12-updated-at-utc-datetimes).
     fn update(&self) -> Option<Stamp> {
         let u = self.updated_at?;
-        match self.date {
+        match self.created_at {
             Some(d) if u.seconds() < d.noon_utc() + date::DAY => None,
             _ => Some(u),
         }
     }
 
     /// When the note was last tended, in seconds since 1970: its update,
-    /// or else its `date`.
+    /// or else its `created_at`.
     fn tended(&self) -> Option<i64> {
-        self.update().map(|u| u.seconds()).or(self.date.map(|d| d.noon_utc()))
+        self.update()
+            .map(|u| u.seconds())
+            .or(self.created_at.map(|d| d.noon_utc()))
     }
 
-    /// The day the page last changed, for the sitemap: the later of `date`
-    /// and the UTC day of `updated_at`.
+    /// The day the page last changed, for the sitemap: the later of
+    /// `created_at` and the UTC day of `updated_at`.
     fn last_modified(&self) -> Option<Date> {
-        match (self.date, self.updated_at.map(|u| u.day)) {
+        match (self.created_at, self.updated_at.map(|u| u.day)) {
             (Some(d), Some(u)) => Some(d.max(u)),
             (d, u) => d.or(u),
         }
@@ -446,10 +448,22 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
             Err(LoadError::NotMapping) => return Err(format!("{}: front-matter is not a YAML mapping", rel)),
             Err(LoadError::Yaml(m)) => return Err(format!("{}: {}", rel, m)),
         };
-        // Said before the schema check, whose own words for these two are
-        // an unknown field and a pattern (ADR 2026-11-12-updated-at-utc-datetimes).
-        if frontmatter::get(&fm, "updated").is_some() {
-            return Err(format!("{}: `updated` is now `updated_at`; rename the field", rel));
+        // Said before the schema check, whose own words for these are an
+        // unknown field and a pattern (ADRs 2026-11-12-updated-at-utc-datetimes
+        // and 2026-11-13-created-at).
+        for (old, new) in [("updated", "updated_at"), ("date", "created_at")] {
+            if frontmatter::get(&fm, old).is_some() {
+                return Err(format!("{}: `{}` is now `{}`; rename the field", rel, old, new));
+            }
+        }
+        if let Some(s) = frontmatter::get(&fm, "created_at").and_then(Value::as_str) {
+            if !s.is_empty() && !(frontmatter::is_day_like(s) && Date::parse(s).is_some()) {
+                return Err(format!(
+                    "{}: `created_at` must be a day, such as 2026-11-13, not {}",
+                    rel,
+                    py_repr_str(s)
+                ));
+            }
         }
         let updated_at = match frontmatter::get(&fm, "updated_at").and_then(Value::as_str) {
             None | Some("") => None,
@@ -478,7 +492,7 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
                     .ok_or_else(|| format!("{}: invalid {} {}", rel, key, py_repr_str(s))),
             }
         };
-        let date = parse_date("date")?;
+        let created_at = parse_date("created_at")?;
         let url = url_for(&parts, kind);
         notes.push(Note {
             rel,
@@ -490,7 +504,7 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
             out_path: PathBuf::new(),
             content_html: String::new(),
             backlinks: Vec::new(),
-            date,
+            created_at,
             updated_at,
         });
     }
@@ -1038,7 +1052,7 @@ fn list_dates(n: &Note) -> Result<String, String> {
             day.human()
         )
     };
-    Ok(match (n.evergreen(), n.date, n.update()) {
+    Ok(match (n.evergreen(), n.created_at, n.update()) {
         (true, _, Some(u)) => time("dt-updated", u.iso(), u.day, "Updated "),
         (_, Some(d), Some(u)) => format!(
             "{}\n \u{b7}\u{a0}{}",
@@ -1272,8 +1286,8 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         .filter(|&i| notes[i].kind == Kind::Post && !notes[i].evergreen())
         .collect();
     posts.sort_by(|&a, &b| {
-        let ka = (notes[a].date.unwrap_or(date::MIN), &notes[a].slug);
-        let kb = (notes[b].date.unwrap_or(date::MIN), &notes[b].slug);
+        let ka = (notes[a].created_at.unwrap_or(date::MIN), &notes[a].slug);
+        let kb = (notes[b].created_at.unwrap_or(date::MIN), &notes[b].slug);
         kb.cmp(&ka)
     });
     let mut listed: Vec<usize> = (0..notes.len()).filter(|&i| notes[i].kind == Kind::Post).collect();
@@ -1359,7 +1373,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         e(site.language),
         e(site.base_url)
     );
-    let rfc = |i: usize| notes[i].date.unwrap_or(date::EPOCH).rfc822();
+    let rfc = |i: usize| notes[i].created_at.unwrap_or(date::EPOCH).rfc822();
     if let Some(&first) = posts.first() {
         rss.push_str(&format!("\n<lastBuildDate>{}</lastBuildDate>", e(&rfc(first))));
     }
@@ -1401,7 +1415,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
                 ("content_html".to_string(), json::s(&n.content_html)),
                 (
                     "date_published".to_string(),
-                    Json::Str(n.date.unwrap_or(date::EPOCH).iso_datetime()),
+                    Json::Str(n.created_at.unwrap_or(date::EPOCH).iso_datetime()),
                 ),
             ];
             if let Some(s) = n.summary() {

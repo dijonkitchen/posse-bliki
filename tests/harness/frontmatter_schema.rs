@@ -36,10 +36,10 @@ fn frontmatter_validates() {
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
 
-/// A note needs `date` to be a post, or `updated_at` to be an evergreen note
-/// (ADR 2026-11-07-evergreen-notes).
+/// A note needs `created_at` to be a post, or `updated_at` to be an
+/// evergreen note (ADR 2026-11-07-evergreen-notes).
 #[test]
-fn notes_have_date_or_updated_at() {
+fn notes_have_created_at_or_updated_at() {
     let content = content_dir();
     for md in files_with_ext(&content.join("notes"), "md") {
         let fm = front_matter(&read(&md));
@@ -47,8 +47,8 @@ fn notes_have_date_or_updated_at() {
             continue;
         }
         assert!(
-            frontmatter::get(&fm, "date").is_some() || frontmatter::get(&fm, "updated_at").is_some(),
-            "{} has neither `date` (a post) nor `updated_at` (an evergreen note)",
+            frontmatter::get(&fm, "created_at").is_some() || frontmatter::get(&fm, "updated_at").is_some(),
+            "{} has neither `created_at` (a post) nor `updated_at` (an evergreen note)",
             rel(&md, &content)
         );
     }
@@ -90,4 +90,31 @@ fn updated_at_is_a_day_or_a_utc_datetime() {
         !errors("updated", "2026-11-12").is_empty(),
         "schema still has `updated`"
     );
+}
+
+/// `created_at` is a day, and `date` is no longer a field
+/// (ADR 2026-11-13-created-at). The schema file and the build's own check
+/// agree on every sample.
+#[test]
+fn created_at_is_a_day() {
+    let schema = json::parse(&read(&repo().join("spec/content-schema.json"))).expect("schema is JSON");
+    let errors = |key: &str, value: &str| {
+        let fm = Value::Map(vec![
+            ("title".to_string(), Value::Str("t".to_string())),
+            (key.to_string(), Value::Str(value.to_string())),
+        ]);
+        schema::validate(&schema, &fm)
+    };
+    assert!(errors("created_at", "2026-11-13").is_empty(), "schema refuses a day");
+    assert!(frontmatter::is_day_like("2026-11-13"), "build refuses a day");
+    for bad in [
+        "2026-11-13T09:00:00Z",
+        "2026-11-13T09:00",
+        "13 November 2026",
+        "2026-11-13 ",
+    ] {
+        assert!(!errors("created_at", bad).is_empty(), "schema accepts {bad:?}");
+        assert!(!frontmatter::is_day_like(bad), "build accepts {bad:?}");
+    }
+    assert!(!errors("date", "2026-11-13").is_empty(), "schema still has `date`");
 }
