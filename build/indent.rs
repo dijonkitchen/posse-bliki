@@ -14,7 +14,7 @@ const VOID: &[&str] = &[
 ];
 
 /// Elements whose contents ship byte for byte: their whitespace is content.
-const RAW: &[&str] = &["pre", "textarea", "script", "style"];
+pub const RAW: &[&str] = &["pre", "textarea", "script", "style"];
 
 const STEP: &str = "  ";
 

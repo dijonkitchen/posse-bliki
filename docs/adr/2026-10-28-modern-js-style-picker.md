@@ -1,7 +1,7 @@
 # 2026-10-28 — Modern JavaScript in the style picker
 
 - Date: 2026-10-28
-- Status: Accepted
+- Status: Accepted; the script ships inline since [2026-11-11-inline-house-style-and-script](2026-11-11-inline-house-style-and-script.md)
 - Decided by: JC, asking whether `/style-picker.js` should use more modern
   JS with `const fn-name = () => ...`, then choosing "const arrows
   throughout", and "use latest best practices, especially if they are

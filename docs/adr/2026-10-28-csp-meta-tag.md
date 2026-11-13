@@ -1,7 +1,8 @@
 # 2026-10-28 — A strict Content Security Policy in a meta tag
 
 - Date: 2026-10-28
-- Status: Accepted
+- Status: Accepted; the policy allows the inline house style and style
+  picker by hash since [2026-11-11-inline-house-style-and-script](2026-11-11-inline-house-style-and-script.md)
 - Decided by: JC, after a Cloudflare Radar URL scan of
   www.dijonkitchen.org flagged missing security headers. JC chose this
   fix plus a `security.txt` (its own change).

@@ -13,6 +13,7 @@ use crate::image;
 use crate::indent;
 use crate::json::{self, Json};
 use crate::markdown;
+use crate::sha256;
 use crate::text;
 use crate::util::{escape as e, percent_decode, py_repr_str};
 use crate::webmention::{self, Mention};
@@ -120,7 +121,8 @@ const THEMES: &[(&str, &str, &str, &str)] = &[
 ];
 /// Loads the picked style and remembers it across pages; the picker works
 /// without it on the current page (ADR 2026-10-18-style-picker,
-/// ADR 2026-10-20-zen-garden-styles).
+/// ADR 2026-10-20-zen-garden-styles). Inline in every page's `<head>`, like
+/// the house style (ADR 2026-11-11-inline-house-style-and-script).
 const STYLE_PICKER_JS: &str = include_str!("static/style-picker.js");
 /// Keeps pages as they're read for reading offline; style-picker.js starts
 /// it (ADR 2026-10-29-offline-reading).
@@ -485,8 +487,9 @@ fn base_path(base_url: &str) -> String {
 }
 
 /// Root-relative URL openers the pages and feeds emit: attributes in HTML,
-/// the same escaped inside RSS (`&quot;`) and JSON Feed (`\"`) bodies, and
-/// the meta-refresh target of alias redirects.
+/// the same escaped inside RSS (`&quot;`) and JSON Feed (`\"`) bodies, the
+/// meta-refresh target of alias redirects, and the site root the style
+/// picker resolves its stylesheets and worker against.
 const ROOT_RELATIVE: &[&str] = &[
     "href=\"/",
     "src=\"/",
@@ -495,6 +498,7 @@ const ROOT_RELATIVE: &[&str] = &[
     "href=\\\"/",
     "src=\\\"/",
     "url=/",
+    "data-root=\"/",
 ];
 
 /// Prefix every root-relative link with `prefix` (`/notes/` becomes
@@ -667,7 +671,7 @@ fn page(
     } else {
         ""
     };
-    // style-picker.js runs in <head>, before the picker exists, so it gets
+    // The style picker runs in <head>, before the picker exists, so it gets
     // the menu's styles from its own tag (ADR 2026-10-30-style-before-first-paint).
     let theme_slugs = THEMES.iter().map(|(slug, ..)| *slug).collect::<Vec<_>>().join(" ");
     let mut theme_options = String::new();
@@ -681,8 +685,9 @@ fn page(
         theme_options.push_str(&format!("<option value=\"{slug}\">{name}</option>\n"));
     }
     theme_options.push_str("</optgroup>\n");
+    let Inline { style, script, csp } = inline(site);
     let html = format!(
-        "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n{CSP}\
+        "<!DOCTYPE html>\n<html lang=\"{lang}\">\n<head>\n<meta charset=\"utf-8\">\n{csp}\
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n{THEME_COLOR}<title>{title}</title>\n{meta}\n{canon}\n\
 <link rel=\"alternate\" type=\"application/rss+xml\" title=\"{t}\" href=\"/index.xml\">\n\
 <link rel=\"alternate\" type=\"application/feed+json\" title=\"{t}\" href=\"/feed.json\">\n\
@@ -692,8 +697,8 @@ fn page(
 <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n\
 <link rel=\"manifest\" href=\"/manifest.webmanifest\">\n\
 <link rel=\"preload\" href=\"/fonts/atkinson-hyperlegible-next-latin.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>\n\
-<link rel=\"stylesheet\" href=\"/style.css\">\n<noscript>\n{theme_links}</noscript>\n\
-<script src=\"/style-picker.js\" data-styles=\"{theme_slugs}\"></script>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
+<style>{style}</style>\n<noscript>\n{theme_links}</noscript>\n\
+<script data-root=\"/\" data-styles=\"{theme_slugs}\">{script}</script>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n{now}<a href=\"/about/\">About</a>\n\
 </nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
@@ -880,11 +885,45 @@ An <a href=\"https://xn--sr8hvo.ws\">IndieWeb Webring</a> <span aria-hidden=\"tr
 const THEME_COLOR: &str = "<meta name=\"theme-color\" media=\"(prefers-color-scheme: light)\" content=\"#fbfaf7\">\n\
 <meta name=\"theme-color\" media=\"(prefers-color-scheme: dark)\" content=\"#15171b\">\n";
 
-/// Pages load only the site's own files, so the policy allows nothing else.
-/// A `<meta>` because GitHub Pages can't send headers (ADR 2026-10-28-csp-meta-tag).
-const CSP: &str = "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; \
-script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'self'; \
-base-uri 'none'; form-action 'none'\">\n";
+/// `style.css` with its root-relative font URLs under the site's sub-path,
+/// if any; byte for byte as written at a domain root.
+fn house_style(site: &Config) -> String {
+    STYLE_CSS.replace("url(\"/", &format!("url(\"{}/", base_path(site.base_url)))
+}
+
+/// The house style and the style picker as they sit inside every page's
+/// `<style>` and `<script>`, and the Content Security Policy that allows
+/// exactly those two blocks.
+struct Inline {
+    style: String,
+    script: String,
+    csp: String,
+}
+
+/// Both blocks ship inline, so the first paint waits on no request after the
+/// page itself (ADR 2026-11-11-inline-house-style-and-script). Under a
+/// sub-path the font URLs get the prefix here: the page's own links are
+/// prefixed after the build, which would change the text the hash covers.
+/// Neither block starts or ends with whitespace: browsers hash the text as
+/// it is, the Nu HTML Checker trims it first, and this way both agree, so
+/// `make validate` checks the hashes too.
+///
+/// Pages load only the site's own files, so the policy allows nothing else,
+/// plus each inline block by its hash. `script-src 'self'` stays for
+/// `/sw.js`, which `worker-src` falls back to. A `<meta>` because GitHub
+/// Pages can't send headers (ADR 2026-10-28-csp-meta-tag).
+fn inline(site: &Config) -> Inline {
+    let style = house_style(site).trim_end().to_string();
+    let script = STYLE_PICKER_JS.trim_end().to_string();
+    let csp = format!(
+        "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; \
+script-src 'self' {}; style-src 'self' {}; img-src 'self'; font-src 'self'; manifest-src 'self'; connect-src 'self'; \
+base-uri 'none'; form-action 'none'\">\n",
+        sha256::csp_source(&script),
+        sha256::csp_source(&style),
+    );
+    Inline { style, script, csp }
+}
 
 /// The author as readers see it, "JC", with the full name kept for mf2
 /// parsers as `p-name` (ADR 2026-10-16-site-title-heads-home).
@@ -1442,11 +1481,13 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     )?;
 
     // static assets
-    write(&out.join("style.css"), STYLE_CSS)?;
+    // Pages carry the house style inline; the file stays for anyone reading
+    // or remixing it, and for pages cached before it moved inline
+    // (ADR 2026-11-11-inline-house-style-and-script).
+    write(&out.join("style.css"), &house_style(site))?;
     for (slug, _, _, css) in THEMES {
         write(&out.join("themes").join(format!("{slug}.css")), css)?;
     }
-    write(&out.join("style-picker.js"), STYLE_PICKER_JS)?;
     write(&out.join("sw.js"), SERVICE_WORKER_JS)?;
     for (name, bytes) in ICONS {
         write_bytes(&out.join(name), bytes)?;

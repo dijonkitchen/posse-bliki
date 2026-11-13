@@ -10,7 +10,9 @@ it does.
 
 ## How it works
 
-The house style is `/style.css`. Each extra style is a short file in
+The house style sits at the top of every page's source, so a page draws
+without waiting for another file, and it's also at `/style.css` to read on
+its own. Each extra style is a short file in
 `/themes/` that changes the colour tokens, the fonts and a few flourishes,
 and nothing else. The menu switches between them with CSS alone, so it works
 with JavaScript off. A few lines of JavaScript load only the style you pick,
