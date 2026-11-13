@@ -286,28 +286,6 @@ fn the_old_date_field_says_its_new_name() {
 }
 
 #[test]
-fn created_at_must_be_a_day() {
-    for (label, value) in [("time", "2020-01-01T09:00:00Z"), ("impossible", "2021-02-29")] {
-        let vault = vault_copy(&format!("created-at-{label}"));
-        std::fs::write(
-            vault.join("notes/probe.md"),
-            format!("---\ntitle: Probe\ncreated_at: {value}\n---\n\ntext\n"),
-        )
-        .unwrap();
-        let err = build(
-            &vault,
-            &temp_dir(&format!("created-at-{label}-out")),
-            &["--today", TODAY],
-        )
-        .expect_err("the build should fail");
-        assert!(
-            err.contains("notes/probe.md") && err.contains("`created_at` must be a day") && err.contains(value),
-            "{value}: {err}"
-        );
-    }
-}
-
-#[test]
 fn updated_at_must_be_a_day_or_a_utc_datetime() {
     for (label, value) in [
         ("offset", "2099-01-04T01:30:00-08:00"),

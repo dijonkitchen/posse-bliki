@@ -54,11 +54,12 @@ fn notes_have_created_at_or_updated_at() {
     }
 }
 
-/// `updated_at` is a day or a UTC datetime, and `updated` is no longer a
-/// field (ADR 2026-11-12-updated-at-utc-datetimes). The schema file and the
-/// build's own check agree on every sample.
+/// `created_at` and `updated_at` are each a day or a UTC datetime, and the
+/// old `date` and `updated` are no longer fields (ADRs
+/// 2026-11-12-updated-at-utc-datetimes and 2026-11-13-created-at). The schema
+/// file and the build's own check agree on every sample.
 #[test]
-fn updated_at_is_a_day_or_a_utc_datetime() {
+fn created_at_and_updated_at_are_a_day_or_a_utc_datetime() {
     let schema = json::parse(&read(&repo().join("spec/content-schema.json"))).expect("schema is JSON");
     let errors = |key: &str, value: &str| {
         let fm = Value::Map(vec![
@@ -67,54 +68,28 @@ fn updated_at_is_a_day_or_a_utc_datetime() {
         ]);
         schema::validate(&schema, &fm)
     };
-    for ok in [
-        "2026-11-12",
-        "2026-11-12T04:27:28Z",
-        "2026-11-12T04:27Z",
-        "2026-11-12T04:27:28+00:00",
-    ] {
-        assert!(errors("updated_at", ok).is_empty(), "schema refuses {ok}");
-        assert!(frontmatter::is_updated_at_like(ok), "build refuses {ok}");
+    for key in ["created_at", "updated_at"] {
+        for ok in [
+            "2026-11-12",
+            "2026-11-12T04:27:28Z",
+            "2026-11-12T04:27Z",
+            "2026-11-12T04:27:28+00:00",
+        ] {
+            assert!(errors(key, ok).is_empty(), "schema refuses {key}: {ok}");
+            assert!(frontmatter::is_stamp_like(ok), "build refuses {key}: {ok}");
+        }
+        for bad in [
+            "2026-11-11T20:27:28-08:00",
+            "2026-11-11T20:27:28",
+            "2026-11-12T04:27:28+0000",
+            "2026-11-12 04:27:28Z",
+            "November 12th 2026",
+        ] {
+            assert!(!errors(key, bad).is_empty(), "schema accepts {key}: {bad}");
+            assert!(!frontmatter::is_stamp_like(bad), "build accepts {key}: {bad}");
+        }
     }
-    for bad in [
-        "2026-11-11T20:27:28-08:00",
-        "2026-11-11T20:27:28",
-        "2026-11-12T04:27:28+0000",
-        "2026-11-12 04:27:28Z",
-        "November 12th 2026",
-    ] {
-        assert!(!errors("updated_at", bad).is_empty(), "schema accepts {bad}");
-        assert!(!frontmatter::is_updated_at_like(bad), "build accepts {bad}");
+    for old in ["date", "updated"] {
+        assert!(!errors(old, "2026-11-12").is_empty(), "schema still has `{old}`");
     }
-    assert!(
-        !errors("updated", "2026-11-12").is_empty(),
-        "schema still has `updated`"
-    );
-}
-
-/// `created_at` is a day, and `date` is no longer a field
-/// (ADR 2026-11-13-created-at). The schema file and the build's own check
-/// agree on every sample.
-#[test]
-fn created_at_is_a_day() {
-    let schema = json::parse(&read(&repo().join("spec/content-schema.json"))).expect("schema is JSON");
-    let errors = |key: &str, value: &str| {
-        let fm = Value::Map(vec![
-            ("title".to_string(), Value::Str("t".to_string())),
-            (key.to_string(), Value::Str(value.to_string())),
-        ]);
-        schema::validate(&schema, &fm)
-    };
-    assert!(errors("created_at", "2026-11-13").is_empty(), "schema refuses a day");
-    assert!(frontmatter::is_day_like("2026-11-13"), "build refuses a day");
-    for bad in [
-        "2026-11-13T09:00:00Z",
-        "2026-11-13T09:00",
-        "13 November 2026",
-        "2026-11-13 ",
-    ] {
-        assert!(!errors("created_at", bad).is_empty(), "schema accepts {bad:?}");
-        assert!(!frontmatter::is_day_like(bad), "build accepts {bad:?}");
-    }
-    assert!(!errors("date", "2026-11-13").is_empty(), "schema still has `date`");
 }

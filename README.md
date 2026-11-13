@@ -43,8 +43,9 @@ Front matter handles the rest:
 `draft: true` keeps a note out of the build,
 `aliases:` keeps old URLs redirecting (never remove one),
 and `syndication:` lists a post's copies elsewhere.
-`created_at` is the day you made a note, typed by hand.
-It dates a post, and a future one holds the post back until that day.
+`created_at` is when you made a note, typed by hand,
+as a UTC datetime (`date -u +%Y-%m-%dT%H:%M:%SZ` prints one) or a day.
+It dates a post, and a future one holds the post back until then.
 `updated_at` says when you last reworked a note, as a UTC datetime (`2026-11-12T04:27:28Z`) or a day,
 and moves the note to the top of Home and Notes.
 Obsidian stamps it as you edit; anywhere else, type it.
