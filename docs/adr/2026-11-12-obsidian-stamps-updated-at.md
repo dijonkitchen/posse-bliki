@@ -1,10 +1,13 @@
-# 2026-11-12 — Obsidian stamps `updated_at` on save
+# 2026-11-12 — Obsidian stamps `updated_at` as you edit
 
 - Date: 2026-11-12
 - Status: Accepted
 - Decided by: JC ("be sure to setup those community plugins if needed"),
   after asking "Can't obsidian auto update an updated_at property on save?"
   and Claude recommending Linter over Update time on edit.
+  On 2026-11-13 JC opened the repo root as the vault,
+  committed Linter's code with it,
+  and set its YAML Timestamp rule to stamp five seconds after an edit.
 
 ## Context
 
@@ -24,28 +27,52 @@ Two community plugins do it.
   and changes made across many notes would move them all up.
   It also writes a `created` key, which the content schema has no field for.
 - [Linter](https://platers.github.io/obsidian-linter/settings/yaml-rules/#yaml-timestamp)
-  has a YAML Timestamp rule that stamps a note when it is linted.
-  Linting can be tied to saving with Ctrl+S
+  has a YAML Timestamp rule that stamps a note when it is linted,
+  which can be on save
   ([Running rules](https://platers.github.io/obsidian-linter/usage/running-rules/)),
-  which Obsidian's own autosave doesn't trigger.
+  and, with "Update YAML timestamp on file contents update",
+  a few seconds after an edit in the editor.
   The key and the format are settings,
   and "Convert local time to UTC" writes the stamp in UTC.
 
 ADR 2026-05-10-obsidian-as-editor-no-required-plugins keeps content
-correct without any plugin, and leaves the plugins a person uses to them.
+correct without any plugin.
+
+A first version of this ADR put Linter's settings in `content/.obsidian/`,
+for a vault opened at `content/`,
+and left each device to install the plugin's code.
+On 2026-11-13 JC opened the repo root as the vault on phone and laptop instead,
+and Obsidian Git now commits the whole vault, plugin code included, to `main`.
+Obsidian reads only the vault root's `.obsidian/`,
+so the settings in `content/.obsidian/` went unread.
+JC set the rule up by hand there,
+in Linter's default format, `dddd, MMMM Do YYYY, h:mm:ss a`,
+which the build can't read,
+so the first stamp stopped the deploy (fixed by #105).
 
 ## Decision
 
-- **The vault's committed Obsidian settings turn on Linter, with one rule.**
-  `content/.obsidian/community-plugins.json` lists it,
-  and `content/.obsidian/plugins/obsidian-linter/data.json` turns on YAML Timestamp alone:
+- **The vault's settings at the repo root turn Linter's YAML Timestamp rule on.**
+  `.obsidian/plugins/obsidian-linter/data.json` keeps JC's settings
+  and sets the rule to the form the build reads:
   the modified date under the key `updated_at`,
   in the format `YYYY-MM-DDTHH:mm:ss[Z]`, converted to UTC,
-  with no created date, linting on save.
-- **Only the settings are in the repo.**
-  Each device installs the plugin's code from Obsidian's community directory,
-  and `.gitignore` keeps that code out.
-- **The plugin stays optional.**
+  with no created date.
+- **It stamps five seconds after an edit, and on save.**
+  JC's setting, "after 5 seconds", stamps a note
+  once its text has stopped changing in the editor,
+  which works on the phone, where there's no Ctrl+S.
+  Lint on save stays on.
+- **Only files in `content/` are stamped.**
+  The vault is now the whole repo,
+  and the README, specs and ADRs are Markdown too.
+  Linter's "Files to ignore" holds one pattern, `^(?!content/)`,
+  which matches every path outside `content/`,
+  so no rule touches those files.
+- **The plugin's code is committed with the vault.**
+  JC's vault carries it, as Obsidian Git commits it,
+  so the phone and the laptop run the same version with no install step.
+- **The plugin stays optional for the build.**
   The build reads the field, whoever wrote it.
   An edit made anywhere else, on GitHub's site or by an agent in a PR,
   sets `updated_at` by hand when it reworks a note's text,
@@ -54,34 +81,37 @@ correct without any plugin, and leaves the plugins a person uses to them.
 
 ## Consequences
 
-- JC installs Linter once on each device.
-  Obsidian runs in Restricted mode by default,
-  so community plugins are turned on in its settings first
-  ([Obsidian Help: Plugin security](https://obsidian.md/help/plugin-security)).
-- Saving with Ctrl+S says "I tended this".
-  An edit that Obsidian autosaves, with no Ctrl+S, leaves the stamp alone,
-  so a quick typo fix needn't move a note up.
-- To stamp on every edit instead,
-  set the rule's "Update YAML timestamp on file contents update".
-- Linter's "Lint all files" command would stamp every note at once.
+- Any edit made in Obsidian stamps the note, a typo fix included,
+  and moves it up Home and Notes.
+  Edits in the 24 hours after a post is dated aren't counted as updates
+  (ADR 2026-11-12-updated-at-utc-datetimes),
+  so writing and polishing a new post doesn't.
+- The rule listens for edits in the editor and for saves,
+  so a pull doesn't stamp a note that isn't open.
+  Whether Obsidian reports a pull into an open note as an edit hasn't been checked.
+- Linter's "Lint all files" command would stamp every note in `content/` at once.
   The README says not to run it.
-- Linter fills `data.json` with the defaults of its other rules, all off, the first time it runs.
-  That fuller file is committed once.
-- The settings were written from Linter 1.35.0's source.
-  `tests/harness/obsidian.rs` checks that what they write is what the build reads.
+- Linter reads its settings when Obsidian starts,
+  so a change to them takes effect once Obsidian is reopened on each device.
+- About a megabyte of bundled third-party JavaScript is in the repo,
+  updated whenever Linter updates on one of JC's devices.
+  The build never loads it.
+- The rule's behaviour was read from Linter 1.35.0's source.
+  `tests/harness/obsidian.rs` checks that what the format writes is what the build reads,
+  and that files outside `content/` are ignored.
 
 ## Alternatives considered
 
 - **Update time on edit.**
   Less to set up, since its key already defaults to `updated`,
   but it stamps on changes from outside Obsidian and adds `created`.
-- **Commit the plugin's code too**, so opening the vault is the whole setup.
-  It would put a megabyte of third-party JavaScript, bundled past reading,
-  into a repo whose output is meant to be read (ADR 2026-10-14-mobile-first-readable-output-lighthouse),
-  and have it run on JC's devices from a diff nobody can review.
-  Installing from Obsidian's directory leaves that trust decision with JC.
-- **Only describe the settings in the README.**
-  Six settings to click on every device, free to drift from what the build reads.
+- **Stamp on save only** ("Update YAML timestamp on file contents update" off),
+  as the first version of this ADR had it,
+  so a quick typo fix needn't move a note up.
+  The phone has no Ctrl+S, so notes edited there would never be stamped.
+- **Install the plugin's code on each device**, as the first version had it.
+  Keeps third-party code out of the repo,
+  but JC's vault commits it, and the phone needs it there to sync.
 - **A bot that writes the field after each push.**
   It would need write access to `main`,
   which the workflows are denied on purpose (ADR 2026-10-14-supply-chain-pinned-actions),

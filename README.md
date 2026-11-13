@@ -23,15 +23,17 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 
 ## Daily workflow
 
-1. Open `content/` as an Obsidian vault. Its `.obsidian/app.json` already
-   turns off wikilinks and makes new links relative paths (*Settings →
-   Files and links*); keep it that way.
-2. Optional, once on each device: turn on community plugins
-   (*Settings → Community plugins*), then *Browse* for the Linter plugin,
-   install it and turn it on.
-   Its settings are already in the vault,
-   so saving a note with Ctrl+S (Cmd+S on a Mac) stamps `updated_at` with the current UTC time
+1. Open the repo as an Obsidian vault, at its root,
+   so Obsidian reads the vault's settings in `.obsidian/`.
+   Keep wikilinks off and new links as relative paths
+   (*Settings → Files and links*).
+2. The vault carries the Linter plugin, its code and its settings,
+   so there is nothing to install;
+   if Obsidian asks, turn on community plugins (*Settings → Community plugins*).
+   Five seconds after you stop typing in a note in `content/`, and when you save it,
+   Linter stamps `updated_at` with the current UTC time
    (ADR 2026-11-12-obsidian-stamps-updated-at).
+   It leaves files outside `content/` alone.
    Don't run its "Lint all files" command, which would stamp every note.
 3. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`).
@@ -43,7 +45,7 @@ URLs redirecting (never remove one), and `syndication:` lists a post's
 copies elsewhere.
 `updated_at` says when you last reworked a note, as a UTC datetime (`2026-11-12T04:27:28Z`) or a day,
 and moves the note to the top of Home and Notes.
-Obsidian stamps it when you save with Ctrl+S; anywhere else, type it.
+Obsidian stamps it as you edit; anywhere else, type it.
 A note with `updated_at` and no `date` is an evergreen note:
 listed with the rest, but never sent to the feeds or syndicated. [`spec/content-schema.md`](spec/content-schema.md) has
 every field.

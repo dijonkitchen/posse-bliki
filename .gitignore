@@ -7,13 +7,6 @@ content/.obsidian/workspace*
 content/.obsidian/cache
 content/.obsidian/graph.json
 
-# Obsidian plugin code: each device installs it from Obsidian's own
-# directory; only a plugin's settings (data.json) are kept here
-# (ADR 2026-11-12-obsidian-stamps-updated-at).
-content/.obsidian/plugins/*/main.js
-content/.obsidian/plugins/*/manifest.json
-content/.obsidian/plugins/*/styles.css
-
 # Rust build output
 target/
 node_modules/
