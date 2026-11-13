@@ -88,10 +88,7 @@ impl Date {
 
     /// Today in UTC, from the system clock.
     pub fn today_utc() -> Date {
-        let secs = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map_or(0, |d| d.as_secs());
-        Date::from_days_since_epoch((secs / 86_400) as i64)
+        Date::from_days_since_epoch(now_utc().div_euclid(DAY))
     }
 
     /// 0 = Monday … 6 = Sunday.
@@ -114,16 +111,22 @@ impl Date {
 
     /// `email.utils.format_datetime` of midnight UTC.
     pub fn rfc822(&self) -> String {
+        self.rfc822_at(0)
+    }
+
+    /// RFC 822 for `secs` seconds after midnight UTC on this day.
+    fn rfc822_at(&self, secs: u32) -> String {
         const DAYS: [&str; 7] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
         const MONTHS: [&str; 12] = [
             "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
         ];
         format!(
-            "{}, {:02} {} {:04} 00:00:00 +0000",
+            "{}, {:02} {} {:04} {} +0000",
             DAYS[self.weekday()],
             self.day,
             MONTHS[(self.month - 1) as usize],
-            self.year
+            self.year,
+            clock(secs)
         )
     }
 
@@ -143,8 +146,20 @@ impl Date {
 /// Seconds in a day.
 pub const DAY: i64 = 86_400;
 
-/// When a note was last updated, as its `updated_at` gives it: a UTC
-/// datetime, or a bare day (ADR 2026-11-12-updated-at-utc-datetimes).
+/// Now, in seconds since 1970, from the system clock.
+pub fn now_utc() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs() as i64)
+}
+
+/// `HH:MM:SS` for `secs` seconds after midnight.
+fn clock(secs: u32) -> String {
+    format!("{:02}:{:02}:{:02}", secs / 3600, secs / 60 % 60, secs % 60)
+}
+
+/// A moment as `created_at` and `updated_at` give it: a UTC datetime, or a
+/// bare day (ADRs 2026-11-12-updated-at-utc-datetimes and 2026-11-13-created-at).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Stamp {
     /// The UTC day, which is the day readers are shown.
@@ -191,13 +206,29 @@ impl Stamp {
         }
     }
 
+    /// The first moment it has come, in seconds since 1970: the time, or
+    /// the start of a bare day (ADR 2026-10-20-scheduled-posts).
+    pub fn starts(&self) -> i64 {
+        self.day.days_from_epoch() * DAY + self.time.unwrap_or(0) as i64
+    }
+
     /// The machine-readable value: `2026-11-12T04:27:28Z`, or `2026-11-12`
     /// for a bare day, so the output never claims a time nobody wrote.
     pub fn iso(&self) -> String {
         match self.time {
-            Some(t) => format!("{}T{:02}:{:02}:{:02}Z", self.day.iso(), t / 3600, t / 60 % 60, t % 60),
+            Some(t) => format!("{}T{}Z", self.day.iso(), clock(t)),
             None => self.day.iso(),
         }
+    }
+
+    /// RFC 822 for RSS: the time, or midnight UTC for a bare day.
+    pub fn rfc822(&self) -> String {
+        self.day.rfc822_at(self.time.unwrap_or(0))
+    }
+
+    /// RFC 3339 for JSON Feed: the time, or midnight UTC for a bare day.
+    pub fn rfc3339(&self) -> String {
+        format!("{}T{}+00:00", self.day.iso(), clock(self.time.unwrap_or(0)))
     }
 }
 
@@ -244,6 +275,14 @@ mod tests {
         assert_eq!(bare.seconds(), bare.day.noon_utc());
         assert!(s.seconds() < bare.seconds());
         assert_eq!(EPOCH.noon_utc(), 43_200);
+        // Feeds get the time, or midnight for a bare day, as before.
+        assert_eq!(s.rfc822(), "Thu, 12 Nov 2026 04:27:28 +0000");
+        assert_eq!(s.rfc3339(), "2026-11-12T04:27:28+00:00");
+        assert_eq!(bare.rfc822(), bare.day.rfc822());
+        assert_eq!(bare.rfc3339(), bare.day.iso_datetime());
+        // A bare day has come from its first second.
+        assert_eq!(bare.starts(), bare.day.days_from_epoch() * DAY);
+        assert_eq!(s.starts(), s.seconds());
         // Only UTC: no offsets, no zone-less times, no impossible clocks.
         for bad in [
             "2026-11-11T20:27:28-08:00",

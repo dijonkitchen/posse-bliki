@@ -1,4 +1,4 @@
-# 2026-11-13 — `created_at`, the day a note was made
+# 2026-11-13 — `created_at`, when a note was made
 
 - Date: 2026-11-13
 - Status: Accepted
@@ -8,6 +8,7 @@
   latter that auto-updates on save and is the sort order for notes that can be updated over time."
   Claude had recommended keeping `date`, then offered `published_at`,
   which JC found a poor fit for drafts and for posts meant to show up in the future.
+  On a first draft that kept it a day, JC: "created_at soudl be a datetime".
 
 ## Context
 
@@ -45,10 +46,30 @@ Three names were weighed:
   and holds a post back until its day comes.
   Lists sort by a note's update, or else by `created_at`,
   as JC described.
-- **It is a day, typed by hand.**
-  A time after it fails the build, where `date` let one through and ignored it.
-  The site rebuilds once a day,
-  so a day is all the build can act on for scheduling.
+- **It is a UTC datetime or a day, typed by hand,**
+  in the forms `updated_at` takes (ADR 2026-11-12-updated-at-utc-datetimes):
+  `2026-11-13T05:19:33Z`, seconds optional, `+00:00` for `Z`,
+  or a bare day such as `2026-11-13`.
+  Any other zone fails the build, as for `updated_at`.
+  The 67 notes keep their bare days; no time is made up for them.
+  The page shows the UTC day,
+  the `datetime` of its `<time>` carries the value as written,
+  and the feeds carry the time (a bare day as midnight UTC).
+  Two posts on one day sort by their times.
+- **A timed post goes live at its moment.**
+  The build is held back by a moment, not a day:
+  a bare day comes at the start of that day in UTC,
+  a datetime at that time,
+  and the post goes out with the first build after it,
+  a push or the daily 06:17 UTC rebuild.
+  An evergreen note waits for its `updated_at` the same way.
+  `--today` takes a datetime to preview a cutoff;
+  a bare day there stands for the end of that day.
+- **A save in the 24 hours after `created_at` isn't an update.**
+  ADR 2026-11-12-updated-at-utc-datetimes counted a post as updated
+  from noon UTC the day after its day.
+  With a time to go by, that becomes 24 hours after `created_at`,
+  and a bare day still stands for noon UTC, so it ends at the same moment as before.
 - **Obsidian doesn't stamp it.**
   The Linter plugin's created date comes from the file's creation time on disk,
   and git keeps no file times,
@@ -64,8 +85,13 @@ Three names were weighed:
 - An evergreen note is still one with `updated_at` and no `created_at`.
   If every note should carry `created_at`,
   the feeds will need another way to tell a post from an evergreen note.
-- `tests/harness/evergreen.rs` and `tests/harness/frontmatter_schema.rs` check
-  the old name, the day-only form and that the schema and build agree.
+- A post with a time shows only its UTC day,
+  so one written on a Pacific evening shows the next day,
+  as `updated_at` already does.
+- `tests/harness/created_at.rs` checks timed posts:
+  the page, both feeds, the sort, the 24 hours and going live at the moment.
+  `tests/harness/evergreen.rs` and `tests/harness/frontmatter_schema.rs` check
+  the old name, the forms and that the schema and build agree.
 
 ## Alternatives considered
 
@@ -77,6 +103,10 @@ Three names were weighed:
   but JC preferred a name that reads true for drafts and future posts.
 - **Both `created_at` and `published_at`.**
   Two dates to keep for every post, where nothing here tells them apart.
-- **Let `created_at` take a UTC time, like `updated_at`.**
-  Possible later. Until the site rebuilds more than daily,
-  a time could only delay a post to the next build.
+- **Keep `created_at` a day.**
+  Simpler, and with daily rebuilds a time only moves a scheduled post
+  to the first build after it.
+  JC wanted a datetime, which also orders posts within a day
+  and gives the feeds a real time.
+- **Require a datetime.**
+  Every old note would need a time nobody recorded.

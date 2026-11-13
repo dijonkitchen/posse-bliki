@@ -15,7 +15,7 @@ external bridges (Bridgy Fed, echofeed, IFTTT) at one of them.
   With full text, 50 posts come to about 100 KB, or 30 KB gzipped.
 - Each `<item>`: `<title>`, `<link>` (canonical post URL),
   `<guid isPermaLink="true">` = link, `<pubDate>` (RFC 822 from
-  front-matter `created_at`), `<description>`, then `<content:encoded>`.
+  front-matter `created_at`, its time or else midnight UTC), `<description>`, then `<content:encoded>`.
 - `<description>` is plain text:
   the `summary`, or else the body's opening words with markup stripped,
   at most 200 characters,
@@ -64,7 +64,8 @@ Spec: <https://www.jsonfeed.org/version/1.1/>
   `language`, `authors`, `items`.
 - Every post (excluding drafts and evergreen notes), newest first by `created_at`.
 - Each item: `id` (canonical URL), `url`, `title`, `content_html`,
-  `date_published` (RFC 3339), optional `summary`.
+  `date_published` (RFC 3339 from `created_at`, its time or else midnight UTC),
+  optional `summary`.
 
 ## Blogroll — `/blogroll/` and `/blogroll.opml`
 

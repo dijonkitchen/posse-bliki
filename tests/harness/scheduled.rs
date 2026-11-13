@@ -1,6 +1,6 @@
 //! A note dated after `--today` is held back from the build, like a draft,
 //! and goes live on the first build on or after its date (spec/content-schema.md,
-//! ADR 2026-10-20-scheduled-posts).
+//! ADR 2026-10-20-scheduled-posts). Timed posts are in created_at.rs.
 
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
