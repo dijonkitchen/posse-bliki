@@ -1,10 +1,8 @@
 ---
 title: Now
 summary: What I'm focused on now, after Derek Sivers's now pages.
-updated: 2026-11-05
+updated: 2026-11-13
 draft: false
-created_at: Tuesday, November 10th 2026, 1:15:13 am
-updated_at: Friday, November 13th 2026, 4:42:25 pm
 ---
 
 This is what I'm focused on now.
