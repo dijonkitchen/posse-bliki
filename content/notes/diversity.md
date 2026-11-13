@@ -1,6 +1,6 @@
 ---
 title: diversity
-date: 2020-05-24
+created_at: 2020-05-24
 aliases:
   - /diversity/
   - /p/diversity/

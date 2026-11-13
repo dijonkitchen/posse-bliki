@@ -1,6 +1,6 @@
 ---
 title: dependencies
-date: 2017-10-29
+created_at: 2017-10-29
 aliases:
   - /dependencies/
 ---

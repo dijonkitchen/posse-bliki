@@ -36,10 +36,10 @@ fn frontmatter_validates() {
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }
 
-/// A note needs `date` to be a post, or `updated_at` to be an evergreen note
-/// (ADR 2026-11-07-evergreen-notes).
+/// A note needs `created_at` to be a post, or `updated_at` to be an
+/// evergreen note (ADR 2026-11-07-evergreen-notes).
 #[test]
-fn notes_have_date_or_updated_at() {
+fn notes_have_created_at_or_updated_at() {
     let content = content_dir();
     for md in files_with_ext(&content.join("notes"), "md") {
         let fm = front_matter(&read(&md));
@@ -47,18 +47,19 @@ fn notes_have_date_or_updated_at() {
             continue;
         }
         assert!(
-            frontmatter::get(&fm, "date").is_some() || frontmatter::get(&fm, "updated_at").is_some(),
-            "{} has neither `date` (a post) nor `updated_at` (an evergreen note)",
+            frontmatter::get(&fm, "created_at").is_some() || frontmatter::get(&fm, "updated_at").is_some(),
+            "{} has neither `created_at` (a post) nor `updated_at` (an evergreen note)",
             rel(&md, &content)
         );
     }
 }
 
-/// `updated_at` is a day or a UTC datetime, and `updated` is no longer a
-/// field (ADR 2026-11-12-updated-at-utc-datetimes). The schema file and the
-/// build's own check agree on every sample.
+/// `created_at` and `updated_at` are each a day or a UTC datetime, and the
+/// old `date` and `updated` are no longer fields (ADRs
+/// 2026-11-12-updated-at-utc-datetimes and 2026-11-13-created-at). The schema
+/// file and the build's own check agree on every sample.
 #[test]
-fn updated_at_is_a_day_or_a_utc_datetime() {
+fn created_at_and_updated_at_are_a_day_or_a_utc_datetime() {
     let schema = json::parse(&read(&repo().join("spec/content-schema.json"))).expect("schema is JSON");
     let errors = |key: &str, value: &str| {
         let fm = Value::Map(vec![
@@ -67,27 +68,28 @@ fn updated_at_is_a_day_or_a_utc_datetime() {
         ]);
         schema::validate(&schema, &fm)
     };
-    for ok in [
-        "2026-11-12",
-        "2026-11-12T04:27:28Z",
-        "2026-11-12T04:27Z",
-        "2026-11-12T04:27:28+00:00",
-    ] {
-        assert!(errors("updated_at", ok).is_empty(), "schema refuses {ok}");
-        assert!(frontmatter::is_updated_at_like(ok), "build refuses {ok}");
+    for key in ["created_at", "updated_at"] {
+        for ok in [
+            "2026-11-12",
+            "2026-11-12T04:27:28Z",
+            "2026-11-12T04:27Z",
+            "2026-11-12T04:27:28+00:00",
+        ] {
+            assert!(errors(key, ok).is_empty(), "schema refuses {key}: {ok}");
+            assert!(frontmatter::is_stamp_like(ok), "build refuses {key}: {ok}");
+        }
+        for bad in [
+            "2026-11-11T20:27:28-08:00",
+            "2026-11-11T20:27:28",
+            "2026-11-12T04:27:28+0000",
+            "2026-11-12 04:27:28Z",
+            "November 12th 2026",
+        ] {
+            assert!(!errors(key, bad).is_empty(), "schema accepts {key}: {bad}");
+            assert!(!frontmatter::is_stamp_like(bad), "build accepts {key}: {bad}");
+        }
     }
-    for bad in [
-        "2026-11-11T20:27:28-08:00",
-        "2026-11-11T20:27:28",
-        "2026-11-12T04:27:28+0000",
-        "2026-11-12 04:27:28Z",
-        "November 12th 2026",
-    ] {
-        assert!(!errors("updated_at", bad).is_empty(), "schema accepts {bad}");
-        assert!(!frontmatter::is_updated_at_like(bad), "build accepts {bad}");
+    for old in ["date", "updated"] {
+        assert!(!errors(old, "2026-11-12").is_empty(), "schema still has `{old}`");
     }
-    assert!(
-        !errors("updated", "2026-11-12").is_empty(),
-        "schema still has `updated`"
-    );
 }

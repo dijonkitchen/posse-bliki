@@ -1,6 +1,6 @@
 ---
 title: work
-date: 2017-10-08
+created_at: 2017-10-08
 aliases:
   - /work/
 ---

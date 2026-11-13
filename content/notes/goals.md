@@ -1,6 +1,6 @@
 ---
 title: goals
-date: 2016-04-10
+created_at: 2016-04-10
 aliases:
   - /goals/
 ---

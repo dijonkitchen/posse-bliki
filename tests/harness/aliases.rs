@@ -15,7 +15,7 @@ fn aliased_site() -> &'static PathBuf {
         let vault = vault_copy("alias");
         std::fs::write(
             vault.join("notes/moved-note.md"),
-            "---\ntitle: A moved note\ndate: 2026-05-08\naliases:\n  - /old-location/\n  - /even-older/\n---\n\nbody\n",
+            "---\ntitle: A moved note\ncreated_at: 2026-05-08\naliases:\n  - /old-location/\n  - /even-older/\n---\n\nbody\n",
         )
         .unwrap();
         let out = temp_dir("alias-out");

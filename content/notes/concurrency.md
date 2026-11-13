@@ -1,6 +1,6 @@
 ---
 title: concurrency
-date: 2015-11-01
+created_at: 2015-11-01
 aliases:
   - /concurrency/
 ---

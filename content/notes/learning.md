@@ -1,6 +1,6 @@
 ---
 title: learning
-date: 2021-08-27
+created_at: 2021-08-27
 aliases:
   - /learning/
   - /p/learning/

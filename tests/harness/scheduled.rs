@@ -1,13 +1,13 @@
 //! A note dated after `--today` is held back from the build, like a draft,
 //! and goes live on the first build on or after its date (spec/content-schema.md,
-//! ADR 2026-10-20-scheduled-posts).
+//! ADR 2026-10-20-scheduled-posts). Timed posts are in created_at.rs.
 
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
 use crate::support::{build, read, temp_dir, vault_copy};
 
-const POST: &str = "---\ntitle: Scheduled post\ndate: 2099-01-02\n---\n\nnot out until 2099\n";
+const POST: &str = "---\ntitle: Scheduled post\ncreated_at: 2099-01-02\n---\n\nnot out until 2099\n";
 
 fn vault() -> &'static PathBuf {
     static VAULT: OnceLock<PathBuf> = OnceLock::new();
@@ -66,7 +66,7 @@ fn link_to_a_scheduled_post_fails_the_build() {
     std::fs::write(vault.join("notes/scheduled-post.md"), POST).unwrap();
     std::fs::write(
         vault.join("notes/teaser.md"),
-        "---\ntitle: Teaser\ndate: 2026-01-01\n---\n\nSee [soon](scheduled-post.md).\n",
+        "---\ntitle: Teaser\ncreated_at: 2026-01-01\n---\n\nSee [soon](scheduled-post.md).\n",
     )
     .unwrap();
     let err = build(&vault, &temp_dir("scheduled-link-out"), &["--today", "2098-12-31"])

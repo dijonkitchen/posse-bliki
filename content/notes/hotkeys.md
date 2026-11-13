@@ -1,6 +1,6 @@
 ---
 title: hotkeys
-date: 2015-10-28
+created_at: 2015-10-28
 aliases:
   - /hotkeys/
 ---

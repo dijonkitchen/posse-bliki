@@ -1,6 +1,6 @@
 ---
 title: privacy
-date: 2018-06-13
+created_at: 2018-06-13
 aliases:
   - /privacy/
 ---

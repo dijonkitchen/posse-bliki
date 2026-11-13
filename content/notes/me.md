@@ -1,6 +1,6 @@
 ---
 title: me
-date: 2015-07-18
+created_at: 2015-07-18
 aliases:
   - /me/
 ---

@@ -1,6 +1,6 @@
 ---
 title: solutioning
-date: 2019-06-12
+created_at: 2019-06-12
 aliases:
   - /solutioning/
 ---

@@ -1,6 +1,6 @@
 ---
 title: "lemonade"
-date: 2026-04-29
+created_at: 2026-04-29
 aliases:
   - /p/lemonade/
 ---

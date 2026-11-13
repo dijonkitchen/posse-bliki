@@ -1,6 +1,6 @@
 ---
 title: economic ethics
-date: 2018-09-15
+created_at: 2018-09-15
 aliases:
   - /economic-ethics/
   - /p/economic-ethics/

@@ -205,9 +205,10 @@ pub struct Config {
     /// Received webmentions keyed by `webmention::url_key` of their target;
     /// empty unless `--webmentions` is given.
     pub mentions: HashMap<String, Vec<Mention>>,
-    /// Notes dated after this day are held back until it arrives
-    /// (ADR 2026-10-20-scheduled-posts); `--today` overrides the UTC clock.
-    pub today: Date,
+    /// The publish cutoff, in seconds since 1970: a note whose `created_at`
+    /// hasn't come by then is held back (ADR 2026-10-20-scheduled-posts).
+    /// The UTC clock, read once; `--today` overrides it.
+    pub now: i64,
 }
 
 pub fn default_config() -> Config {
@@ -230,11 +231,16 @@ pub fn default_config() -> Config {
             ("https://fed.brid.gy/", "https://fed.brid.gy/webmention"),
         ],
         mentions: HashMap::new(),
-        today: Date::today_utc(),
+        now: date::now_utc(),
     }
 }
 
 impl Config {
+    /// The UTC day of `now`.
+    pub fn today(&self) -> Date {
+        Date::from_days_since_epoch(self.now.div_euclid(date::DAY))
+    }
+
     pub fn to_json(&self) -> String {
         json::dumps(&Json::Obj(vec![
             ("title".into(), json::s(self.title)),
@@ -290,7 +296,7 @@ struct Note {
     out_path: PathBuf,
     content_html: String,
     backlinks: Vec<usize>,
-    date: Option<Date>,
+    created_at: Option<Stamp>,
     updated_at: Option<Stamp>,
 }
 
@@ -319,53 +325,54 @@ impl Note {
         frontmatter::get(&self.fm, "draft").is_some_and(Value::truthy)
     }
 
-    fn post_date(&self) -> Result<Date, String> {
-        self.date.ok_or_else(|| {
+    fn post_date(&self) -> Result<Stamp, String> {
+        self.created_at.ok_or_else(|| {
             format!(
-                "{}: note has no `date` (required for dt-published); give it `updated_at` instead to make it an evergreen note",
+                "{}: note has no `created_at` (required for dt-published); give it `updated_at` instead to make it an evergreen note",
                 self.rel
             )
         })
     }
 
-    /// A note in `notes/` with `updated_at` but no `date`: listed with the
-    /// other notes but never posted to the feeds (ADR 2026-11-07-evergreen-notes).
+    /// A note in `notes/` with `updated_at` but no `created_at`: listed with
+    /// the other notes but never posted to the feeds (ADR 2026-11-07-evergreen-notes).
     fn evergreen(&self) -> bool {
-        self.kind == Kind::Post && self.date.is_none() && self.updated_at.is_some()
+        self.kind == Kind::Post && self.created_at.is_none() && self.updated_at.is_some()
     }
 
-    /// The day a note goes live: its `date`, or the UTC day of an evergreen
-    /// note's `updated_at`.
-    fn goes_live(&self) -> Option<Date> {
+    /// When a note goes live: its `created_at`, or an evergreen note's
+    /// `updated_at` (ADR 2026-10-20-scheduled-posts).
+    fn goes_live(&self) -> Option<Stamp> {
         if self.evergreen() {
-            self.updated_at.map(|u| u.day)
+            self.updated_at
         } else {
-            self.date
+            self.created_at
         }
     }
 
-    /// The update readers are told about. `date` is a day in no time zone,
-    /// so it isn't over everywhere until noon UTC the day after, and a save
-    /// before then is part of publishing the note, not an update to it
-    /// (ADR 2026-11-12-updated-at-utc-datetimes).
+    /// The update readers are told about: a save in the 24 hours after
+    /// `created_at` is part of writing the note, not an update to it. A
+    /// bare day stands for noon UTC, so its 24 hours end when that day is
+    /// over everywhere on Earth (ADRs 2026-11-12-updated-at-utc-datetimes
+    /// and 2026-11-13-created-at).
     fn update(&self) -> Option<Stamp> {
         let u = self.updated_at?;
-        match self.date {
-            Some(d) if u.seconds() < d.noon_utc() + date::DAY => None,
+        match self.created_at {
+            Some(c) if u.seconds() < c.seconds() + date::DAY => None,
             _ => Some(u),
         }
     }
 
     /// When the note was last tended, in seconds since 1970: its update,
-    /// or else its `date`.
+    /// or else its `created_at`.
     fn tended(&self) -> Option<i64> {
-        self.update().map(|u| u.seconds()).or(self.date.map(|d| d.noon_utc()))
+        self.update().or(self.created_at).map(|s| s.seconds())
     }
 
-    /// The day the page last changed, for the sitemap: the later of `date`
-    /// and the UTC day of `updated_at`.
+    /// The day the page last changed, for the sitemap: the later of the
+    /// UTC days of `created_at` and `updated_at`.
     fn last_modified(&self) -> Option<Date> {
-        match (self.date, self.updated_at.map(|u| u.day)) {
+        match (self.created_at.map(|c| c.day), self.updated_at.map(|u| u.day)) {
             (Some(d), Some(u)) => Some(d.max(u)),
             (d, u) => d.or(u),
         }
@@ -446,21 +453,29 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
             Err(LoadError::NotMapping) => return Err(format!("{}: front-matter is not a YAML mapping", rel)),
             Err(LoadError::Yaml(m)) => return Err(format!("{}: {}", rel, m)),
         };
-        // Said before the schema check, whose own words for these two are
-        // an unknown field and a pattern (ADR 2026-11-12-updated-at-utc-datetimes).
-        if frontmatter::get(&fm, "updated").is_some() {
-            return Err(format!("{}: `updated` is now `updated_at`; rename the field", rel));
+        // Said before the schema check, whose own words for these are an
+        // unknown field and a pattern (ADRs 2026-11-12-updated-at-utc-datetimes
+        // and 2026-11-13-created-at).
+        for (old, new) in [("updated", "updated_at"), ("date", "created_at")] {
+            if frontmatter::get(&fm, old).is_some() {
+                return Err(format!("{}: `{}` is now `{}`; rename the field", rel, old, new));
+            }
         }
-        let updated_at = match frontmatter::get(&fm, "updated_at").and_then(Value::as_str) {
-            None | Some("") => None,
-            Some(s) => Some(Stamp::parse(s).ok_or_else(|| {
-                format!(
-                    "{}: `updated_at` must be a day (2026-11-12) or a UTC datetime ending in Z (2026-11-12T04:27:28Z), not {}",
-                    rel,
-                    py_repr_str(s)
-                )
-            })?),
+        let stamp = |key: &str| -> Result<Option<Stamp>, String> {
+            match frontmatter::get(&fm, key).and_then(Value::as_str) {
+                None | Some("") => Ok(None),
+                Some(s) => Stamp::parse(s).map(Some).ok_or_else(|| {
+                    format!(
+                        "{}: `{}` must be a day (2026-11-13) or a UTC datetime ending in Z (2026-11-13T05:19:33Z), not {}",
+                        rel,
+                        key,
+                        py_repr_str(s)
+                    )
+                }),
+            }
         };
+        let created_at = stamp("created_at")?;
+        let updated_at = stamp("updated_at")?;
         if let Err(msg) = frontmatter::validate(&fm) {
             return Err(format!("{}: front-matter invalid: {}", rel, msg));
         }
@@ -470,15 +485,6 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
         } else {
             text::slugify(stem(parts.last().unwrap()))
         };
-        let parse_date = |key: &str| -> Result<Option<Date>, String> {
-            match frontmatter::get(&fm, key).and_then(Value::as_str) {
-                None | Some("") => Ok(None),
-                Some(s) => Date::parse(s)
-                    .map(Some)
-                    .ok_or_else(|| format!("{}: invalid {} {}", rel, key, py_repr_str(s))),
-            }
-        };
-        let date = parse_date("date")?;
         let url = url_for(&parts, kind);
         notes.push(Note {
             rel,
@@ -490,7 +496,7 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
             out_path: PathBuf::new(),
             content_html: String::new(),
             backlinks: Vec::new(),
-            date,
+            created_at,
             updated_at,
         });
     }
@@ -851,7 +857,7 @@ fn render_post(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
             format!(
                 "<a class=\"u-url u-uid\" href=\"{canon}\"><time class=\"dt-published\" datetime=\"{}\">{}</time></a>\n{updated}",
                 d.iso(),
-                d.human()
+                d.day.human()
             )
         }
     };
@@ -1032,23 +1038,21 @@ fn render_page(site: &Config, notes: &[Note], n: &Note, canonical: &str) -> Resu
 /// if that came later, so a note that moved up the list says why. An
 /// evergreen note shows only when it was updated (ADR 2026-11-07-evergreen-notes).
 fn list_dates(n: &Note) -> Result<String, String> {
-    let time = |class: &str, iso: String, day: Date, label: &str| {
+    let time = |class: &str, at: Stamp, label: &str| {
         format!(
-            "<time class=\"{class}\" datetime=\"{iso}\">{label}{}</time>",
-            day.human()
+            "<time class=\"{class}\" datetime=\"{}\">{label}{}</time>",
+            at.iso(),
+            at.day.human()
         )
     };
-    Ok(match (n.evergreen(), n.date, n.update()) {
-        (true, _, Some(u)) => time("dt-updated", u.iso(), u.day, "Updated "),
-        (_, Some(d), Some(u)) => format!(
+    Ok(match (n.evergreen(), n.created_at, n.update()) {
+        (true, _, Some(u)) => time("dt-updated", u, "Updated "),
+        (_, Some(c), Some(u)) => format!(
             "{}\n \u{b7}\u{a0}{}",
-            time("dt-published", d.iso(), d, ""),
-            time("dt-updated", u.iso(), u.day, "updated ")
+            time("dt-published", c, ""),
+            time("dt-updated", u, "updated ")
         ),
-        _ => {
-            let d = n.post_date()?;
-            time("dt-published", d.iso(), d, "")
-        }
+        _ => time("dt-published", n.post_date()?, ""),
     })
 }
 
@@ -1191,7 +1195,7 @@ fn render_offline(site: &Config, links: FooterLinks) -> String {
 pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), String> {
     let mut notes: Vec<Note> = load_notes(content)?
         .into_iter()
-        .filter(|n| !n.draft() && n.goes_live().is_none_or(|d| d <= site.today))
+        .filter(|n| !n.draft() && n.goes_live().is_none_or(|at| at.starts() <= site.now))
         .collect();
 
     // unique slugs
@@ -1272,8 +1276,8 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         .filter(|&i| notes[i].kind == Kind::Post && !notes[i].evergreen())
         .collect();
     posts.sort_by(|&a, &b| {
-        let ka = (notes[a].date.unwrap_or(date::MIN), &notes[a].slug);
-        let kb = (notes[b].date.unwrap_or(date::MIN), &notes[b].slug);
+        let ka = (notes[a].created_at.map_or(i64::MIN, |c| c.seconds()), &notes[a].slug);
+        let kb = (notes[b].created_at.map_or(i64::MIN, |c| c.seconds()), &notes[b].slug);
         kb.cmp(&ka)
     });
     let mut listed: Vec<usize> = (0..notes.len()).filter(|&i| notes[i].kind == Kind::Post).collect();
@@ -1359,7 +1363,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         e(site.language),
         e(site.base_url)
     );
-    let rfc = |i: usize| notes[i].date.unwrap_or(date::EPOCH).rfc822();
+    let rfc = |i: usize| notes[i].created_at.map_or(date::EPOCH.rfc822(), |c| c.rfc822());
     if let Some(&first) = posts.first() {
         rss.push_str(&format!("\n<lastBuildDate>{}</lastBuildDate>", e(&rfc(first))));
     }
@@ -1401,7 +1405,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
                 ("content_html".to_string(), json::s(&n.content_html)),
                 (
                     "date_published".to_string(),
-                    Json::Str(n.date.unwrap_or(date::EPOCH).iso_datetime()),
+                    Json::Str(n.created_at.map_or(date::EPOCH.iso_datetime(), |c| c.rfc3339())),
                 ),
             ];
             if let Some(s) = n.summary() {
@@ -1467,7 +1471,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
 
     // security.txt (RFC 9116), dated off the build's today so the daily
     // rebuild keeps Expires ahead (ADR 2026-10-28-security-txt).
-    let expires = Date::from_days_since_epoch(site.today.days_from_epoch() + SECURITY_TXT_DAYS);
+    let expires = Date::from_days_since_epoch(site.today().days_from_epoch() + SECURITY_TXT_DAYS);
     write(
         &out.join(".well-known").join("security.txt"),
         &format!(

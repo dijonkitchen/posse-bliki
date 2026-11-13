@@ -1,6 +1,6 @@
 ---
 title: "wonder"
-date: 2026-05-14
+created_at: 2026-05-14
 aliases:
   - /p/wonder/
 ---

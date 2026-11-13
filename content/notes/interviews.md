@@ -1,6 +1,6 @@
 ---
 title: interviews
-date: 2018-06-07
+created_at: 2018-06-07
 aliases:
   - /interviews/
 ---

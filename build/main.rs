@@ -3,7 +3,7 @@
 //! Behaviour is defined by `spec/` and verified by `tests/`; see
 //! docs/adr/2026-10-06-rust-build-zero-dependencies.md.
 
-use posse_bliki_build::date::Date;
+use posse_bliki_build::date::{self, Stamp};
 use posse_bliki_build::{serve, site, webmention};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -20,8 +20,9 @@ options:
   --webmentions FILE
                    show the received webmentions in FILE (webmention.io jf2)
                    on the posts they respond to
-  --today DATE     publish only notes dated on or before DATE (YYYY-MM-DD;
-                   default: today in UTC)
+  --today DATE     publish only notes whose created_at has come by DATE:
+                   the end of a day (YYYY-MM-DD), or a UTC datetime
+                   (YYYY-MM-DDTHH:MM:SSZ); default: now, by the UTC clock
   --serve          build, serve the output at 127.0.0.1:PORT and rebuild on changes
   --port N         port for --serve (default: 8080)
   --print-config   print the site config as JSON and exit
@@ -120,10 +121,15 @@ fn main() -> ExitCode {
         cfg.base_url = Box::leak(url.into_boxed_str());
     }
     if let Some(s) = &args.today {
-        match Date::parse(s).filter(|_| s.len() == 10) {
-            Some(d) => cfg.today = d,
+        // A day means the end of it, so everything dated that day shows.
+        match Stamp::parse(s) {
+            Some(at) if s.len() == 10 => cfg.now = at.day.days_from_epoch() * date::DAY + date::DAY - 1,
+            Some(at) => cfg.now = at.starts(),
             None => {
-                eprintln!("bliki: error: argument --today: expected YYYY-MM-DD, got '{}'", s);
+                eprintln!(
+                    "bliki: error: argument --today: expected YYYY-MM-DD or a UTC datetime (YYYY-MM-DDTHH:MM:SSZ), got '{}'",
+                    s
+                );
                 return ExitCode::from(2);
             }
         }
