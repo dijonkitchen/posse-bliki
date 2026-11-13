@@ -1,7 +1,7 @@
 # 2026-11-07 — Evergreen notes, and lists ordered by when a note was last tended
 
 - Date: 2026-11-07
-- Status: Accepted; the `updated` field is now `updated_at`, a UTC datetime, by [2026-11-12-updated-at-utc-datetimes](2026-11-12-updated-at-utc-datetimes.md), and Obsidian stamps it, by [2026-11-12-obsidian-stamps-updated-at](2026-11-12-obsidian-stamps-updated-at.md)
+- Status: Accepted; the `updated` field is now `updated_at`, a UTC datetime, by [2026-11-12-updated-at-utc-datetimes](2026-11-12-updated-at-utc-datetimes.md), and Obsidian stamps it, by [2026-11-12-obsidian-stamps-updated-at](2026-11-12-obsidian-stamps-updated-at.md); the `date` field is now `created_at`, by [2026-11-13-created-at](2026-11-13-created-at.md)
 - Decided by: JC ("Go"),
   after asking "wouldn't it be good to have updated notes automatically be on top?"
   and Claude recommending the `updated` field over git dates.

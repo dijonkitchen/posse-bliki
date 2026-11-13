@@ -1,5 +1,5 @@
 //! Evergreen notes and the order of lists (spec/content-schema.md,
-//! ADR 2026-11-07-evergreen-notes): a note with `updated_at` but no `date` is
+//! ADR 2026-11-07-evergreen-notes): a note with `updated_at` but no `created_at` is
 //! listed on home and /notes/ but stays out of the feeds, and those lists
 //! put the most recently tended note first. The feeds stay in publish order.
 //!
@@ -21,9 +21,9 @@ const NOTES: [(&str, &str); 9] = [
     ),
     (
         "tended-post",
-        "---\ntitle: Tended post\ndate: 2020-01-01\nupdated_at: 2099-01-04T09:30:00Z\n---\n\nold, freshly updated\n",
+        "---\ntitle: Tended post\ncreated_at: 2020-01-01\nupdated_at: 2099-01-04T09:30:00Z\n---\n\nold, freshly updated\n",
     ),
-    ("new-post", "---\ntitle: New post\ndate: 2099-01-02\n---\n\nnew\n"),
+    ("new-post", "---\ntitle: New post\ncreated_at: 2099-01-02\n---\n\nnew\n"),
     (
         "evergreen-later",
         "---\ntitle: Evergreen later\nupdated_at: 2099-02-01\n---\n\nnot out until February\n",
@@ -41,17 +41,17 @@ const NOTES: [(&str, &str); 9] = [
     // next day in UTC, but not an update.
     (
         "evening-post",
-        "---\ntitle: Evening post\ndate: 2099-01-01\nupdated_at: 2099-01-02T04:27:28Z\n---\n\nsame evening\n",
+        "---\ntitle: Evening post\ncreated_at: 2099-01-01\nupdated_at: 2099-01-02T04:27:28Z\n---\n\nsame evening\n",
     ),
     // Last saved while it was still being written.
     (
         "drafted-ahead",
-        "---\ntitle: Drafted ahead\ndate: 2098-12-31\nupdated_at: 2098-12-25T10:00:00Z\n---\n\nscheduled\n",
+        "---\ntitle: Drafted ahead\ncreated_at: 2098-12-31\nupdated_at: 2098-12-25T10:00:00Z\n---\n\nscheduled\n",
     ),
     // Saved at the first moment its publish day is over everywhere.
     (
         "next-day-post",
-        "---\ntitle: Next day post\ndate: 2098-12-28\nupdated_at: 2098-12-29T12:00:00Z\n---\n\nreworked\n",
+        "---\ntitle: Next day post\ncreated_at: 2098-12-28\nupdated_at: 2098-12-29T12:00:00Z\n---\n\nreworked\n",
     ),
 ];
 
@@ -255,7 +255,7 @@ fn build_error(label: &str, front_matter: &str) -> String {
     let vault = vault_copy(label);
     std::fs::write(
         vault.join("notes/probe.md"),
-        format!("---\ntitle: Probe\ndate: 2020-01-01\n{front_matter}\n---\n\ntext\n"),
+        format!("---\ntitle: Probe\ncreated_at: 2020-01-01\n{front_matter}\n---\n\ntext\n"),
     )
     .unwrap();
     build(&vault, &temp_dir(&format!("{label}-out")), &["--today", TODAY]).expect_err("the build should fail")
@@ -268,6 +268,43 @@ fn the_old_updated_field_says_its_new_name() {
         err.contains("notes/probe.md") && err.contains("`updated` is now `updated_at`"),
         "{err}"
     );
+}
+
+#[test]
+fn the_old_date_field_says_its_new_name() {
+    let vault = vault_copy("old-date");
+    std::fs::write(
+        vault.join("notes/probe.md"),
+        "---\ntitle: Probe\ndate: 2020-01-01\n---\n\ntext\n",
+    )
+    .unwrap();
+    let err = build(&vault, &temp_dir("old-date-out"), &["--today", TODAY]).expect_err("the build should fail");
+    assert!(
+        err.contains("notes/probe.md") && err.contains("`date` is now `created_at`"),
+        "{err}"
+    );
+}
+
+#[test]
+fn created_at_must_be_a_day() {
+    for (label, value) in [("time", "2020-01-01T09:00:00Z"), ("impossible", "2021-02-29")] {
+        let vault = vault_copy(&format!("created-at-{label}"));
+        std::fs::write(
+            vault.join("notes/probe.md"),
+            format!("---\ntitle: Probe\ncreated_at: {value}\n---\n\ntext\n"),
+        )
+        .unwrap();
+        let err = build(
+            &vault,
+            &temp_dir(&format!("created-at-{label}-out")),
+            &["--today", TODAY],
+        )
+        .expect_err("the build should fail");
+        assert!(
+            err.contains("notes/probe.md") && err.contains("`created_at` must be a day") && err.contains(value),
+            "{value}: {err}"
+        );
+    }
 }
 
 #[test]
@@ -298,7 +335,7 @@ fn evergreen_note_waits_for_its_updated_at_day() {
 }
 
 #[test]
-fn note_with_neither_date_nor_updated_at_fails_the_build() {
+fn note_with_neither_created_at_nor_updated_at_fails_the_build() {
     let vault = vault_copy("undated");
     std::fs::write(vault.join("notes/undated.md"), "---\ntitle: Undated\n---\n\nwhen?\n").unwrap();
     let err = build(&vault, &temp_dir("undated-out"), &[]).expect_err("a note needs a date");

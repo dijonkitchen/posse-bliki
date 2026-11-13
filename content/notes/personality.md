@@ -1,6 +1,6 @@
 ---
 title: personality
-date: 2015-08-18
+created_at: 2015-08-18
 aliases:
   - /personality/
 ---

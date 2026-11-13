@@ -1,6 +1,6 @@
 ---
 title: "meld"
-date: 2026-05-21
+created_at: 2026-05-21
 aliases:
   - /p/meld/
 ---

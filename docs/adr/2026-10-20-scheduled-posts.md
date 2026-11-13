@@ -1,7 +1,7 @@
 # 2026-10-20 — Future-dated posts go live on their date
 
 - Date: 2026-10-20
-- Status: Accepted (JC chose "Yes, as proposed", 2026-10-20)
+- Status: Accepted (JC chose "Yes, as proposed", 2026-10-20); the `date` field is now `created_at`, by [2026-11-13-created-at](2026-11-13-created-at.md)
 - Raised by: JC, who asked how posts get scheduled and whether the site
   could publish only items dated in the past.
 

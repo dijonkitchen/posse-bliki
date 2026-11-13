@@ -1,7 +1,7 @@
 # 2026-11-12 — `updated_at`, a UTC datetime
 
 - Date: 2026-11-12
-- Status: Accepted
+- Status: Accepted; the `date` it is measured against is now `created_at`, by [2026-11-13-created-at](2026-11-13-created-at.md)
 - Decided by: JC, who asked "can it be `updated_at` and use UTC datetimes?",
   after asking whether notes should carry datetimes and update on their own,
   and Claude answering that an Obsidian plugin can stamp the field on save.

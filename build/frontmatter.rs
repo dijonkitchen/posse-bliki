@@ -903,14 +903,14 @@ fn resolve_float(s: &str) -> Option<f64> {
 
 const PROPERTIES: &[&str] = &[
     "title",
-    "date",
+    "created_at",
     "updated_at",
     "summary",
     "draft",
     "aliases",
     "syndication",
 ];
-const DATE_PATTERN: &str = r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(Z|[+-]\d{2}:?\d{2})?)?$";
+const CREATED_AT_PATTERN: &str = r"^\d{4}-\d{2}-\d{2}$";
 const UPDATED_AT_PATTERN: &str = r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(Z|\+00:00))?$";
 const ALIAS_PATTERN: &str = "^/.+";
 
@@ -1076,6 +1076,11 @@ fn check_array(v: &Value, key: &str, pattern: Option<Pattern>, uri: bool, errs: 
     }
 }
 
+/// `CREATED_AT_PATTERN`: a day, `YYYY-MM-DD`, and nothing after it.
+pub fn is_day_like(s: &str) -> bool {
+    is_date_like(s) && strip_dollar_nl(s).len() == 10
+}
+
 /// `UPDATED_AT_PATTERN`: a day, or a datetime that says it is UTC.
 pub fn is_updated_at_like(s: &str) -> bool {
     let t = strip_dollar_nl(s);
@@ -1121,7 +1126,14 @@ pub fn validate(fm: &FrontMatter) -> Result<(), String> {
         let path = vec![PathElem::Key(prop.to_string())];
         match prop {
             "title" => check_string(v, path, true, None, false, &mut errs),
-            "date" => check_string(v, path, false, Some((DATE_PATTERN, is_date_like)), false, &mut errs),
+            "created_at" => check_string(
+                v,
+                path,
+                false,
+                Some((CREATED_AT_PATTERN, is_day_like)),
+                false,
+                &mut errs,
+            ),
             "updated_at" => check_string(
                 v,
                 path,
@@ -1183,14 +1195,14 @@ mod tests {
 
     #[test]
     fn yaml_basics() {
-        let y = "title: \"Hi: there\"\ndate: 2020-01-02\naliases: [/a/, '/b/', /c-d/]\nsyndication:\n  - https://x.example/\n  - https://y.example/\ndraft: yes\nsummary: plain text # comment\n";
+        let y = "title: \"Hi: there\"\ncreated_at: 2020-01-02\naliases: [/a/, '/b/', /c-d/]\nsyndication:\n  - https://x.example/\n  - https://y.example/\ndraft: yes\nsummary: plain text # comment\n";
         let v = parse_yaml(y).unwrap().unwrap();
         let m = match v {
             Value::Map(m) => m,
             _ => panic!(),
         };
         assert_eq!(get(&m, "title"), Some(&Value::Str("Hi: there".into())));
-        assert_eq!(get(&m, "date"), Some(&Value::Str("2020-01-02".into())));
+        assert_eq!(get(&m, "created_at"), Some(&Value::Str("2020-01-02".into())));
         assert_eq!(
             get(&m, "aliases"),
             Some(&Value::List(vec![

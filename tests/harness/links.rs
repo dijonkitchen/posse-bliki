@@ -140,7 +140,7 @@ fn vault_with(label: &str, body: &str) -> (PathBuf, PathBuf) {
     let vault = vault_copy(label);
     fs::write(
         vault.join("notes/link-test.md"),
-        format!("---\ntitle: Link test\ndate: 2026-10-16\n---\n\n{body}\n"),
+        format!("---\ntitle: Link test\ncreated_at: 2026-10-16\n---\n\n{body}\n"),
     )
     .unwrap();
     (vault, temp_dir(&format!("{label}-out")))
