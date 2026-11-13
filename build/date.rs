@@ -131,6 +131,74 @@ impl Date {
     pub fn iso_datetime(&self) -> String {
         format!("{}T00:00:00+00:00", self.iso())
     }
+
+    /// Noon UTC on this day, in seconds since 1970. A day written without
+    /// a time stands for its noon, the one moment that falls on that date
+    /// in nearly every time zone (ADR 2026-11-12-updated-at-utc-datetimes).
+    pub fn noon_utc(&self) -> i64 {
+        self.days_from_epoch() * DAY + DAY / 2
+    }
+}
+
+/// Seconds in a day.
+pub const DAY: i64 = 86_400;
+
+/// When a note was last updated, as its `updated_at` gives it: a UTC
+/// datetime, or a bare day (ADR 2026-11-12-updated-at-utc-datetimes).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct Stamp {
+    /// The UTC day, which is the day readers are shown.
+    pub day: Date,
+    /// Seconds after midnight UTC; `None` for a bare day.
+    time: Option<u32>,
+}
+
+impl Stamp {
+    /// `YYYY-MM-DD`, or `YYYY-MM-DDTHH:MM[:SS]` ending in `Z` or `+00:00`.
+    /// A time in any other zone, or in none, is refused: only UTC says
+    /// when without the build knowing time zone rules.
+    pub fn parse(s: &str) -> Option<Stamp> {
+        let day = Date::parse(s.get(..10)?)?;
+        let rest = &s[10..];
+        if rest.is_empty() {
+            return Some(Stamp { day, time: None });
+        }
+        let clock = rest.strip_prefix('T')?;
+        let clock = clock.strip_suffix('Z').or_else(|| clock.strip_suffix("+00:00"))?;
+        let mut fields = clock.split(':').map(|f| {
+            if f.len() == 2 && f.bytes().all(|c| c.is_ascii_digit()) {
+                f.parse::<u32>().ok()
+            } else {
+                None
+            }
+        });
+        let (h, m) = (fields.next()??, fields.next()??);
+        let sec = fields.next().unwrap_or(Some(0))?;
+        if fields.next().is_some() || h > 23 || m > 59 || sec > 59 {
+            return None;
+        }
+        Some(Stamp {
+            day,
+            time: Some(h * 3600 + m * 60 + sec),
+        })
+    }
+
+    /// Seconds since 1970, for telling which of two moments is later.
+    pub fn seconds(&self) -> i64 {
+        match self.time {
+            Some(t) => self.day.days_from_epoch() * DAY + t as i64,
+            None => self.day.noon_utc(),
+        }
+    }
+
+    /// The machine-readable value: `2026-11-12T04:27:28Z`, or `2026-11-12`
+    /// for a bare day, so the output never claims a time nobody wrote.
+    pub fn iso(&self) -> String {
+        match self.time {
+            Some(t) => format!("{}T{:02}:{:02}:{:02}Z", self.day.iso(), t / 3600, t / 60 % 60, t % 60),
+            None => self.day.iso(),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -158,6 +226,42 @@ mod tests {
         );
         assert!(Date::parse("2021-02-29").is_none());
         assert!(Date::parse("0000-01-01").is_none());
+    }
+
+    #[test]
+    fn stamps() {
+        let s = Stamp::parse("2026-11-12T04:27:28Z").unwrap();
+        assert_eq!(s.day, Date::parse("2026-11-12").unwrap());
+        assert_eq!(s.iso(), "2026-11-12T04:27:28Z");
+        assert_eq!(s.seconds(), s.day.days_from_epoch() * DAY + 4 * 3600 + 27 * 60 + 28);
+        assert_eq!(
+            Stamp::parse("2026-11-12T04:27+00:00").unwrap().iso(),
+            "2026-11-12T04:27:00Z"
+        );
+        // A bare day keeps its form, and stands for noon UTC.
+        let bare = Stamp::parse("2026-11-12").unwrap();
+        assert_eq!(bare.iso(), "2026-11-12");
+        assert_eq!(bare.seconds(), bare.day.noon_utc());
+        assert!(s.seconds() < bare.seconds());
+        assert_eq!(EPOCH.noon_utc(), 43_200);
+        // Only UTC: no offsets, no zone-less times, no impossible clocks.
+        for bad in [
+            "2026-11-11T20:27:28-08:00",
+            "2026-11-11T20:27:28",
+            "2026-11-12T04:27:28+0000",
+            "2026-11-12T24:00:00Z",
+            "2026-11-12T04:60:00Z",
+            "2026-11-12T04:27:60Z",
+            "2026-11-12T4:27:28Z",
+            "2026-11-12T04:27:28:00Z",
+            "2026-11-12 04:27:28Z",
+            "2026-11-12Z",
+            "2026-02-30T04:27:28Z",
+            "2026-11-12T04Z",
+            "",
+        ] {
+            assert!(Stamp::parse(bad).is_none(), "{bad:?} parsed");
+        }
     }
 
     #[test]

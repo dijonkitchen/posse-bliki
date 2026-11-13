@@ -123,7 +123,8 @@ tells a newcomer nothing.
 ## Sitemap — `/sitemap.xml`
 
 - `urlset` per <https://www.sitemaps.org/protocol.html>.
-- One `<url>` per non-draft page, with `<loc>` and `<lastmod>` (W3C date).
+- One `<url>` per non-draft page, with `<loc>` and `<lastmod>` (W3C date):
+  the later of the page's `date` and the UTC day of its `updated_at`.
 
 ## robots.txt
 

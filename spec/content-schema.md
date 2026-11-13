@@ -24,7 +24,7 @@ The directory determines the kind. No `type:` field needed in front-matter.
 
 `content/now.md`, when published, is linked from every page's header, and
 `content/follow.md` and `content/blogroll.md` from every page's footer
-(ADR 2026-11-05-now-in-the-header, ADR 2026-11-05-follow-with-a-feed-reader). The now page must have `updated` (the build fails
+(ADR 2026-11-05-now-in-the-header, ADR 2026-11-05-follow-with-a-feed-reader). The now page must have `updated_at` (the build fails
 without it), shown under its title as "Updated <date>", since a now page
 is only as good as its date (ADR 2026-11-01-now-page).
 
@@ -37,7 +37,7 @@ contain one; keep the note `draft: true` until it's filled in.
 |---|---|---|---|
 | `title` | string | yes | Maps to `<title>` and `p-name`. |
 | `date` | ISO-8601 date | yes for posts | Maps to `dt-published`. Pages and evergreen notes omit it. |
-| `updated` | ISO-8601 date | yes for evergreen notes | Maps to `dt-updated`. Moves the note up Home and Notes. |
+| `updated_at` | UTC datetime, or a day | yes for evergreen notes | Maps to `dt-updated`. Moves the note up Home and Notes. See [`updated_at`](#updated_at). |
 | `summary` | string | no | Maps to `p-summary` and `<meta name=description>` (else an excerpt of the text is used). |
 | `draft` | bool | no | If `true`, excluded from build entirely. |
 | `aliases` | string[] | no | Old slugs that should redirect to this page. |
@@ -50,26 +50,59 @@ Remove it from a note promoted from Obsidian.
 
 ## Evergreen notes and the order of lists
 
-A note in `content/notes/` needs `date`, `updated`, or both
+A note in `content/notes/` needs `date`, `updated_at`, or both
 (ADR 2026-11-07-evergreen-notes):
 
 - With `date`, it is a post:
   listed on Home and `/notes/`, and carried by the RSS and JSON feeds,
   so the deploy syndicates it.
-- With `updated` and no `date`, it is an evergreen note:
+- With `updated_at` and no `date`, it is an evergreen note:
   listed on Home and `/notes/` like a post, but in no feed, so never syndicated.
   Its page has `dt-updated` ("Updated <date>") and no `dt-published`.
-  It is held back until its `updated` date, like a scheduled post.
+  It is held back until the UTC day of its `updated_at`, like a scheduled post.
 - With neither, the build fails.
 
 Home and `/notes/` list notes most recently tended first:
-by the later of `date` and `updated`, then by slug.
+by a note's update, or else its `date`, then by slug.
 Each entry shows its publish date,
-then " · updated <date>" when `updated` is later;
+then " · updated <date>" when the note has been updated since;
 an evergreen note shows only "Updated <date>".
 The feeds stay in `date` order.
-Set `updated` by hand when a note has changed enough to resurface;
-the build never reads git dates.
+
+## `updated_at`
+
+`updated_at` says when a note was last reworked
+(ADR 2026-11-12-updated-at-utc-datetimes).
+
+- It is a UTC datetime, `2026-11-12T04:27:28Z`,
+  or a bare day, `2026-11-12`.
+  The seconds are optional, and `+00:00` may stand in for `Z`.
+  A time in any other zone, or with no zone, fails the build:
+  the build has no time zone rules, and only UTC says when without them.
+- Readers see its UTC day, in the Holocene calendar like every date on the page.
+  The `datetime` of its `<time>` carries the value as written,
+  and the sitemap's `<lastmod>` its day.
+- When two notes are compared, a day with no time stands for noon UTC,
+  for `updated_at` and `date` alike.
+- A post counts as updated once its `updated_at` is at or after noon UTC
+  on the day after its `date`.
+  `date` is a day in no time zone,
+  and by then that day is over everywhere on Earth.
+  So a save on the evening a post goes out in the Americas,
+  which is already the next day in UTC,
+  is part of publishing it, as is any save made while it was being written.
+  It shows no "updated" and moves nothing.
+  For a bare day this comes to any day after `date`.
+- The vault's Obsidian settings stamp it:
+  the Linter plugin, committed with the vault at the repo root,
+  writes the current UTC time five seconds after an edit to a note in `content/`,
+  and when the note is saved
+  (ADR 2026-11-12-obsidian-stamps-updated-at).
+  Anywhere else, write it by hand when the text is reworked,
+  and leave it alone for a typo or a formatting fix.
+  The build never reads git dates.
+- The field used to be `updated`.
+  The build stops on the old name and says the new one.
 
 ## Scheduled posts
 
@@ -81,8 +114,8 @@ scheduled note from a published one is a broken link, as for a draft.
 
 ## Date format
 
-Always `YYYY-MM-DD` (or full ISO-8601 with time). Obsidian's daily-note format
-is fine. Strings only — no implicit YAML date types, since their stringification
+`date` is always `YYYY-MM-DD` (a time after it is allowed and ignored). Obsidian's daily-note format
+is fine. `updated_at` has its own form, [above](#updated_at). Strings only — no implicit YAML date types, since their stringification
 varies by parser.
 
 ## No raw HTML

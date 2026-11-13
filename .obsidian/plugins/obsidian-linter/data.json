@@ -64,14 +64,14 @@
       "yaml-sort-order-for-other-keys": "None"
     },
     "yaml-timestamp": {
-      "enabled": false,
-      "date-created": true,
+      "enabled": true,
+      "date-created": false,
       "date-created-key": "created_at",
       "date-created-source-of-truth": "frontmatter",
       "date-modified": true,
       "date-modified-key": "updated_at",
       "date-modified-source-of-truth": "user or Linter edits",
-      "format": "dddd, MMMM Do YYYY, h:mm:ss a",
+      "format": "YYYY-MM-DDTHH:mm:ss[Z]",
       "convert-to-utc": true,
       "update-on-file-contents-updated": "after 5 seconds"
     },
@@ -298,7 +298,13 @@
   "defaultArrayStyleMovedToCommonStyles": true,
   "additionalFileExtensions": [],
   "foldersToIgnore": [],
-  "filesToIgnore": [],
+  "filesToIgnore": [
+    {
+      "match": "^(?!content/)",
+      "flags": "",
+      "label": "Lint only notes and pages in content/"
+    }
+  ],
   "linterLocale": "system-default",
   "logLevel": "ERROR",
   "lintCommands": [],
