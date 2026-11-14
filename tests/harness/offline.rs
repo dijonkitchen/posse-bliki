@@ -70,10 +70,13 @@ fn worker_is_network_first_for_own_gets() {
 
 #[test]
 fn style_picker_starts_the_worker() {
-    let js = read(&site().join("style-picker.js"));
+    // Inline, the script has no URL of its own, so it registers sw.js against
+    // the site root its tag names (ADR 2026-11-11-inline-house-style-and-script).
+    let js = read(&repo().join("build/static/style-picker.js"));
     assert!(
-        js.contains("new URL(\"sw.js\", document.currentScript.src)"),
-        "style-picker.js should register sw.js relative to itself"
+        js.contains("const root = new URL(script.dataset.root || \"/\", location.href);")
+            && js.contains("new URL(\"sw.js\", root)"),
+        "style-picker.js should register sw.js against the site root"
     );
     assert!(
         js.contains("navigator.serviceWorker.register("),

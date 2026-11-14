@@ -4,7 +4,7 @@
 use std::fs;
 
 use posse_bliki_build::image;
-use posse_bliki_build::indent::BLOCK;
+use posse_bliki_build::indent::{BLOCK, RAW};
 
 use posse_bliki_build::util::escape_html;
 
@@ -109,19 +109,53 @@ fn html_is_not_minified() {
     }
 }
 
-/// Lines outside `<pre>` blocks, which keep their own whitespace.
-fn lines_outside_pre(html: &str) -> Vec<&str> {
+/// Lines outside the contents of `<pre>`, `<textarea>`, `<script>` and
+/// `<style>`, which ship byte for byte (ADR 2026-10-28-indented-html). A
+/// start tag's own lines count, attributes included; the contents start
+/// after its `>`.
+fn lines_outside_raw(html: &str) -> Vec<&str> {
+    enum State {
+        Text,
+        Tag(&'static str),
+        Raw(&'static str),
+    }
+    let close = |name: &str| format!("</{name}>");
     let mut lines = Vec::new();
-    let mut in_pre = false;
+    let mut state = State::Text;
     for line in html.lines() {
-        if !in_pre {
-            lines.push(line);
-        }
-        if line.contains("<pre") {
-            in_pre = true;
-        }
-        if line.contains("</pre>") {
-            in_pre = false;
+        match state {
+            State::Raw(name) => {
+                if line.contains(&close(name)) {
+                    state = State::Text;
+                }
+            }
+            State::Tag(name) => {
+                lines.push(line);
+                if line.contains('>') {
+                    state = if line.contains(&close(name)) {
+                        State::Text
+                    } else {
+                        State::Raw(name)
+                    };
+                }
+            }
+            State::Text => {
+                lines.push(line);
+                let open = RAW.iter().find_map(|name| {
+                    let at = line.find(&format!("<{name}"))?;
+                    let rest = &line[at + name.len() + 1..];
+                    (rest.is_empty() || rest.starts_with([' ', '>'])).then_some((*name, rest))
+                });
+                if let Some((name, rest)) = open {
+                    state = if !rest.contains('>') {
+                        State::Tag(name)
+                    } else if rest.contains(&close(name)) {
+                        State::Text
+                    } else {
+                        State::Raw(name)
+                    };
+                }
+            }
         }
     }
     lines
@@ -135,7 +169,7 @@ fn html_is_indented_by_nesting() {
     let flush = ["<head>", "</head>", "<body>", "</body>", "</html>"];
     for p in files_with_ext(site(), "html") {
         let html = &read_as_built(&p);
-        let lines = lines_outside_pre(html);
+        let lines = lines_outside_raw(html);
         for tag in flush {
             assert!(lines.contains(&tag), "{}: {tag} not flush left", p.display());
         }
@@ -166,7 +200,7 @@ fn each_attribute_on_its_own_line() {
     let mut split = 0;
     for p in files_with_ext(site(), "html") {
         let html = read_as_built(&p);
-        let lines = lines_outside_pre(&html);
+        let lines = lines_outside_raw(&html);
         for (n, line) in lines.iter().enumerate() {
             for (i, _) in line.match_indices('<') {
                 let tag = &line[i + 1..];
@@ -227,7 +261,7 @@ fn block_content_on_its_own_lines() {
     let mut checked = 0;
     for p in files_with_ext(site(), "html") {
         let html = read_as_built(&p);
-        for (n, line) in lines_outside_pre(&html).iter().enumerate() {
+        for (n, line) in lines_outside_raw(&html).iter().enumerate() {
             let line = line.trim();
             for name in BLOCK {
                 let open = format!("<{name}");

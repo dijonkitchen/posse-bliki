@@ -1,7 +1,8 @@
 # 2026-10-29 — Offline reading with a service worker
 
 - Date: 2026-10-29
-- Status: Accepted
+- Status: Accepted; `style.css` and `style-picker.js` left the install list,
+  and the script ships inline, in [2026-11-11-inline-house-style-and-script](2026-11-11-inline-house-style-and-script.md)
 - Decided by: JC, asking whether the site should become a PWA for offline
   reading, then choosing "Yes, cache as you read" over precaching the
   whole site, and asking to precache the main pages but not every note.

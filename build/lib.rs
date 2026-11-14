@@ -12,6 +12,7 @@ pub mod json;
 pub mod markdown;
 pub mod mdurl;
 pub mod serve;
+pub mod sha256;
 pub mod site;
 pub mod text;
 pub mod unicode;
