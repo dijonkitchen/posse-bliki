@@ -13,7 +13,8 @@ The architecture is **spec + harness + replaceable build** — see
 ## Layout
 
 ```
-content/         Obsidian vault — your notes
+content/         Your notes: everything here is published
+drafts/          Notes in progress: never built or published
 spec/            Outcome contracts (what "correct" means)
 tests/           Automated harness enforcing the specs
 build/           Build implementation — Rust, std only (replaceable)
@@ -23,12 +24,25 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 
 ## Daily workflow
 
-1. Open `content/` as an Obsidian vault. Its `.obsidian/app.json` already
-   turns off wikilinks and makes new links relative paths (*Settings →
-   Files and links*); keep it that way.
-2. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
+1. Open the repo as an Obsidian vault, at its root, on laptop and phone
+   (ADR 2026-11-14-vault-at-repo-root).
+   The Git plugin commits and pushes every change to `main`,
+   and every push deploys.
+   The vault's `.obsidian/app.json` turns off wikilinks,
+   makes new links relative paths,
+   puts new notes in `drafts/`,
+   and hides the code, specs and ADRs from search and the graph
+   (*Settings → Files and links*); keep it that way.
+2. Write a new note in `drafts/`. The build never reads it,
+   so an unfinished note can't break the deploy.
+   It's still public on GitHub, like the rest of the repo.
+3. To publish, give it a `title` and a `date`
+   (or `updated`, for an evergreen note),
+   then move it into `content/notes/`.
+   Obsidian rewrites its links as it moves.
+   A published note can't link to a draft: the build fails on that link.
+4. Link notes as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`).
-3. `git commit && git push`. CI runs the harness and deploys.
 
 Front matter handles the rest: `draft: true` keeps a note out of the build,
 a `date` in the future holds it back until that day, `aliases:` keeps old

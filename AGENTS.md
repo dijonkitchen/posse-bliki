@@ -61,7 +61,8 @@ cargo test --release --test harness design::focus   # tests whose name matches
 
 ## Files you will touch often
 
-- `content/` — the Obsidian vault. Edit notes here.
+- `content/` — the published notes. Edit notes here. The Obsidian vault is the
+  repo root; `drafts/` holds notes not yet published (ADR 2026-11-14-vault-at-repo-root).
 - `spec/` — outcome contracts. Edit when intent changes.
 - `tests/harness/` — harness. Edit when adding/fixing features. Shared
   fixtures and the std-only HTML, XML, microformats and JSON Schema

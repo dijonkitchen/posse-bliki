@@ -1,7 +1,7 @@
 # 2026-10-16 — Relative Markdown links between notes
 
 - Date: 2026-10-16
-- Status: Accepted
+- Status: Accepted; its Obsidian settings moved from `content/.obsidian/app.json` to the root `.obsidian/app.json` by [2026-11-14-vault-at-repo-root](2026-11-14-vault-at-repo-root.md)
 - Decided by: JC, who asked for links that read well on GitHub and in
   Obsidian and work on the site, and chose "Markdown links" over keeping
   wikilinks.
