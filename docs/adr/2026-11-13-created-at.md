@@ -9,6 +9,10 @@
   Claude had recommended keeping `date`, then offered `published_at`,
   which JC found a poor fit for drafts and for posts meant to show up in the future.
   On a first draft that kept it a day, JC: "created_at soudl be a datetime".
+  On a draft where only `updated_at` was stamped, JC, on 2026-11-14:
+  "all notes are evergreen no? [...]
+  so shouldn't linter always automatically add created_at and updated_at for all of these?"
+  Claude had recommended typing `created_at` by hand, to keep evergreen notes possible.
 
 ## Context
 
@@ -46,7 +50,7 @@ Three names were weighed:
   and holds a post back until its day comes.
   Lists sort by a note's update, or else by `created_at`,
   as JC described.
-- **It is a UTC datetime or a day, typed by hand,**
+- **It is a UTC datetime or a day,**
   in the forms `updated_at` takes (ADR 2026-11-12-updated-at-utc-datetimes):
   `2026-11-13T05:19:33Z`, seconds optional, `+00:00` for `Z`,
   or a bare day such as `2026-11-13`.
@@ -70,21 +74,39 @@ Three names were weighed:
   from noon UTC the day after its day.
   With a time to go by, that becomes 24 hours after `created_at`,
   and a bare day still stands for noon UTC, so it ends at the same moment as before.
-- **Obsidian doesn't stamp it.**
-  The Linter plugin's created date comes from the file's creation time on disk,
-  and git keeps no file times,
-  so a note would be dated to the day it reached each device: the clone, for every note.
-  Stamping would also give every evergreen note and page a `created_at`,
-  and a `created_at` makes an evergreen note a post that goes to the feeds.
+- **Obsidian stamps it.**
+  The vault's Linter settings
+  (ADR 2026-11-12-obsidian-stamps-updated-at)
+  turn on the YAML Timestamp rule's created date, under the key `created_at`,
+  with the note's front matter as its source of truth.
+  The first time Linter stamps a note in `content/` or `drafts/` that has no `created_at`,
+  it writes the file's creation time on that device, in UTC.
+  After that the value in the note stands, on every device.
+  Anywhere else, `created_at` is typed when a note is started.
 
 ## Consequences
 
 - The built site is unchanged.
 - A promoted note or an old draft that still has `date` fails the build
   with a message naming the new field.
-- An evergreen note is still one with `updated_at` and no `created_at`.
-  If every note should carry `created_at`,
-  the feeds will need another way to tell a post from an evergreen note.
+- Every note made in Obsidian is a post, dated when its file was made,
+  and goes to the feeds once it isn't a draft.
+  All 67 notes are posts already.
+  An evergreen note, with `updated_at` and no `created_at`,
+  can only be made outside Obsidian,
+  since Linter adds `created_at` the first time it stamps one.
+- A note's date is when its file was made, not when it was published:
+  a draft started on the 1st and published on the 20th is dated the 1st.
+  Setting `created_at` later by hand moves it, or schedules it if in the future.
+- Git keeps no file times, so a file that reached a device by a pull or clone
+  has the time it arrived.
+  Linter only uses that for a file with no `created_at`,
+  which today means the pages: `now.md` was first stamped Nov 10, the clone, not Nov 1.
+  The build ignores `created_at` on a page.
+- Linter rewrites a `created_at` it didn't write in its own form
+  when it next stamps the note,
+  so a bare day `2026-01-05` becomes `2026-01-05T00:00:00Z`.
+  The day shown and the feeds' time are unchanged.
 - A post with a time shows only its UTC day,
   so one written on a Pacific evening shows the next day,
   as `updated_at` already does.
@@ -110,3 +132,10 @@ Three names were weighed:
   and gives the feeds a real time.
 - **Require a datetime.**
   Every old note would need a time nobody recorded.
+- **Type `created_at` by hand, and have Obsidian stamp only `updated_at`.**
+  Keeps evergreen notes possible from Obsidian
+  and never dates a note by a file time,
+  but a new note has no date until one is typed.
+  JC wanted both stamped on every note.
+- **Stamp it, and mark evergreen notes some other way**, such as a folder.
+  More to build, for a kind of note there are none of today.

@@ -36,7 +36,7 @@ contain one; keep the note `draft: true` until it's filled in.
 | Field | Type | Required | Notes |
 |---|---|---|---|
 | `title` | string | yes | Maps to `<title>` and `p-name`. |
-| `created_at` | UTC datetime, or a day | yes for posts | When the note was made. Maps to `dt-published`. Pages and evergreen notes omit it. See [`created_at`](#created_at). |
+| `created_at` | UTC datetime, or a day | yes for posts | When the note was made. Maps to `dt-published`. Evergreen notes omit it; on a page the build ignores it. See [`created_at`](#created_at). |
 | `updated_at` | UTC datetime, or a day | yes for evergreen notes | Maps to `dt-updated`. Moves the note up Home and Notes. See [`updated_at`](#updated_at). |
 | `summary` | string | no | Maps to `p-summary` and `<meta name=description>` (else an excerpt of the text is used). |
 | `draft` | bool | no | If `true`, excluded from build entirely. |
@@ -60,6 +60,8 @@ A note in `content/notes/` needs `created_at`, `updated_at`, or both
   listed on Home and `/notes/` like a post, but in no feed, so never syndicated.
   Its page has `dt-updated` ("Updated <date>") and no `dt-published`.
   It is held back until its `updated_at`, like a scheduled post.
+  Obsidian gives every note it edits a `created_at`,
+  so an evergreen note can only be made outside Obsidian.
 - With neither, the build fails.
 
 Home and `/notes/` list notes most recently tended first:
@@ -77,8 +79,6 @@ The feeds stay in `created_at` order.
 - It takes the same forms as [`updated_at`](#updated_at):
   a UTC datetime, `2026-11-13T05:19:33Z`,
   or a bare day, `2026-11-13`.
-  Type it by hand when you start a post;
-  `date -u +%Y-%m-%dT%H:%M:%SZ` prints the time now.
   The 67 notes from before carry bare days.
 - It is the note's date: readers see its UTC day, in Holocene years,
   and it is the publish date the feeds and microformats carry
@@ -87,11 +87,14 @@ The feeds stay in `created_at` order.
   the feeds give a bare day as midnight UTC.
   Lists fall back to it for a note that has no update,
   and two posts on one day sort by their times.
-- It isn't stamped on save.
-  Stamping would date a note to whenever the file appeared on a device,
-  which after a clone is the clone,
-  and would give every evergreen note and page a `created_at`,
-  sending evergreen notes to the feeds.
+- The vault's Obsidian settings stamp it.
+  The first time Linter stamps a note in `content/` or `drafts/` that has no `created_at`,
+  it writes when the note's file was made on that device, in UTC.
+  After that the value in the note stands,
+  though Linter rewrites a bare day in the stamp's form, as midnight UTC.
+  A page gets one too, which the build ignores.
+  Anywhere else, write it by hand when you start a note;
+  `date -u +%Y-%m-%dT%H:%M:%SZ` prints the time now.
 - A future `created_at` schedules the post (see [Scheduled posts](#scheduled-posts)).
 - The field used to be `date`.
   The build stops on the old name and says the new one.
