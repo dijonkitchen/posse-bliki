@@ -1,6 +1,6 @@
 ---
 title: "Balance"
-date: 2026-02-12
+created_at: 2026-02-12
 aliases:
   - /p/balance/
 ---

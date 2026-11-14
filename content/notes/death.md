@@ -1,6 +1,6 @@
 ---
 title: "Death"
-date: 2024-12-14
+created_at: 2024-12-14
 summary: "Survive or thrive"
 aliases:
   - /p/death-b2f/

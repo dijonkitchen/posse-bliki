@@ -1,6 +1,6 @@
 ---
 title: life
-date: 2020-05-29
+created_at: 2020-05-29
 aliases:
   - /life/
   - /p/life/

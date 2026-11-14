@@ -1,6 +1,6 @@
 ---
 title: exploration
-date: 2020-05-09
+created_at: 2020-05-09
 aliases:
   - /exploration/
 ---

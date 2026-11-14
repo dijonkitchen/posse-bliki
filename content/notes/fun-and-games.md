@@ -1,6 +1,6 @@
 ---
 title: "Fun and games"
-date: 2026-02-18
+created_at: 2026-02-18
 aliases:
   - /p/fun-and-games/
 ---

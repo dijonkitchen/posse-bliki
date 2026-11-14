@@ -1,6 +1,6 @@
 ---
 title: enums
-date: 2015-10-11
+created_at: 2015-10-11
 aliases:
   - /enums/
 ---

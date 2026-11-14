@@ -1,6 +1,6 @@
 ---
 title: vision
-date: 2020-03-15
+created_at: 2020-03-15
 aliases:
   - /vision/
   - /p/vision/

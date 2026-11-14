@@ -1,6 +1,6 @@
 ---
 title: process
-date: 2019-08-23
+created_at: 2019-08-23
 aliases:
   - /process/
   - /p/process/
