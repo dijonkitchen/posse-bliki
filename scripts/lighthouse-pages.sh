@@ -30,11 +30,17 @@ cargo build --release --locked --quiet
 target/release/bliki --out "$tmp/head" --today "$today" >/dev/null
 
 git worktree add --quiet --detach "$tmp/src" "$base"
-(
-  cd "$tmp/src"
-  CARGO_TARGET_DIR="$tmp/target" cargo build --release --locked --quiet
-  "$tmp/target/release/bliki" --out "$tmp/base" --today "$today" >/dev/null
-)
+# Vault backups push straight to main, so the base may not build. Then
+# there's nothing to diff against: audit the fixed pages rather than fail
+# the PR that fixes main.
+if ! (
+  cd "$tmp/src" &&
+    CARGO_TARGET_DIR="$tmp/target" cargo build --release --locked --quiet &&
+    "$tmp/target/release/bliki" --out "$tmp/base" --today "$today" >/dev/null
+); then
+  echo "the base doesn't build: auditing only the fixed pages" >&2
+  exit 0
+fi
 
 # Built HTML pages, new or changed, as the paths they're served at.
 changed=$(

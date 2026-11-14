@@ -1,7 +1,7 @@
 ---
 title: Now
 summary: What I'm focused on now, after Derek Sivers's now pages.
-updated: 2026-11-05
+updated: 2026-11-13
 draft: false
 ---
 
@@ -33,6 +33,7 @@ it's the short version of what you'd hear.
 ## Reading
 
 - Pachinko by Min Jin Lee
+- Code by Charles Petzold
 
 ## About this page
 
