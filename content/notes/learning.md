@@ -1,5 +1,6 @@
 ---
 title: learning
+published: true
 created_at: 2021-08-27
 aliases:
   - /learning/

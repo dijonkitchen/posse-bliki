@@ -1,5 +1,6 @@
 ---
 title: "control"
+published: true
 created_at: 2026-04-22
 aliases:
   - /p/control/

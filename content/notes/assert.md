@@ -1,5 +1,6 @@
 ---
 title: "assert"
+published: true
 created_at: 2026-05-28
 aliases:
   - /p/assert/

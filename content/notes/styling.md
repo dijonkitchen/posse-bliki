@@ -1,5 +1,6 @@
 ---
 title: styling
+published: true
 created_at: 2015-09-28
 aliases:
   - /styling/

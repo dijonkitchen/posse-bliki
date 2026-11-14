@@ -2,30 +2,11 @@
 //! ADR 2026-11-05-now-in-the-header).
 
 use std::fs;
-use std::path::{Path, PathBuf};
-use std::sync::OnceLock;
+use std::path::Path;
 
 use crate::support::{build, content_dir, files_with_ext, html_files, read, rel, site, temp_dir, vault_copy};
 
 const PLACEHOLDER: &str = "TODO(JC)";
-
-/// The vault with `now.md` published, as it will be once JC fills it in.
-fn published_now() -> &'static PathBuf {
-    static SITE: OnceLock<PathBuf> = OnceLock::new();
-    SITE.get_or_init(|| {
-        let vault = vault_copy("now");
-        let now = vault.join("now.md");
-        let kept: Vec<String> = read(&now)
-            .lines()
-            .filter(|l| !l.starts_with("draft:"))
-            .map(String::from)
-            .collect();
-        fs::write(&now, kept.join("\n")).unwrap();
-        let out = temp_dir("now-out");
-        build(&vault, &out, &[]).expect("build with a published now page");
-        out
-    })
-}
 
 fn footer(html: &str) -> &str {
     html.split("<footer class=\"site-footer\">").nth(1).unwrap_or("")
@@ -39,7 +20,7 @@ fn now_page_credits_derek_sivers_and_nownownow() {
         md.contains("(https://nownownow.com/about)"),
         "now.md doesn't link nownownow.com/about"
     );
-    let html = read(&published_now().join("now/index.html"));
+    let html = read(&site().join("now/index.html"));
     assert!(html.contains(r#"href="https://nownownow.com/about""#));
 }
 
@@ -54,7 +35,7 @@ fn now_page_nods_to_the_long_now() {
 
 #[test]
 fn now_page_says_when_it_was_updated() {
-    let html = read(&published_now().join("now/index.html"));
+    let html = read(&site().join("now/index.html"));
     let p = html
         .split("<p class=\"now-updated\">")
         .nth(1)
@@ -81,7 +62,7 @@ fn nav_hrefs(html: &str) -> Vec<String> {
 
 #[test]
 fn every_page_header_reads_notes_now_about() {
-    let out = published_now();
+    let out = site();
     let wrong: Vec<String> = files_with_ext(out, "html")
         .iter()
         .filter(|p| nav_hrefs(&read(p)) != ["/notes/", "/now/", "/about/"])
@@ -122,7 +103,7 @@ fn no_now_page_means_no_now_link() {
 #[test]
 fn a_now_page_without_an_updated_date_fails_the_build() {
     let vault = vault_copy("now-undated");
-    fs::write(vault.join("now.md"), "---\ntitle: Now\n---\n\nBusy.\n").unwrap();
+    fs::write(vault.join("now.md"), "---\npublished: true\ntitle: Now\n---\n\nBusy.\n").unwrap();
     let err = build(&vault, &temp_dir("now-undated-out"), &[]).expect_err("build should fail");
     assert!(err.contains("now.md"), "unexpected error: {err}");
 }
@@ -136,7 +117,7 @@ fn no_published_page_has_a_placeholder() {
         .collect();
     assert!(
         found.is_empty(),
-        "{PLACEHOLDER} left on published pages; fill it in or keep the note a draft:\n{}",
+        "{PLACEHOLDER} left on published pages; fill it in or untick `published`:\n{}",
         found.join("\n")
     );
 }

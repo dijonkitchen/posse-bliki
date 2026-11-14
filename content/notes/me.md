@@ -1,5 +1,6 @@
 ---
 title: me
+published: true
 created_at: 2015-07-18
 aliases:
   - /me/

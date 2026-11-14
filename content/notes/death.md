@@ -1,5 +1,6 @@
 ---
 title: "Death"
+published: true
 created_at: 2024-12-14
 summary: "Survive or thrive"
 aliases:

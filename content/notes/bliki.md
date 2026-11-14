@@ -1,5 +1,6 @@
 ---
 title: bliki
+published: true
 created_at: 2015-11-08
 aliases:
   - /bliki/

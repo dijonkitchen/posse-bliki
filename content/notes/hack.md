@@ -1,5 +1,6 @@
 ---
 title: hack
+published: true
 created_at: 2015-05-26
 aliases:
   - /hack/

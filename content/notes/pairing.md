@@ -1,5 +1,6 @@
 ---
 title: pairing
+published: true
 created_at: 2017-05-25
 aliases:
   - /pairing/

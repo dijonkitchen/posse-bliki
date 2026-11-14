@@ -1,5 +1,6 @@
 ---
 title: "Cleanse"
+published: true
 created_at: 2026-04-01
 aliases:
   - /p/cleanse/

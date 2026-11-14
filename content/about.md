@@ -1,5 +1,6 @@
 ---
 title: About
+published: true
 summary: Napkin logic for thought. Why this site exists and how to reach me.
 aliases:
   - /why/

@@ -1,5 +1,6 @@
 ---
 title: enums
+published: true
 created_at: 2015-10-11
 aliases:
   - /enums/

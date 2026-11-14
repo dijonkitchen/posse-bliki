@@ -42,7 +42,8 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 4. `git commit && git push`. CI runs the harness and deploys.
 
 Front matter handles the rest:
-`draft: true` keeps a note out of the build,
+`published: true` puts a note on the site (Obsidian shows it as a checkbox),
+and the build skips every note without it,
 `aliases:` keeps old URLs redirecting (never remove one),
 and `syndication:` lists a post's copies elsewhere.
 `created_at` is when you made a note,

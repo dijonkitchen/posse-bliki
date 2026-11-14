@@ -21,7 +21,7 @@
     "summary": {
       "type": "string"
     },
-    "draft": {
+    "published": {
       "type": "boolean"
     },
     "aliases": {

@@ -1,5 +1,6 @@
 ---
 title: goals
+published: true
 created_at: 2016-04-10
 aliases:
   - /goals/

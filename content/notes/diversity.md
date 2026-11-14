@@ -1,5 +1,6 @@
 ---
 title: diversity
+published: true
 created_at: 2020-05-24
 aliases:
   - /diversity/

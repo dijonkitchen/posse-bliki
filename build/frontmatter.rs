@@ -906,7 +906,7 @@ const PROPERTIES: &[&str] = &[
     "created_at",
     "updated_at",
     "summary",
-    "draft",
+    "published",
     "aliases",
     "syndication",
 ];
@@ -1125,7 +1125,7 @@ pub fn validate(fm: &FrontMatter) -> Result<(), String> {
                 check_string(v, path, false, Some((STAMP_PATTERN, is_stamp_like)), false, &mut errs)
             }
             "summary" => check_string(v, path, false, None, false, &mut errs),
-            "draft" => {
+            "published" => {
                 if type_name(v) != "boolean" {
                     errs.push((path, format!("{} is not of type 'boolean'", v.repr())));
                 }
@@ -1177,7 +1177,7 @@ mod tests {
 
     #[test]
     fn yaml_basics() {
-        let y = "title: \"Hi: there\"\ncreated_at: 2020-01-02\naliases: [/a/, '/b/', /c-d/]\nsyndication:\n  - https://x.example/\n  - https://y.example/\ndraft: yes\nsummary: plain text # comment\n";
+        let y = "title: \"Hi: there\"\ncreated_at: 2020-01-02\naliases: [/a/, '/b/', /c-d/]\nsyndication:\n  - https://x.example/\n  - https://y.example/\npublished: yes\nsummary: plain text # comment\n";
         let v = parse_yaml(y).unwrap().unwrap();
         let m = match v {
             Value::Map(m) => m,
@@ -1197,7 +1197,7 @@ mod tests {
             get(&m, "syndication").unwrap().repr(),
             "['https://x.example/', 'https://y.example/']"
         );
-        assert_eq!(get(&m, "draft"), Some(&Value::Bool(true)));
+        assert_eq!(get(&m, "published"), Some(&Value::Bool(true)));
         assert_eq!(get(&m, "summary"), Some(&Value::Str("plain text".into())));
         assert!(validate(&m).is_ok());
     }

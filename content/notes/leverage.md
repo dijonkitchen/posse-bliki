@@ -1,5 +1,6 @@
 ---
 title: leverage
+published: true
 created_at: 2021-05-14
 aliases:
   - /leverage/

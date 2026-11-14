@@ -1,5 +1,6 @@
 ---
 title: "lemonade"
+published: true
 created_at: 2026-04-29
 aliases:
   - /p/lemonade/
