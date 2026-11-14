@@ -109,7 +109,7 @@ The feeds stay in `created_at` order.
   Lists fall back to it for a note that has no update,
   and two posts on one day sort by their times.
 - The vault's Obsidian settings stamp it.
-  The first time Linter stamps a note in `content/` or `drafts/` that has no `created_at`,
+  The first time Linter stamps a note in `content/` that has no `created_at`,
   it writes when the note's file was made on that device, in UTC.
   After that the value in the note stands,
   though Linter rewrites a bare day in the stamp's form, as midnight UTC.
@@ -146,7 +146,7 @@ The feeds stay in `created_at` order.
   already the next day in UTC, isn't an update either.
 - The vault's Obsidian settings stamp it:
   the Linter plugin, committed with the vault at the repo root,
-  writes the current UTC time five seconds after an edit to a note in `content/` or `drafts/`,
+  writes the current UTC time five seconds after an edit to a note in `content/`,
   and when the note is saved
   (ADR 2026-11-12-obsidian-stamps-updated-at).
   Anywhere else, write it by hand when the text is reworked,

@@ -13,8 +13,7 @@ The architecture is **spec + harness + replaceable build** — see
 ## Layout
 
 ```
-content/         Your notes: everything here is published
-drafts/          Notes in progress: never built or published
+content/         Your notes: each is published once its `published` box is ticked
 spec/            Outcome contracts (what "correct" means)
 tests/           Automated harness enforcing the specs
 build/           Build implementation — Rust, std only (replaceable)
@@ -30,7 +29,7 @@ AGENTS.md        Operating contract for any agent/human editing this repo
    and every push deploys.
    The vault's `.obsidian/app.json` turns off wikilinks,
    makes new links relative paths,
-   puts new notes in `drafts/`,
+   puts new notes in `content/notes/`,
    and hides the code, specs and ADRs from search and the graph
    (*Settings → Files and links*); keep it that way.
 2. The vault carries the Linter plugin, its code and its settings,
@@ -40,17 +39,18 @@ AGENTS.md        Operating contract for any agent/human editing this repo
    Linter stamps `updated_at` with the current UTC time,
    and gives a note with no `created_at` the time its file was made
    (ADRs 2026-11-12-obsidian-stamps-updated-at and 2026-11-13-created-at).
-   It stamps only notes, in `content/` and `drafts/`,
+   It stamps only notes, in `content/`,
    and leaves the README, specs and ADRs alone.
    Don't run its "Lint all files" command, which would stamp every note.
-3. Write a new note in `drafts/`. The build never reads it,
-   so an unfinished note can't break the deploy.
+3. Write a new note; it starts in `content/notes/`.
+   Until its `published` property is ticked, the build skips it,
+   so an unfinished note can't break the deploy
+   (ADR 2026-11-14-published-checkbox).
    It's still public on GitHub, like the rest of the repo.
 4. To publish, give it the front matter a published note needs
    (a `title` and its dates; see [`spec/content-schema.md`](spec/content-schema.md)),
-   then move it into `content/notes/`.
-   Obsidian rewrites its links as it moves.
-   A published note can't link to a draft: the build fails on that link.
+   then add the `published` property and tick it.
+   A published note can't link to an unpublished one: the build fails on that link.
 5. Link notes as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`).
 
