@@ -1,6 +1,6 @@
 ---
 title: "Crafting"
-date: 2026-02-26
+created_at: 2026-02-26
 aliases:
   - /p/crafting/
 ---

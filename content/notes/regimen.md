@@ -1,6 +1,6 @@
 ---
 title: regimen
-date: 2023-04-11
+created_at: 2023-04-11
 aliases:
   - /regimen/
   - /p/regimen/

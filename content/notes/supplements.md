@@ -1,6 +1,6 @@
 ---
 title: "Supplements"
-date: 2026-03-19
+created_at: 2026-03-19
 aliases:
   - /p/supplements/
 ---

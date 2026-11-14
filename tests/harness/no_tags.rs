@@ -8,7 +8,7 @@ fn hash_word_stays_text() {
     let vault = vault_copy("hash-word");
     std::fs::write(
         vault.join("notes/hash-word.md"),
-        "---\ntitle: Hash word\ndate: 2026-05-09\n---\n\nWe're #1 at #ideas.\n",
+        "---\ntitle: Hash word\ncreated_at: 2026-05-09\n---\n\nWe're #1 at #ideas.\n",
     )
     .unwrap();
     let out = temp_dir("hash-word-out");
@@ -26,7 +26,7 @@ fn tags_field_fails_the_build() {
     let vault = vault_copy("tags-field");
     std::fs::write(
         vault.join("notes/tagged.md"),
-        "---\ntitle: Tagged\ndate: 2026-05-09\ntags: [podcast]\n---\n\nbody\n",
+        "---\ntitle: Tagged\ncreated_at: 2026-05-09\ntags: [podcast]\n---\n\nbody\n",
     )
     .unwrap();
     let err = build(&vault, &temp_dir("tags-field-out"), &[]).expect_err("build should fail");

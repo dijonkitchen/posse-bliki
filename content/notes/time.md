@@ -1,6 +1,6 @@
 ---
 title: time
-date: 2019-12-26
+created_at: 2019-12-26
 aliases:
   - /time/
   - /p/time/

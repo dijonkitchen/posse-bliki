@@ -12,7 +12,7 @@ fn draft_site() -> &'static PathBuf {
         let vault = vault_copy("draft");
         std::fs::write(
             vault.join("notes/secret-draft.md"),
-            "---\ntitle: Secret draft\ndate: 2026-05-09\ndraft: true\n---\n\nthis should never appear in output\n",
+            "---\ntitle: Secret draft\ncreated_at: 2026-05-09\ndraft: true\n---\n\nthis should never appear in output\n",
         )
         .unwrap();
         let out = temp_dir("draft-out");

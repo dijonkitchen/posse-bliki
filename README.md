@@ -33,23 +33,40 @@ AGENTS.md        Operating contract for any agent/human editing this repo
    puts new notes in `drafts/`,
    and hides the code, specs and ADRs from search and the graph
    (*Settings → Files and links*); keep it that way.
-2. Write a new note in `drafts/`. The build never reads it,
+2. The vault carries the Linter plugin, its code and its settings,
+   so there is nothing to install;
+   if Obsidian asks, turn on community plugins (*Settings → Community plugins*).
+   Five seconds after you stop typing in a note, and when you save it,
+   Linter stamps `updated_at` with the current UTC time,
+   and gives a note with no `created_at` the time its file was made
+   (ADRs 2026-11-12-obsidian-stamps-updated-at and 2026-11-13-created-at).
+   It stamps only notes, in `content/` and `drafts/`,
+   and leaves the README, specs and ADRs alone.
+   Don't run its "Lint all files" command, which would stamp every note.
+3. Write a new note in `drafts/`. The build never reads it,
    so an unfinished note can't break the deploy.
    It's still public on GitHub, like the rest of the repo.
-3. To publish, give it the front matter a published note needs
+4. To publish, give it the front matter a published note needs
    (a `title` and its dates; see [`spec/content-schema.md`](spec/content-schema.md)),
    then move it into `content/notes/`.
    Obsidian rewrites its links as it moves.
    A published note can't link to a draft: the build fails on that link.
-4. Link notes as `[text](other-note.md)` (Obsidian does this for
+5. Link notes as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`).
 
-Front matter handles the rest: `draft: true` keeps a note out of the build,
-a `date` in the future holds it back until that day, `aliases:` keeps old
-URLs redirecting (never remove one), and `syndication:` lists a post's
-copies elsewhere.
-Set `updated` when you rework a note, and it moves to the top of Home and Notes.
-A note with `updated` and no `date` is an evergreen note:
+Front matter handles the rest:
+`draft: true` keeps a note out of the build,
+`aliases:` keeps old URLs redirecting (never remove one),
+and `syndication:` lists a post's copies elsewhere.
+`created_at` is when you made a note,
+as a UTC datetime (`date -u +%Y-%m-%dT%H:%M:%SZ` prints one) or a day.
+It dates a post, and a future one holds the post back until then.
+Obsidian fills it in the first time you edit a new note, and keeps it after;
+anywhere else, type it.
+`updated_at` says when you last reworked a note, as a UTC datetime (`2026-11-12T04:27:28Z`) or a day,
+and moves the note to the top of Home and Notes.
+Obsidian stamps it as you edit; anywhere else, type it.
+A note with `updated_at` and no `created_at` is an evergreen note:
 listed with the rest, but never sent to the feeds or syndicated. [`spec/content-schema.md`](spec/content-schema.md) has
 every field.
 

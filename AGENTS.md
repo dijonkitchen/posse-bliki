@@ -91,6 +91,10 @@ cargo test --release --test harness design::focus   # tests whose name matches
   wikilinks or site URLs, so links work on GitHub, in Obsidian and on the
   site (ADR 2026-10-16-relative-markdown-links).
 - No unresolved wikilinks, no broken internal links — both are build errors.
+- A change that reworks what a note says sets its `updated_at` to the
+  current UTC time (`date -u +%Y-%m-%dT%H:%M:%SZ`). A typo, a formatting
+  fix or a change made across many notes leaves it alone, so the note
+  doesn't move up Home and Notes (ADR 2026-11-12-obsidian-stamps-updated-at).
 - No `<script>` tags in output except the style picker
   (`build/static/style-picker.js`, inline in `<head>`), which only
   remembers the picked style and starts the offline-reading worker

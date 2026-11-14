@@ -1,6 +1,6 @@
 ---
 title: versioning
-date: 2015-09-10
+created_at: 2015-09-10
 aliases:
   - /versioning/
 ---

@@ -52,9 +52,10 @@ In addition to the universal invariants, every post page must:
 - Contain exactly one `<article class="h-entry">`.
 - That `h-entry` contains:
   - `.p-name` with the title
-  - `.dt-published` `<time datetime="…">` from front-matter `date`;
-    an evergreen note has `.dt-updated` from `updated` instead
-    (ADR 2026-11-07-evergreen-notes)
+  - `.dt-published` `<time datetime="…">` from front-matter `created_at`;
+    an evergreen note has `.dt-updated` from `updated_at` instead
+    (ADR 2026-11-07-evergreen-notes), and a post updated since it was
+    published has both (ADR 2026-11-12-updated-at-utc-datetimes)
   - `.e-content` wrapping the rendered body
   - `.p-author` `h-card` referencing the site author
   - `.u-url` matching the page's canonical URL
