@@ -1,5 +1,5 @@
 //! The vault's committed Obsidian settings stamp `updated_at` in the form
-//! the build reads, and only in `content/` (spec/content-schema.md,
+//! the build reads, and only in notes (spec/content-schema.md,
 //! ADR 2026-11-12-obsidian-stamps-updated-at). The vault is the repo root,
 //! so its settings are the root `.obsidian/`.
 
@@ -69,7 +69,7 @@ fn linter_stamps_updated_at_in_utc() {
 }
 
 #[test]
-fn linter_leaves_files_outside_content_alone() {
+fn linter_stamps_only_notes() {
     // Linter tests each pattern as a JavaScript RegExp against the file's
     // path from the vault root, and skips the files that match.
     let data = linter();
@@ -78,7 +78,7 @@ fn linter_leaves_files_outside_content_alone() {
         .map(|f| f.as_arr().iter().filter_map(|p| p.str_at("match")).collect())
         .unwrap_or_default();
     assert!(
-        ignored.contains(&"^(?!content/)"),
-        "Linter would stamp README.md, the specs and the ADRs too: filesToIgnore is {ignored:?}"
+        ignored.contains(&"^(?!(content|drafts)/)"),
+        "Linter would stamp README.md, the specs and the ADRs, or skip drafts: filesToIgnore is {ignored:?}"
     );
 }

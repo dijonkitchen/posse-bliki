@@ -95,7 +95,7 @@ The feeds stay in `date` order.
   For a bare day this comes to any day after `date`.
 - The vault's Obsidian settings stamp it:
   the Linter plugin, committed with the vault at the repo root,
-  writes the current UTC time five seconds after an edit to a note in `content/`,
+  writes the current UTC time five seconds after an edit to a note in `content/` or `drafts/`,
   and when the note is saved
   (ADR 2026-11-12-obsidian-stamps-updated-at).
   Anywhere else, write it by hand when the text is reworked,

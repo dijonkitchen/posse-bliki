@@ -30,10 +30,11 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 2. The vault carries the Linter plugin, its code and its settings,
    so there is nothing to install;
    if Obsidian asks, turn on community plugins (*Settings → Community plugins*).
-   Five seconds after you stop typing in a note in `content/`, and when you save it,
+   Five seconds after you stop typing in a note, and when you save it,
    Linter stamps `updated_at` with the current UTC time
    (ADR 2026-11-12-obsidian-stamps-updated-at).
-   It leaves files outside `content/` alone.
+   It stamps only notes, in `content/` and `drafts/`,
+   and leaves the README, specs and ADRs alone.
    Don't run its "Lint all files" command, which would stamp every note.
 3. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`).

@@ -300,9 +300,9 @@
   "foldersToIgnore": [],
   "filesToIgnore": [
     {
-      "match": "^(?!content/)",
+      "match": "^(?!(content|drafts)/)",
       "flags": "",
-      "label": "Lint only notes and pages in content/"
+      "label": "Lint only notes: content/ and drafts/"
     }
   ],
   "linterLocale": "system-default",

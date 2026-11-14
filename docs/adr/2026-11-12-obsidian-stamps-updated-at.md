@@ -63,11 +63,13 @@ so the first stamp stopped the deploy (fixed by #105).
   once its text has stopped changing in the editor,
   which works on the phone, where there's no Ctrl+S.
   Lint on save stays on.
-- **Only files in `content/` are stamped.**
+- **Only notes are stamped: files in `content/` and in `drafts/`.**
   The vault is now the whole repo,
   and the README, specs and ADRs are Markdown too.
-  Linter's "Files to ignore" holds one pattern, `^(?!content/)`,
-  which matches every path outside `content/`,
+  New notes start in `drafts/`, outside the build,
+  and are stamped there so they carry their dates when they move into `content/`.
+  Linter's "Files to ignore" holds one pattern, `^(?!(content|drafts)/)`,
+  which matches every path outside those two folders,
   so no rule touches those files.
 - **The plugin's code is committed with the vault.**
   JC's vault carries it, as Obsidian Git commits it,
@@ -89,7 +91,7 @@ so the first stamp stopped the deploy (fixed by #105).
 - The rule listens for edits in the editor and for saves,
   so a pull doesn't stamp a note that isn't open.
   Whether Obsidian reports a pull into an open note as an edit hasn't been checked.
-- Linter's "Lint all files" command would stamp every note in `content/` at once.
+- Linter's "Lint all files" command would stamp every note at once.
   The README says not to run it.
 - Linter reads its settings when Obsidian starts,
   so a change to them takes effect once Obsidian is reopened on each device.
@@ -98,7 +100,7 @@ so the first stamp stopped the deploy (fixed by #105).
   The build never loads it.
 - The rule's behaviour was read from Linter 1.35.0's source.
   `tests/harness/obsidian.rs` checks that what the format writes is what the build reads,
-  and that files outside `content/` are ignored.
+  and that files outside `content/` and `drafts/` are ignored.
 
 ## Alternatives considered
 
