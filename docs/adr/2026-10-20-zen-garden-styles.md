@@ -5,7 +5,9 @@
   [ADR 2026-10-21-doctor-who-style](2026-10-21-doctor-who-style.md), and
   Garments removed by [ADR 2026-10-22-star-trek-style](2026-10-22-star-trek-style.md);
   April Fools' Day draws from every style since
-  [ADR 2026-10-22-ft-solarized-and-editor-styles](2026-10-22-ft-solarized-and-editor-styles.md)
+  [ADR 2026-10-22-ft-solarized-and-editor-styles](2026-10-22-ft-solarized-and-editor-styles.md);
+  the house style and the script are inline since
+  [ADR 2026-11-11-inline-house-style-and-script](2026-11-11-inline-house-style-and-script.md)
 - Decided by: JC, asking to "have some fun and duplicate the same styles as
   CSS Zen Garden" without affecting page performance, then for a Diablo I
   style that turns on for Halloween, a holiday style for Christmas time,

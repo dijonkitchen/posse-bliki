@@ -72,3 +72,39 @@ fn feeds_use_base_url() {
     assert!(!read(&site.join("feed.json")).contains("href=\\\"/notes/"));
     assert!(!read(&site.join("index.xml")).contains("href=&quot;/notes/"));
 }
+
+#[test]
+fn inline_style_and_script_work_under_sub_path() {
+    // The style picker's root and the house style's font URLs take the
+    // sub-path, and the policy's hashes still match the blocks once the
+    // page's links are prefixed (ADR 2026-11-11-inline-house-style-and-script).
+    let site = sub_site();
+    for f in files_with_ext(site, "html") {
+        let html = read(&f);
+        let page = rel(&f, site);
+        assert!(
+            html.contains(&format!("<script data-root=\"{PREFIX}\" data-styles=\"")),
+            "{page}: the style picker's root is not {PREFIX}"
+        );
+        let style = crate::csp::inline_text(&html, "style");
+        let urls: Vec<&str> = style
+            .match_indices("url(\"")
+            .map(|(i, _)| style[i + 5..].split('"').next().unwrap())
+            .collect();
+        assert!(!urls.is_empty(), "{page}: no font urls in the house style");
+        for url in urls {
+            let path = url
+                .strip_prefix(PREFIX)
+                .unwrap_or_else(|| panic!("{page}: url({url}) not under {PREFIX}"));
+            assert!(site.join(path).is_file(), "{page}: url({url}) does not resolve");
+        }
+        assert!(
+            html.contains(&crate::csp::expected_policy(&html)),
+            "{page}: the policy's hashes don't match the inline blocks"
+        );
+    }
+    assert!(
+        read(&site.join("style.css")).contains(&format!("url(\"{PREFIX}fonts/")),
+        "style.css font urls not under {PREFIX}"
+    );
+}

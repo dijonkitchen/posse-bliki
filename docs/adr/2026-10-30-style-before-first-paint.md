@@ -1,7 +1,8 @@
 # 2026-10-30 — The picked style is in place before first paint
 
 - Date: 2026-10-30
-- Status: Accepted
+- Status: Accepted; the script ships inline, so it no longer holds up the
+  first paint, since [2026-11-11-inline-house-style-and-script](2026-11-11-inline-house-style-and-script.md)
 - Decided by: JC, choosing to fix the Halloween style shifting pages as
   they load, in its own PR.
 

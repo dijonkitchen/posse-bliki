@@ -6,18 +6,22 @@
 // with the style and add its stylesheet render-blocking, so the first
 // paint is already in that style. From inside <body> a browser ignores
 // blocking="render", and the page jumped when the style arrived
-// (ADR 2026-10-30-style-before-first-paint). Modern syntax, since every
-// browser that has :has() has it; helpers are arrows, so each one must be
-// defined above its first use (ADR 2026-10-28-modern-js-style-picker).
+// (ADR 2026-10-30-style-before-first-paint). It ships inline, so the first
+// paint doesn't wait to fetch it (ADR 2026-11-11-inline-house-style-and-script).
+// Modern syntax, since every browser that has :has() has it; helpers are
+// arrows, so each one must be defined above its first use
+// (ADR 2026-10-28-modern-js-style-picker).
 (() => {
   "use strict";
   const script = document.currentScript;
+  // Inline, the script has no URL of its own, so its tag names the site's
+  // root, which the build sets to the sub-path when there is one.
+  const root = new URL(script.dataset.root || "/", location.href);
 
   // Also starts the worker that keeps pages for reading offline, once the
   // page has loaded so it never competes with drawing it
-  // (ADR 2026-10-29-offline-reading). Resolved against this script's own
-  // URL so it works under a sub-path.
-  const worker = new URL("sw.js", document.currentScript.src);
+  // (ADR 2026-10-29-offline-reading).
+  const worker = new URL("sw.js", root);
   if ("serviceWorker" in navigator) {
     addEventListener("load", () => {
       navigator.serviceWorker.register(worker).catch(() => {
@@ -28,29 +32,27 @@
 
   // The picker isn't parsed yet, so the menu's styles come with the script
   // tag, as data-styles.
-  const root = document.documentElement;
-  const house = document.querySelector('link[rel="stylesheet"][href$="style.css"]');
+  const html = document.documentElement;
   const styles = (script.dataset.styles || "").split(" ").filter(Boolean);
   const values = ["auto", "light", "dark", ...styles];
 
   // A style's stylesheet, added the first time it's picked. Auto, Light and
-  // Dark live in style.css. Render-blocking, so the page doesn't flash the
-  // house style first. Only menu values ever reach here, and the URL is
-  // resolved against the house sheet so it works under a sub-path.
+  // Dark live in the house style. Render-blocking, so the page doesn't flash
+  // the house style first. Only menu values ever reach here.
   const loaded = new Set(["auto", "light", "dark"]);
   const load = (name) => {
-    if (!house || loaded.has(name) || !/^[a-z-]+$/.test(name)) return;
+    if (loaded.has(name) || !/^[a-z-]+$/.test(name)) return;
     loaded.add(name);
     const link = document.createElement("link");
     link.rel = "stylesheet";
-    link.href = new URL(`themes/${name}.css`, house.href).href;
+    link.href = new URL(`themes/${name}.css`, root).href;
     link.setAttribute("blocking", "render");
     document.head.appendChild(link);
   };
 
   // Every style's rules match <html data-style> as well as the picker.
   const show = (name) => {
-    root.dataset.style = name;
+    html.dataset.style = name;
     load(name);
   };
 
@@ -110,7 +112,7 @@
   addEventListener("DOMContentLoaded", () => {
     const picker = document.getElementById("style");
     if (!picker) return;
-    if (root.dataset.style) picker.value = root.dataset.style;
+    if (html.dataset.style) picker.value = html.dataset.style;
     picker.addEventListener("change", () => {
       show(picker.value);
       save(picker.value);

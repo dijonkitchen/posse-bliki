@@ -94,10 +94,13 @@ cargo test --release --test harness design::focus   # tests whose name matches
   current UTC time (`date -u +%Y-%m-%dT%H:%M:%SZ`). A typo, a formatting
   fix or a change made across many notes leaves it alone, so the note
   doesn't move up Home and Notes (ADR 2026-11-12-obsidian-stamps-updated-at).
-- No `<script>` tags in output except `/style-picker.js`, which only
+- No `<script>` tags in output except the style picker
+  (`build/static/style-picker.js`, inline in `<head>`), which only
   remembers the picked style and starts the offline-reading worker
   `/sw.js`; everything works with JS off (ADR 2026-10-18-style-picker,
-  ADR 2026-10-29-offline-reading).
+  ADR 2026-10-29-offline-reading). It and the house style are allowed
+  inline by their hashes in the CSP, which the build computes
+  (ADR 2026-11-11-inline-house-style-and-script).
 - No minifying or uglifying output: HTML and CSS ship readable so readers can audit and remix them (Stallman's reason; ADR 2026-10-14-mobile-first).
 - Mobile-first CSS: `min-width` queries only (spec/performance.md).
 - No editing snapshot files in `tests/snapshots/` without a corresponding

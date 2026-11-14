@@ -68,11 +68,18 @@ fn light_and_dark(css: &str) -> (&str, &str) {
 }
 
 #[test]
-fn every_page_links_the_stylesheet() {
+fn every_page_carries_the_house_style() {
+    // Inline in <head>, byte for byte as written, so the first paint waits
+    // on no other file (ADR 2026-11-11-inline-house-style-and-script).
+    let source = fs::read_to_string(crate::support::repo().join("build/static/style.css")).expect("read source");
+    // No whitespace at either end, so the Nu HTML Checker, which trims
+    // before hashing, agrees with browsers on the CSP hash.
+    let block = format!("<style>{}</style>", source.trim_end());
     for (p, html) in html_files().iter() {
+        let head = &html[..html.find("\n</head>").expect("no </head>")];
         assert!(
-            html.contains("<link rel=\"stylesheet\" href=\"/style.css\">"),
-            "{}",
+            head.contains(&block),
+            "{}: house style not inline in <head>",
             p.display()
         );
     }
@@ -80,9 +87,10 @@ fn every_page_links_the_stylesheet() {
 
 #[test]
 fn no_inline_styles() {
+    // The house style is the one <style> block; nothing else is inline.
     for (p, html) in html_files().iter() {
         let lower = html.to_lowercase();
-        assert!(!lower.contains("<style"), "{}: <style> block", p.display());
+        assert_eq!(lower.matches("<style").count(), 1, "{}: <style> blocks", p.display());
         assert!(!lower.contains(" style="), "{}: inline style attribute", p.display());
     }
 }
@@ -110,12 +118,14 @@ fn no_third_party_requests_from_pages() {
 
 #[test]
 fn stylesheet_is_self_contained() {
+    // Inline, a url() resolves against each page, so it starts at the site
+    // root; the build adds a sub-path (ADR 2026-11-11-inline-house-style-and-script).
     let css = css();
     assert!(!css.contains("@import"), "style.css uses @import");
     for url in css_urls(&css) {
         assert!(
-            !url.contains("//") && !url.starts_with('/') && !url.starts_with("data:"),
-            "non-relative url({url})"
+            url.starts_with('/') && !url.starts_with("//") && !url.contains(':'),
+            "url({url}) is not a path from the site root"
         );
     }
 }
@@ -126,8 +136,8 @@ fn stylesheet_urls_resolve() {
     assert!(!urls.is_empty(), "expected self-hosted font urls");
     for url in urls {
         assert!(
-            site().join(&url).is_file(),
-            "url({url}) does not resolve next to style.css"
+            site().join(url.trim_start_matches('/')).is_file(),
+            "url({url}) does not resolve to an emitted file"
         );
     }
 }
@@ -272,10 +282,11 @@ fn no_text_below_16px() {
 #[test]
 fn skip_link_first_in_body() {
     for (p, html) in html_files().iter() {
-        let Some(i) = html.find("<body>") else {
+        // At the start of a line: the inline script's comments mention <body>.
+        let Some(i) = html.find("\n<body>") else {
             continue; // alias redirect stubs carry no body content
         };
-        let first = html[i + "<body>".len()..].trim_start();
+        let first = html[i + "\n<body>".len()..].trim_start();
         assert!(
             first.starts_with("<a class=\"skip-link\" href=\"#main\">"),
             "{}: body starts with {:?}",
@@ -423,8 +434,9 @@ fn themes() -> Vec<(String, String)> {
 fn styles_load_only_when_picked() {
     // ADR 2026-10-20-zen-garden-styles: the only stylesheet a page loads up
     // front is the house one. The themes are linked inside <noscript>, for
-    // the picker to work with JavaScript off; with it on, style-picker.js
-    // adds just the one picked.
+    // the picker to work with JavaScript off; with it on, the style picker
+    // adds just the one picked. The house style is inline
+    // (ADR 2026-11-11-inline-house-style-and-script).
     let mut expected = Vec::new();
     for (slug, source) in themes() {
         let css = fs::read_to_string(site().join(format!("themes/{slug}.css"))).expect("read theme");
@@ -433,7 +445,7 @@ fn styles_load_only_when_picked() {
     }
     expected.sort();
     for (p, html) in html_files().iter() {
-        let head = &html[..html.find("</head>").expect("no </head>")];
+        let head = &html[..html.find("\n</head>").expect("no </head>")];
         let (before, noscript) = match head.split_once("<noscript>\n") {
             Some((b, n)) => (b, &n[..n.find("</noscript>").expect("unclosed <noscript>")]),
             None => panic!("{}: no <noscript> with the styles", p.display()),
@@ -446,12 +458,12 @@ fn styles_load_only_when_picked() {
                 .map(String::from)
                 .collect()
         };
-        assert_eq!(sheets(before), ["/style.css"], "{}", p.display());
+        assert_eq!(sheets(before), Vec::<String>::new(), "{}", p.display());
         let mut linked = sheets(noscript);
         linked.sort();
         assert_eq!(linked, expected, "{}", p.display());
         assert!(
-            !html[html.find("</head>").unwrap()..].contains("rel=\"stylesheet\""),
+            !html[html.find("\n</head>").unwrap()..].contains("rel=\"stylesheet\""),
             "{}: a stylesheet outside <head>",
             p.display()
         );
@@ -599,14 +611,18 @@ fn every_page_has_the_style_picker() {
         );
         // The script runs in <head>, before the picker exists, and gets the
         // menu's styles from its tag (ADR 2026-10-30-style-before-first-paint).
-        let head = &html[..html.find("</head>").expect("no </head>")];
+        // It's inline, last in <head>, byte for byte as written, and its tag
+        // names the site root (ADR 2026-11-11-inline-house-style-and-script).
         let script = format!(
-            "<script src=\"/style-picker.js\" data-styles=\"{}\"></script>",
-            values[3..].join(" ")
+            "<script data-root=\"/\" data-styles=\"{}\">{}</script>\n</head>",
+            values[3..].join(" "),
+            fs::read_to_string(crate::support::repo().join("build/static/style-picker.js"))
+                .expect("read script")
+                .trim_end()
         );
         assert!(
-            head.contains(&script),
-            "{}: script not in <head> with the menu's styles",
+            html.contains(&script),
+            "{}: script not last in <head>, inline, with the menu's styles",
             p.display()
         );
     }
