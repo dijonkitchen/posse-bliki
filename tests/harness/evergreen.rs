@@ -17,41 +17,41 @@ const TODAY: &str = "2099-01-05";
 const NOTES: [(&str, &str); 9] = [
     (
         "evergreen-garden",
-        "---\ntitle: Evergreen garden\nupdated_at: 2099-01-03\n---\n\ntended, never posted\n",
+        "---\npublished: true\ntitle: Evergreen garden\nupdated_at: 2099-01-03\n---\n\ntended, never posted\n",
     ),
     (
         "tended-post",
-        "---\ntitle: Tended post\ncreated_at: 2020-01-01\nupdated_at: 2099-01-04T09:30:00Z\n---\n\nold, freshly updated\n",
+        "---\npublished: true\ntitle: Tended post\ncreated_at: 2020-01-01\nupdated_at: 2099-01-04T09:30:00Z\n---\n\nold, freshly updated\n",
     ),
-    ("new-post", "---\ntitle: New post\ncreated_at: 2099-01-02\n---\n\nnew\n"),
+    ("new-post", "---\npublished: true\ntitle: New post\ncreated_at: 2099-01-02\n---\n\nnew\n"),
     (
         "evergreen-later",
-        "---\ntitle: Evergreen later\nupdated_at: 2099-02-01\n---\n\nnot out until February\n",
+        "---\npublished: true\ntitle: Evergreen later\nupdated_at: 2099-02-01\n---\n\nnot out until February\n",
     ),
     // The same UTC day as evergreen-garden, earlier and later than its noon.
     (
         "evergreen-morning",
-        "---\ntitle: Evergreen morning\nupdated_at: 2099-01-03T08:00:00Z\n---\n\nearly\n",
+        "---\npublished: true\ntitle: Evergreen morning\nupdated_at: 2099-01-03T08:00:00Z\n---\n\nearly\n",
     ),
     (
         "evergreen-night",
-        "---\ntitle: Evergreen night\nupdated_at: 2099-01-03T22:00:00+00:00\n---\n\nlate\n",
+        "---\npublished: true\ntitle: Evergreen night\nupdated_at: 2099-01-03T22:00:00+00:00\n---\n\nlate\n",
     ),
     // Saved at 8:27 PM Pacific on the day it was published: already the
     // next day in UTC, but not an update.
     (
         "evening-post",
-        "---\ntitle: Evening post\ncreated_at: 2099-01-01\nupdated_at: 2099-01-02T04:27:28Z\n---\n\nsame evening\n",
+        "---\npublished: true\ntitle: Evening post\ncreated_at: 2099-01-01\nupdated_at: 2099-01-02T04:27:28Z\n---\n\nsame evening\n",
     ),
     // Last saved while it was still being written.
     (
         "drafted-ahead",
-        "---\ntitle: Drafted ahead\ncreated_at: 2098-12-31\nupdated_at: 2098-12-25T10:00:00Z\n---\n\nscheduled\n",
+        "---\npublished: true\ntitle: Drafted ahead\ncreated_at: 2098-12-31\nupdated_at: 2098-12-25T10:00:00Z\n---\n\nscheduled\n",
     ),
     // Saved at the first moment its publish day is over everywhere.
     (
         "next-day-post",
-        "---\ntitle: Next day post\ncreated_at: 2098-12-28\nupdated_at: 2098-12-29T12:00:00Z\n---\n\nreworked\n",
+        "---\npublished: true\ntitle: Next day post\ncreated_at: 2098-12-28\nupdated_at: 2098-12-29T12:00:00Z\n---\n\nreworked\n",
     ),
 ];
 
@@ -255,7 +255,7 @@ fn build_error(label: &str, front_matter: &str) -> String {
     let vault = vault_copy(label);
     std::fs::write(
         vault.join("notes/probe.md"),
-        format!("---\ntitle: Probe\ncreated_at: 2020-01-01\n{front_matter}\n---\n\ntext\n"),
+        format!("---\npublished: true\ntitle: Probe\ncreated_at: 2020-01-01\n{front_matter}\n---\n\ntext\n"),
     )
     .unwrap();
     build(&vault, &temp_dir(&format!("{label}-out")), &["--today", TODAY]).expect_err("the build should fail")
@@ -275,7 +275,7 @@ fn the_old_date_field_says_its_new_name() {
     let vault = vault_copy("old-date");
     std::fs::write(
         vault.join("notes/probe.md"),
-        "---\ntitle: Probe\ndate: 2020-01-01\n---\n\ntext\n",
+        "---\npublished: true\ntitle: Probe\ndate: 2020-01-01\n---\n\ntext\n",
     )
     .unwrap();
     let err = build(&vault, &temp_dir("old-date-out"), &["--today", TODAY]).expect_err("the build should fail");
@@ -315,7 +315,11 @@ fn evergreen_note_waits_for_its_updated_at_day() {
 #[test]
 fn note_with_neither_created_at_nor_updated_at_fails_the_build() {
     let vault = vault_copy("undated");
-    std::fs::write(vault.join("notes/undated.md"), "---\ntitle: Undated\n---\n\nwhen?\n").unwrap();
+    std::fs::write(
+        vault.join("notes/undated.md"),
+        "---\npublished: true\ntitle: Undated\n---\n\nwhen?\n",
+    )
+    .unwrap();
     let err = build(&vault, &temp_dir("undated-out"), &[]).expect_err("a note needs a date");
     assert!(err.contains("notes/undated.md") && err.contains("evergreen"), "{err}");
 }

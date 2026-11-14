@@ -1,5 +1,6 @@
 ---
 title: risk
+published: true
 created_at: 2020-09-30
 aliases:
   - /risk/

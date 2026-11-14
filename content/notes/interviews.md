@@ -1,5 +1,6 @@
 ---
 title: interviews
+published: true
 created_at: 2018-06-07
 aliases:
   - /interviews/

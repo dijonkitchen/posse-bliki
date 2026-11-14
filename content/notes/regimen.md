@@ -1,5 +1,6 @@
 ---
 title: regimen
+published: true
 created_at: 2023-04-11
 aliases:
   - /regimen/

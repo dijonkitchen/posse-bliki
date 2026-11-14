@@ -1,5 +1,6 @@
 ---
 title: life
+published: true
 created_at: 2020-05-29
 aliases:
   - /life/

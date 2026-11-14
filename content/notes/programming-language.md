@@ -1,5 +1,6 @@
 ---
 title: programming languages
+published: true
 created_at: 2020-04-07
 aliases:
   - /programming-language/

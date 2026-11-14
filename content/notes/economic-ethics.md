@@ -1,5 +1,6 @@
 ---
 title: economic ethics
+published: true
 created_at: 2018-09-15
 aliases:
   - /economic-ethics/

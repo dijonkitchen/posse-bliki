@@ -1,5 +1,6 @@
 ---
 title: productivity
+published: true
 created_at: 2016-08-18
 aliases:
   - /productivity/

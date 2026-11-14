@@ -1,5 +1,6 @@
 ---
 title: dependencies
+published: true
 created_at: 2017-10-29
 aliases:
   - /dependencies/

@@ -1,5 +1,6 @@
 ---
 title: vision
+published: true
 created_at: 2020-03-15
 aliases:
   - /vision/

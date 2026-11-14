@@ -1,5 +1,6 @@
 ---
 title: architecture
+published: true
 created_at: 2020-07-26
 aliases:
   - /architecture/

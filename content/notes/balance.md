@@ -1,5 +1,6 @@
 ---
 title: "Balance"
+published: true
 created_at: 2026-02-12
 aliases:
   - /p/balance/

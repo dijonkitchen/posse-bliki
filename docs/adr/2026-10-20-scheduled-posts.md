@@ -1,7 +1,7 @@
 # 2026-10-20 — Future-dated posts go live on their date
 
 - Date: 2026-10-20
-- Status: Accepted (JC chose "Yes, as proposed", 2026-10-20); the `date` field is now `created_at`, which may carry a UTC time that holds a post back to that moment, by [2026-11-13-created-at](2026-11-13-created-at.md)
+- Status: Accepted (JC chose "Yes, as proposed", 2026-10-20); the `date` field is now `created_at`, which may carry a UTC time that holds a post back to that moment, by [2026-11-13-created-at](2026-11-13-created-at.md); a note is now held back by an unticked `published` rather than `draft: true`, by [2026-11-14-published-checkbox](2026-11-14-published-checkbox.md)
 - Raised by: JC, who asked how posts get scheduled and whether the site
   could publish only items dated in the past.
 

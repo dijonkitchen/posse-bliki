@@ -1,5 +1,6 @@
 ---
 title: security
+published: true
 created_at: 2015-10-05
 aliases:
   - /security/

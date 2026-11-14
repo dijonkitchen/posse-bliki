@@ -1,5 +1,6 @@
 ---
 title: "Governance"
+published: true
 created_at: 2024-12-21
 summary: "Parental leadership at scale"
 aliases:

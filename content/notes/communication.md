@@ -1,5 +1,6 @@
 ---
 title: communication
+published: true
 created_at: 2019-11-08
 aliases:
   - /communication/
