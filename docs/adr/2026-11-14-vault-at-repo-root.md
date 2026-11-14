@@ -52,7 +52,8 @@ That had three side effects:
   - `userIgnoreFilters` for `build/`, `docs/`, `scripts/`, `spec/`, `target/` and `tests/`,
     so Obsidian's search, graph and link suggestions show only notes.
 - `drafts/` sits outside `content/`, so the build never reads it.
-  A note is published by giving it a `title` and a `date` (or `updated`)
+  A note is published by giving it the front matter a published note needs
+  (a `title` and its dates, per `spec/content-schema.md`)
   and moving it into `content/notes/`.
 
 ## Consequences

@@ -36,8 +36,8 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 2. Write a new note in `drafts/`. The build never reads it,
    so an unfinished note can't break the deploy.
    It's still public on GitHub, like the rest of the repo.
-3. To publish, give it a `title` and a `date`
-   (or `updated`, for an evergreen note),
+3. To publish, give it the front matter a published note needs
+   (a `title` and its dates; see [`spec/content-schema.md`](spec/content-schema.md)),
    then move it into `content/notes/`.
    Obsidian rewrites its links as it moves.
    A published note can't link to a draft: the build fails on that link.
