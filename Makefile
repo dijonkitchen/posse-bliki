@@ -5,7 +5,7 @@ PORT ?= 8080
 OUT  ?= public
 # URL the site is served from; empty keeps the config base_url
 BASE_URL ?=
-# publish cutoff date (YYYY-MM-DD) to preview scheduled posts; empty is today in UTC
+# publish cutoff (YYYY-MM-DD, or a UTC datetime ending in Z) to preview scheduled posts; empty is now
 TODAY ?=
 # jf2 file of received webmentions to show on posts; empty shows none
 WEBMENTIONS ?=

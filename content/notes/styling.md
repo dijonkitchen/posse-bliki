@@ -1,6 +1,6 @@
 ---
 title: styling
-date: 2015-09-28
+created_at: 2015-09-28
 aliases:
   - /styling/
 ---

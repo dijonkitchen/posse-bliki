@@ -1,6 +1,6 @@
 ---
 title: risk
-date: 2020-09-30
+created_at: 2020-09-30
 aliases:
   - /risk/
   - /p/risk/

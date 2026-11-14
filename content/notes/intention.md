@@ -1,6 +1,6 @@
 ---
 title: "intention"
-date: 2026-04-16
+created_at: 2026-04-16
 aliases:
   - /p/intention/
 ---

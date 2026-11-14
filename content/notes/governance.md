@@ -1,6 +1,6 @@
 ---
 title: "Governance"
-date: 2024-12-21
+created_at: 2024-12-21
 summary: "Parental leadership at scale"
 aliases:
   - /p/governance-e38/

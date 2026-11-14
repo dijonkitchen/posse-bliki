@@ -1,6 +1,6 @@
 ---
 title: "Distance"
-date: 2026-04-08
+created_at: 2026-04-08
 aliases:
   - /p/distance/
 ---

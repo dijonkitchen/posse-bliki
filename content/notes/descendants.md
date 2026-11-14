@@ -1,6 +1,6 @@
 ---
 title: descendants
-date: 2020-08-25
+created_at: 2020-08-25
 aliases:
   - /descendants/
   - /p/descendants/

@@ -65,7 +65,7 @@
     },
     "yaml-timestamp": {
       "enabled": true,
-      "date-created": false,
+      "date-created": true,
       "date-created-key": "created_at",
       "date-created-source-of-truth": "frontmatter",
       "date-modified": true,

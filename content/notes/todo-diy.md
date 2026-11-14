@@ -1,6 +1,6 @@
 ---
 title: "TODO: DIY"
-date: 2026-03-11
+created_at: 2026-03-11
 aliases:
   - /p/todo-diy/
 ---

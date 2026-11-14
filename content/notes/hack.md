@@ -1,6 +1,6 @@
 ---
 title: hack
-date: 2015-05-26
+created_at: 2015-05-26
 aliases:
   - /hack/
 ---

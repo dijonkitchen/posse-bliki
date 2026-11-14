@@ -1,6 +1,6 @@
 ---
 title: "raw"
-date: 2026-06-04
+created_at: 2026-06-04
 aliases:
   - /p/raw/
 ---

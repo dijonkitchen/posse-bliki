@@ -1,6 +1,7 @@
-//! The vault's committed Obsidian settings stamp `updated_at` in the form
-//! the build reads, and only in notes (spec/content-schema.md,
-//! ADR 2026-11-12-obsidian-stamps-updated-at). The vault is the repo root,
+//! The vault's committed Obsidian settings stamp `created_at` and
+//! `updated_at` in the form the build reads, and only in notes
+//! (spec/content-schema.md, ADRs 2026-11-12-obsidian-stamps-updated-at and
+//! 2026-11-13-created-at). The vault is the repo root,
 //! so its settings are the root `.obsidian/`.
 
 use posse_bliki_build::date::Stamp;
@@ -37,16 +38,21 @@ fn linter_is_turned_on_in_the_vault() {
 }
 
 #[test]
-fn linter_stamps_updated_at_in_utc() {
+fn linter_stamps_both_dates_in_utc() {
     let data = linter();
     let rule = timestamp_rule(&data);
     assert!(is(rule, "enabled", "true"), "the YAML Timestamp rule is off");
     assert!(is(rule, "date-modified", "true"), "the modified date is off");
     assert_eq!(rule.str_at("date-modified-key"), Some("updated_at"));
     assert!(is(rule, "convert-to-utc", "true"), "stamps would be in local time");
-    assert!(
-        is(rule, "date-created", "false"),
-        "a created date would be a field the build doesn't know"
+    // Every note gets a created_at once, from its file's creation time,
+    // and the value in the note stands after that (ADR 2026-11-13-created-at).
+    assert!(is(rule, "date-created", "true"), "the created date is off");
+    assert_eq!(rule.str_at("date-created-key"), Some("created_at"));
+    assert_eq!(
+        rule.str_at("date-created-source-of-truth"),
+        Some("frontmatter"),
+        "Linter would overwrite created_at with the file's time on each device"
     );
     // What the format writes for one moment is something the build reads.
     let format = rule.str_at("format").expect("no format");
