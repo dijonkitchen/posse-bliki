@@ -13,7 +13,7 @@ The architecture is **spec + harness + replaceable build** — see
 ## Layout
 
 ```
-content/         Obsidian vault — your notes
+content/         Your notes: each is published once its `published` box is ticked
 spec/            Outcome contracts (what "correct" means)
 tests/           Automated harness enforcing the specs
 build/           Build implementation — Rust, std only (replaceable)
@@ -23,10 +23,15 @@ AGENTS.md        Operating contract for any agent/human editing this repo
 
 ## Daily workflow
 
-1. Open the repo as an Obsidian vault, at its root,
-   so Obsidian reads the vault's settings in `.obsidian/`.
-   Keep wikilinks off and new links as relative paths
-   (*Settings → Files and links*).
+1. Open the repo as an Obsidian vault, at its root, on laptop and phone
+   (ADR 2026-11-14-vault-at-repo-root).
+   The Git plugin commits and pushes every change to `main`,
+   and every push deploys.
+   The vault's `.obsidian/app.json` turns off wikilinks,
+   makes new links relative paths,
+   puts new notes in `content/notes/`,
+   and hides the code, specs and ADRs from search and the graph
+   (*Settings → Files and links*); keep it that way.
 2. The vault carries the Linter plugin, its code and its settings,
    so there is nothing to install;
    if Obsidian asks, turn on community plugins (*Settings → Community plugins*).
@@ -34,12 +39,20 @@ AGENTS.md        Operating contract for any agent/human editing this repo
    Linter stamps `updated_at` with the current UTC time,
    and gives a note with no `created_at` the time its file was made
    (ADRs 2026-11-12-obsidian-stamps-updated-at and 2026-11-13-created-at).
-   It stamps only notes, in `content/` and `drafts/`,
+   It stamps only notes, in `content/`,
    and leaves the README, specs and ADRs alone.
    Don't run its "Lint all files" command, which would stamp every note.
-3. Write notes. Link them as `[text](other-note.md)` (Obsidian does this for
+3. Write a new note; it starts in `content/notes/`.
+   Until its `published` property is ticked, the build skips it,
+   so an unfinished note can't break the deploy
+   (ADR 2026-11-14-published-checkbox).
+   It's still public on GitHub, like the rest of the repo.
+4. To publish, give it the front matter a published note needs
+   (a `title` and its dates; see [`spec/content-schema.md`](spec/content-schema.md)),
+   then add the `published` property and tick it.
+   A published note can't link to an unpublished one: the build fails on that link.
+5. Link notes as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`).
-4. `git commit && git push`. CI runs the harness and deploys.
 
 Front matter handles the rest:
 `published: true` puts a note on the site (Obsidian shows it as a checkbox),

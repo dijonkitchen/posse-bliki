@@ -1,7 +1,7 @@
 # 2026-11-12 — Obsidian stamps `updated_at` as you edit
 
 - Date: 2026-11-12
-- Status: Accepted; Linter stamps `created_at` too, by [2026-11-13-created-at](2026-11-13-created-at.md)
+- Status: Accepted; Linter stamps `created_at` too, by [2026-11-13-created-at](2026-11-13-created-at.md); there is no `drafts/` folder, so Linter stamps only `content/`, where new notes now start, by [2026-11-14-vault-at-repo-root](2026-11-14-vault-at-repo-root.md)
 - Decided by: JC ("be sure to setup those community plugins if needed"),
   after asking "Can't obsidian auto update an updated_at property on save?"
   and Claude recommending Linter over Update time on edit.

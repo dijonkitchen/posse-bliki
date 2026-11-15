@@ -1,3 +1,15 @@
 {
-  "useMarkdownLinks": true
+  "useMarkdownLinks": true,
+  "newLinkFormat": "relative",
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "content/notes",
+  "userIgnoreFilters": [
+    "build/",
+    "docs/",
+    "scripts/",
+    "spec/",
+    "target/",
+    "tests/"
+  ]
 }

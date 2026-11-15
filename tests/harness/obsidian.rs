@@ -84,7 +84,7 @@ fn linter_stamps_only_notes() {
         .map(|f| f.as_arr().iter().filter_map(|p| p.str_at("match")).collect())
         .unwrap_or_default();
     assert!(
-        ignored.contains(&"^(?!(content|drafts)/)"),
-        "Linter would stamp README.md, the specs and the ADRs, or skip drafts: filesToIgnore is {ignored:?}"
+        ignored.contains(&"^(?!content/)"),
+        "Linter would stamp README.md, the specs and the ADRs, or skip notes: filesToIgnore is {ignored:?}"
     );
 }
