@@ -1,5 +1,6 @@
 ---
 title: biology
+published: true
 created_at: 2019-09-30
 aliases:
   - /biology/

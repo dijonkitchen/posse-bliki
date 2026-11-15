@@ -1,5 +1,6 @@
 ---
 title: blockchain
+published: true
 created_at: 2021-04-28
 aliases:
   - /blockchain/

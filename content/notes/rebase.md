@@ -1,5 +1,6 @@
 ---
 title: rebase
+published: true
 created_at: 2018-08-31
 aliases:
   - /rebase/

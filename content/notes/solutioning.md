@@ -1,5 +1,6 @@
 ---
 title: solutioning
+published: true
 created_at: 2019-06-12
 aliases:
   - /solutioning/

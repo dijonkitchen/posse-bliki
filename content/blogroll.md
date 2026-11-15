@@ -1,5 +1,6 @@
 ---
 title: Blogroll
+published: true
 summary: Sites I read and keep coming back to, with their feeds and all of them as one OPML file for your feed reader, plus places to find more of the indie web.
 ---
 

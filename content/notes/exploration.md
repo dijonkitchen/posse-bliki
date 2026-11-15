@@ -1,5 +1,6 @@
 ---
 title: exploration
+published: true
 created_at: 2020-05-09
 aliases:
   - /exploration/

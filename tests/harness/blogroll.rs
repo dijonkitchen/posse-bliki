@@ -134,7 +134,7 @@ fn an_item_without_a_site_link_fails_the_build() {
     let vault = vault_copy("bad-blogroll");
     fs::write(
         vault.join("blogroll.md"),
-        "---\ntitle: Blogroll\n---\n\n- [A](https://a.example/)\n- just a name\n",
+        "---\npublished: true\ntitle: Blogroll\n---\n\n- [A](https://a.example/)\n- just a name\n",
     )
     .unwrap();
     let err = build(&vault, &temp_dir("bad-blogroll-out"), &[]).expect_err("build should fail");

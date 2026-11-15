@@ -1,5 +1,6 @@
 ---
 title: "raw"
+published: true
 created_at: 2026-06-04
 aliases:
   - /p/raw/

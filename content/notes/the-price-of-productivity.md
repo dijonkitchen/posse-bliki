@@ -1,5 +1,6 @@
 ---
 title: "The Price of Productivity"
+published: true
 created_at: 2024-12-06
 summary: "Technology's extraction of value"
 aliases:

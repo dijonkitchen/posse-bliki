@@ -323,10 +323,6 @@ impl Note {
         }
     }
 
-    fn draft(&self) -> bool {
-        frontmatter::get(&self.fm, "draft").is_some_and(Value::truthy)
-    }
-
     fn post_date(&self) -> Result<Stamp, String> {
         self.created_at.ok_or_else(|| {
             format!(
@@ -455,6 +451,20 @@ fn load_notes(content: &Path) -> Result<Vec<Note>, String> {
             Err(LoadError::NotMapping) => return Err(format!("{}: front-matter is not a YAML mapping", rel)),
             Err(LoadError::Yaml(m)) => return Err(format!("{}: {}", rel, m)),
         };
+        // Only a file marked `published: true` is built, and only it is
+        // checked, so a note still being written can't break the deploy
+        // (ADR 2026-11-14-published-checkbox).
+        match frontmatter::get(&fm, "published") {
+            Some(Value::Bool(true)) => {}
+            None | Some(Value::Bool(false)) => continue,
+            Some(v) => return Err(format!("{}: `published` must be true or false, not {}", rel, v.repr())),
+        }
+        if frontmatter::get(&fm, "draft").is_some() {
+            return Err(format!(
+                "{}: `draft` is gone; a note is on the site only while `published` is true",
+                rel
+            ));
+        }
         // Said before the schema check, whose own words for these are an
         // unknown field and a pattern (ADRs 2026-11-12-updated-at-utc-datetimes
         // and 2026-11-13-created-at).
@@ -1234,7 +1244,7 @@ fn render_offline(site: &Config, links: FooterLinks) -> String {
 pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), String> {
     let mut notes: Vec<Note> = load_notes(content)?
         .into_iter()
-        .filter(|n| !n.draft() && n.goes_live().is_none_or(|at| at.starts() <= site.now))
+        .filter(|n| n.goes_live().is_none_or(|at| at.starts() <= site.now))
         .collect();
 
     // unique slugs

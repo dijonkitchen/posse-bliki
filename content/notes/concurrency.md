@@ -1,5 +1,6 @@
 ---
 title: concurrency
+published: true
 created_at: 2015-11-01
 aliases:
   - /concurrency/

@@ -1,5 +1,6 @@
 ---
 title: Style garden
+published: true
 summary: One page to try every style in the picker on, after the CSS Zen Garden. Each style is one stylesheet you can read and remix.
 ---
 

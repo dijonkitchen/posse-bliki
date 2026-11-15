@@ -1,5 +1,6 @@
-//! Every `content/**/*.md` front-matter validates against
-//! spec/content-schema.json (spec/content-schema.md).
+//! Every published `content/**/*.md` front-matter validates against
+//! spec/content-schema.json (spec/content-schema.md). The build skips the
+//! rest (ADR 2026-11-14-published-checkbox).
 //!
 //! The YAML is read with the build's own parser (Rust has no YAML in std);
 //! the schema check is independent of the build's `frontmatter::validate`.
@@ -22,13 +23,21 @@ fn front_matter(text: &str) -> Vec<(String, Value)> {
     }
 }
 
+fn published(fm: &[(String, Value)]) -> bool {
+    fm.iter().any(|(k, v)| k == "published" && *v == Value::Bool(true))
+}
+
 #[test]
 fn frontmatter_validates() {
     let schema = json::parse(&read(&repo().join("spec/content-schema.json"))).expect("schema is JSON");
     let content = content_dir();
     let mut failures = Vec::new();
     for md in files_with_ext(&content, "md") {
-        let fm = Value::Map(front_matter(&read(&md)));
+        let fm = front_matter(&read(&md));
+        if !published(&fm) {
+            continue;
+        }
+        let fm = Value::Map(fm);
         for e in schema::validate(&schema, &fm) {
             failures.push(format!("{}: {e}", rel(&md, &content)));
         }
@@ -43,7 +52,7 @@ fn notes_have_created_at_or_updated_at() {
     let content = content_dir();
     for md in files_with_ext(&content.join("notes"), "md") {
         let fm = front_matter(&read(&md));
-        if frontmatter::get(&fm, "draft").is_some_and(Value::truthy) {
+        if !published(&fm) {
             continue;
         }
         assert!(

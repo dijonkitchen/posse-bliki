@@ -1,5 +1,6 @@
 ---
 title: Information and disinformation
+published: true
 created_at: 2020-01-23
 aliases:
   - /information/

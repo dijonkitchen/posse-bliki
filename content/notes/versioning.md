@@ -1,5 +1,6 @@
 ---
 title: versioning
+published: true
 created_at: 2015-09-10
 aliases:
   - /versioning/

@@ -1,5 +1,6 @@
 ---
 title: me-random
+published: true
 created_at: 2013-12-08
 aliases:
   - /me-random/

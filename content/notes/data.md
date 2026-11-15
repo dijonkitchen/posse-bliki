@@ -1,5 +1,6 @@
 ---
 title: data
+published: true
 created_at: 2015-10-04
 aliases:
   - /data/

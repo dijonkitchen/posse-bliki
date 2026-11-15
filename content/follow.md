@@ -1,5 +1,6 @@
 ---
 title: Follow
+published: true
 summary: The best way to follow this bliki, and the sites I read, is a feed reader such as FeedFlow. Open web standards, no algorithm, no tracking.
 aliases:
   - /subscribe/

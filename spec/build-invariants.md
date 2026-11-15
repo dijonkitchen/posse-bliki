@@ -63,7 +63,7 @@ The build exits non-zero on:
 - Two notes with the same filename stem (wikilink resolution would be ambiguous).
 - An unresolved wikilink.
 - A relative `.md` link to a file that isn't a published note.
-- A wikilink to a draft.
+- A wikilink to an unpublished note.
 - A spec-violating output (caught by post-build harness).
 
 There is no "warn and continue" path. CI is the only place builds happen

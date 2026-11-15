@@ -1,5 +1,6 @@
 ---
 title: "intention"
+published: true
 created_at: 2026-04-16
 aliases:
   - /p/intention/

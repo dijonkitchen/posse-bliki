@@ -1,5 +1,6 @@
 ---
 title: descendants
+published: true
 created_at: 2020-08-25
 aliases:
   - /descendants/

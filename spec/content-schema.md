@@ -1,6 +1,8 @@
 # Content schema
 
 Every file in `content/` is markdown with YAML front-matter.
+Only a file with `published: true` is on the site;
+the build skips every other one (see [Publishing](#publishing)).
 
 The machine-readable schema lives at [`content-schema.json`](content-schema.json)
 (JSON Schema, draft 2020-12). Tests validate every note against it.
@@ -29,17 +31,17 @@ without it), shown under its title as "Updated <date>", since a now page
 is only as good as its date (ADR 2026-11-01-now-page).
 
 `TODO(JC)` marks a placeholder still to fill in. No published page may
-contain one; keep the note `draft: true` until it's filled in.
+contain one; leave the note's `published` unticked until it's filled in.
 
 ## Front-matter fields
 
 | Field | Type | Required | Notes |
 |---|---|---|---|
+| `published` | bool | yes, to be on the site | Only `true` puts the file on the site. See [Publishing](#publishing). |
 | `title` | string | yes | Maps to `<title>` and `p-name`. |
 | `created_at` | UTC datetime, or a day | yes for posts | When the note was made. Maps to `dt-published`. Evergreen notes omit it; on a page the build ignores it. See [`created_at`](#created_at). |
 | `updated_at` | UTC datetime, or a day | yes for evergreen notes | Maps to `dt-updated`. Moves the note up Home and Notes. See [`updated_at`](#updated_at). |
 | `summary` | string | no | Maps to `p-summary` and `<meta name=description>` (else an excerpt of the text is used). |
-| `draft` | bool | no | If `true`, excluded from build entirely. |
 | `aliases` | string[] | no | Old slugs that should redirect to this page. |
 | `syndication` | url[] | no | URLs of POSSE copies. Maps to `u-syndication`. |
 
@@ -47,6 +49,25 @@ Unknown fields are an error — fail loudly, fix in the schema if you want a new
 There is no `tags` field: notes relate through links, not tags
 (ADR 2026-11-06-drop-tags).
 Remove it from a note promoted from Obsidian.
+
+## Publishing
+
+`published: true` puts a file on the site,
+and Obsidian shows it as a checkbox in the note's properties
+(ADR 2026-11-14-published-checkbox).
+The build skips every file without it before checking anything else:
+no page, no listing, no feed item, no sitemap entry, no alias, no webmention,
+and no check of its other fields or its links.
+So a new note in `content/notes/` stays off the site,
+however unfinished, until its box is ticked;
+then it must pass every check below.
+Front matter that isn't YAML at all still fails the build,
+since then the build can't tell whether the file is published.
+
+- `published` must be `true` or `false`.
+  A quoted `"true"` fails the build.
+- The field used to be `draft`, which did the opposite.
+  The build stops on `draft` in a published file and says to drop it.
 
 ## Evergreen notes and the order of lists
 
@@ -137,7 +158,7 @@ The feeds stay in `created_at` order.
 ## Scheduled posts
 
 A note whose `created_at` hasn't come yet is left out of the
-build exactly like a draft: no page, no listing, no feed item, no sitemap entry, no alias, no webmention.
+build exactly like an unpublished one: no page, no listing, no feed item, no sitemap entry, no alias, no webmention.
 "Yet" is the build's UTC clock, or `--today`.
 A bare day comes at the start of that day (UTC),
 and a datetime at that moment.
@@ -146,7 +167,7 @@ the deploy workflow rebuilds daily at 06:17 UTC,
 so a post goes live at the first push or daily build after its time,
 with no push needed (ADR 2026-10-20-scheduled-posts).
 An evergreen note is held back the same way by its `updated_at`.
-A link to a scheduled note from a published one is a broken link, as for a draft.
+A link to a scheduled note from a live one is a broken link, as for an unpublished note.
 
 `--today` takes a day, which stands for the end of that day,
 so everything due that day is in,
@@ -182,7 +203,7 @@ works on GitHub, in Obsidian and on the site (ADR 2026-10-16-relative-markdown-l
 
 The build rewrites each relative `.md` href to the linked note's URL, with a
 `#heading` slugged the same way wikilink anchors are. A link to a file that isn't a published
-note (missing, a draft, or outside `content/`) is a build error — no silent
+note (missing, unpublished, or outside `content/`) is a build error — no silent
 broken links.
 
 Content in this repo uses no wikilinks and no site-URL links (`/other-note`)

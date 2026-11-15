@@ -1,5 +1,6 @@
 ---
 title: "Distance"
+published: true
 created_at: 2026-04-08
 aliases:
   - /p/distance/

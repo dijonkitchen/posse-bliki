@@ -427,10 +427,10 @@ fn embeds_load_lazily() {
 fn missing_self_hosted_image_is_a_build_error() {
     let content = temp_dir("missing-image");
     fs::create_dir_all(content.join("notes")).unwrap();
-    fs::write(content.join("index.md"), "---\ntitle: Home\n---\nHi\n").unwrap();
+    fs::write(content.join("index.md"), "---\npublished: true\ntitle: Home\n---\nHi\n").unwrap();
     fs::write(
         content.join("notes/a.md"),
-        "---\ntitle: A\ncreated_at: 2026-01-01\n---\n![x](/images/nope.png)\n",
+        "---\npublished: true\ntitle: A\ncreated_at: 2026-01-01\n---\n![x](/images/nope.png)\n",
     )
     .unwrap();
     let err = build(&content, &temp_dir("missing-image-out"), &[]).expect_err("build should fail");

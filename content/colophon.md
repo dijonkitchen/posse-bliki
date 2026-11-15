@@ -1,5 +1,6 @@
 ---
 title: Colophon
+published: true
 summary: How this site is built and why.
 aliases:
   - /notes/how-this-bliki-works/

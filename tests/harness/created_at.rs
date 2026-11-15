@@ -13,19 +13,19 @@ use crate::support::{build, html, read, temp_dir, vault_copy};
 const NOTES: [(&str, &str); 4] = [
     (
         "timed-post",
-        "---\ntitle: Timed post\ncreated_at: 2099-01-02T08:15:00Z\n---\n\nmorning\n",
+        "---\npublished: true\ntitle: Timed post\ncreated_at: 2099-01-02T08:15:00Z\n---\n\nmorning\n",
     ),
     (
         "timed-later",
-        "---\ntitle: Timed later\ncreated_at: 2099-01-02T20:00:00+00:00\n---\n\nevening\n",
+        "---\npublished: true\ntitle: Timed later\ncreated_at: 2099-01-02T20:00:00+00:00\n---\n\nevening\n",
     ),
     (
         "timed-quick-fix",
-        "---\ntitle: Timed quick fix\ncreated_at: 2099-01-02T08:15:00Z\nupdated_at: 2099-01-03T08:14:59Z\n---\n\nsaved within the day\n",
+        "---\npublished: true\ntitle: Timed quick fix\ncreated_at: 2099-01-02T08:15:00Z\nupdated_at: 2099-01-03T08:14:59Z\n---\n\nsaved within the day\n",
     ),
     (
         "timed-reworked",
-        "---\ntitle: Timed reworked\ncreated_at: 2099-01-01T08:15:00Z\nupdated_at: 2099-01-02T08:15:00Z\n---\n\nreworked a day later\n",
+        "---\npublished: true\ntitle: Timed reworked\ncreated_at: 2099-01-01T08:15:00Z\nupdated_at: 2099-01-02T08:15:00Z\n---\n\nreworked a day later\n",
     ),
 ];
 
@@ -137,7 +137,7 @@ fn created_at_must_be_a_day_or_a_utc_datetime() {
         let vault = vault_copy(&format!("created-at-bad-{label}"));
         std::fs::write(
             vault.join("notes/probe.md"),
-            format!("---\ntitle: Probe\ncreated_at: {value}\n---\n\ntext\n"),
+            format!("---\npublished: true\ntitle: Probe\ncreated_at: {value}\n---\n\ntext\n"),
         )
         .unwrap();
         let err =

@@ -1,8 +1,8 @@
 ---
 title: Now
+published: true
 summary: What I'm focused on now, after Derek Sivers's now pages.
 updated_at: 2026-11-13
-draft: false
 ---
 
 This is what I'm focused on now.

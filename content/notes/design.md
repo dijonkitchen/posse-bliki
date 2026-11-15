@@ -1,5 +1,6 @@
 ---
 title: design
+published: true
 created_at: 2020-05-11
 aliases:
   - /design/

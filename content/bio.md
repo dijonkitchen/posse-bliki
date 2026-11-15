@@ -1,5 +1,6 @@
 ---
 title: Bio
+published: true
 summary: JC's work history as a software engineer, and how to get in touch about work.
 aliases:
   - /resume/

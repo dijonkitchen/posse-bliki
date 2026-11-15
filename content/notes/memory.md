@@ -1,5 +1,6 @@
 ---
 title: "memory"
+published: true
 created_at: 2026-05-07
 aliases:
   - /p/memory/
