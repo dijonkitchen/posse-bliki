@@ -28,6 +28,7 @@ URLs are forever. Changes here require a redirect from every old URL — see
 | `/robots.txt` | Generated |
 | `/.well-known/security.txt` | Generated, RFC 9116: `Contact`, `Expires` 180 days after the build date, `Canonical` (ADR 2026-10-28-security-txt) |
 | `/notes/` | Notes list page |
+| `/search/` | Search page, with `/search.js` and `/search.json` (ADR 2026-11-21-search-page) |
 | `/404.html` | 404 page |
 
 ## Aliases

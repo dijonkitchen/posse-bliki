@@ -99,8 +99,10 @@ cargo test --release --test harness design::focus   # tests whose name matches
 - No `<script>` tags in output except the style picker
   (`build/static/style-picker.js`, inline in `<head>`), which only
   remembers the picked style and starts the offline-reading worker
-  `/sw.js`; everything works with JS off (ADR 2026-10-18-style-picker,
-  ADR 2026-10-29-offline-reading). It and the house style are allowed
+  `/sw.js`, and, on `/search/` alone, `/search.js`, which searches
+  `/search.json` in the browser; everything else works with JS off
+  (ADR 2026-10-18-style-picker, ADR 2026-10-29-offline-reading,
+  ADR 2026-11-21-search-page). It and the house style are allowed
   inline by their hashes in the CSP, which the build computes
   (ADR 2026-11-11-inline-house-style-and-script).
 - No minifying or uglifying output: HTML and CSS ship readable so readers can audit and remix them (Stallman's reason; ADR 2026-10-14-mobile-first).

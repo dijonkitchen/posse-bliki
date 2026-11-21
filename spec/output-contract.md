@@ -33,7 +33,9 @@ in `tests/`.
 - All internal links resolve to a real emitted file.
 - No `<script>` except `<script data-root="/" data-styles="…">`, last in
   `<head>`, holding `build/static/style-picker.js` byte for byte but for
-  its final newline.
+  its final newline,
+  and on `/search/` alone `<script src="/search.js" defer>`
+  (see [Search](#search-search)).
   `data-styles` lists the picker's styles
   (ADR 2026-10-30-style-before-first-paint), and `data-root` is the site
   root it resolves `themes/` and `sw.js` against
@@ -90,6 +92,42 @@ In addition to the universal invariants, every post page must:
 - Contain an `h-feed` of `h-entry` items: every post and evergreen note,
   most recently tended first
   (see [content-schema.md](content-schema.md#evergreen-notes-and-the-order-of-lists)).
+
+## Search (`/search/`)
+
+Search runs in the reader's browser, on a file the build writes,
+so what they type is never sent anywhere
+(ADR 2026-11-21-search-page).
+Enforced by `tests/harness/search.rs`.
+
+- `/search/` has a `role="search"` form:
+  a labelled `type="search"` box named `q` and a button, both `disabled`.
+  Under it a `role="status"` paragraph holds a `<noscript>` note
+  that search needs JavaScript and that every note is on `/notes/`.
+  It has a canonical and a description like any page.
+- `/search.js`, `build/static/search.js` byte for byte,
+  enables the form and answers in the page.
+  Every word typed must start a word of an entry's title or text,
+  ignoring case and accents.
+  Entries whose title has every word come first,
+  then the order of `search.json`.
+  Each result links the entry
+  and shows its text around the first word found, marked with `<mark>`.
+  The words go in the address as `?q=`,
+  so a search can be shared, bookmarked or reloaded.
+- The script writes results as text nodes, never as HTML,
+  and never submits the form, so `form-action 'none'` holds.
+  It fetches only `search.json`, from beside itself,
+  the first time the reader searches.
+- `/search.json` is an array with one `{"url", "title", "text"}`
+  per note, in the order of `/notes/`,
+  then per page other than home.
+  `url` is canonical; `text` is the rendered note as plain text,
+  tags stripped, entities decoded and whitespace collapsed.
+  What isn't built (unpublished or scheduled notes) isn't in it.
+- The service worker keeps `/search/` and `/search.js` on install
+  and `search.json` once read,
+  so search works offline after the first search.
 
 ## Dates
 

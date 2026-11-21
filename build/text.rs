@@ -209,13 +209,21 @@ pub fn unescape(s: &str) -> String {
         .replace("&amp;", "&")
 }
 
+/// Rendered HTML as plain text: tags stripped, the markdown renderer's
+/// entities decoded, whitespace collapsed to single spaces.
+pub fn plain(html: &str) -> String {
+    unescape(&strip_html(html))
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 /// Plain-text excerpt of rendered HTML for `<meta name="description">`:
-/// tags stripped, the markdown renderer's entities decoded, whitespace
-/// collapsed, and cut at a word boundary to at most `max` characters
+/// its [`plain`] text cut at a word boundary to at most `max` characters
 /// (an ellipsis marks a cut).
 pub fn excerpt(html: &str, max: usize) -> String {
-    let text = unescape(&strip_html(html));
-    let words: Vec<&str> = text.split_whitespace().collect();
+    let text = plain(html);
+    let words: Vec<&str> = text.split(' ').collect();
     let mut out = String::new();
     for w in &words {
         let len = out.chars().count() + usize::from(!out.is_empty()) + w.chars().count();

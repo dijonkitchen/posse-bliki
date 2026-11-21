@@ -462,21 +462,21 @@ main { padding-block-end: var(--space-7); }
   color: var(--text-2);
 }
 
-/* --- lists of notes (h-feed) and backlinks --- */
-.h-feed ul, .backlinks ul {
+/* --- lists of notes (h-feed), backlinks and search results --- */
+.h-feed ul, .backlinks ul, .search-results {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.h-feed li, .backlinks li {
+.h-feed li, .backlinks li, .search-results li {
   max-width: none;
   margin: 0;
   padding-block: var(--space-3);
   border-bottom: 1px solid var(--border-subtle);
 }
-.h-feed li > a { font-weight: var(--weight-bold); }
-.h-feed time, .h-feed .p-summary { color: var(--text-2); }
-.h-feed li > p.p-summary { margin: var(--space-1) 0 0; }
+.h-feed li > a, .search-results a { font-weight: var(--weight-bold); }
+.h-feed time, .h-feed .p-summary, .search-results p { color: var(--text-2); }
+.h-feed li > p.p-summary, .search-results p { margin: var(--space-1) 0 0; }
 .h-feed time {
   margin-inline-start: var(--space-2);
   font-size: var(--size-sm);
@@ -533,7 +533,7 @@ main { padding-block-end: var(--space-7); }
   gap: var(--space-2);
   min-height: var(--target-min);
 }
-.style-picker select {
+.style-picker select, .search input, .search button {
   min-height: var(--target-min);
   padding-inline: var(--space-2);
   border: 1px solid var(--border-strong);
@@ -542,3 +542,16 @@ main { padding-block-end: var(--space-7); }
   color: var(--text-1);
   font: inherit;
 }
+
+/* The search page's form: the label above, the box and its button on one
+   row (ADR 2026-11-21-search-page). Disabled until search.js runs. */
+.search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  max-width: var(--measure);
+  margin-block-end: var(--space-3);
+}
+.search label { flex-basis: 100%; }
+.search input { flex: 1; min-width: 0; }
+.search :disabled { opacity: .6; }

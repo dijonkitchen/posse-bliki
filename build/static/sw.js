@@ -8,16 +8,19 @@
 const CACHE = "pages";
 
 // Kept on install: the pages in the header, so the notes index is there to
-// pick from, and what they and the offline page need to draw in the house
-// style, which each page carries inline
-// (ADR 2026-11-11-inline-house-style-and-script). Everything else, the notes
-// and the picked style included, is kept as you read it. Paths are relative
-// to this file, so they work under a sub-path.
+// pick from, with the search page's script, and what they and the offline
+// page need to draw in the house style, which each page carries inline
+// (ADR 2026-11-11-inline-house-style-and-script). Everything else, the notes,
+// the picked style and search.json included, is kept as you read it
+// (ADR 2026-11-21-search-page). Paths are relative to this file, so they
+// work under a sub-path.
 const SHELL = [
   "./",
   "notes/",
   "about/",
   "now/",
+  "search/",
+  "search.js",
   "offline.html",
   "fonts/atkinson-hyperlegible-next-latin.woff2",
   "icon.svg",

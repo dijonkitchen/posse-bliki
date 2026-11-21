@@ -127,6 +127,9 @@ const STYLE_PICKER_JS: &str = include_str!("static/style-picker.js");
 /// Keeps pages as they're read for reading offline; style-picker.js starts
 /// it (ADR 2026-10-29-offline-reading).
 const SERVICE_WORKER_JS: &str = include_str!("static/sw.js");
+/// Answers the search page in the browser from `/search.json`; the one
+/// script that isn't on every page (ADR 2026-11-21-search-page).
+const SEARCH_JS: &str = include_str!("static/search.js");
 /// Site icons, after the spork on JC's Substack (spec/performance.md):
 /// `favicon.ico` (32px) for old browsers and clients that request it
 /// unprompted, `icon.svg` for the tab (redrawn solid so it reads at 16px,
@@ -751,7 +754,7 @@ fn page(
 <script data-root=\"/\" data-styles=\"{theme_slugs}\">{script}</script>\n</head>\n<body>\n<a class=\"skip-link\" href=\"#main\">Skip to content</a>\n\
 <header class=\"site-header\">\n\
 <div class=\"site-brand\">\n{brand}\n<p class=\"site-tagline\">{tagline}</p>\n</div>\n<nav aria-label=\"Site\">\n<a href=\"/notes/\">Notes</a>\n{now}<a href=\"/about/\">About</a>\n\
-</nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
+<a href=\"/search/\">Search</a>\n</nav>\n<label class=\"style-picker\">Style\n<select id=\"style\">\n<option value=\"auto\" selected>Auto</option>\n\
 <option value=\"light\">Light</option>\n<option value=\"dark\">Dark</option>\n{theme_options}</select>\n</label>\n</header>\n<main id=\"main\">\n{content}\n</main>\n<footer class=\"site-footer\">\n<p>\n{card}{follow}\
 <a href=\"/index.xml\">RSS</a> \u{b7}\n<a href=\"/feed.json\">JSON Feed</a> \u{b7}\n{blogroll}<a href=\"/colophon/\">Colophon</a>\n\
 </p>\n{WEBRING}</footer>\n</body>\n</html>\n",
@@ -1225,6 +1228,25 @@ notes</li>\n<li>All <a href=\"/notes/\">notes</a>, most recently updated first</
     )
 }
 
+/// The search page (ADR 2026-11-21-search-page). The form starts disabled
+/// and `/search.js` enables it, so with JavaScript off it isn't a box that
+/// does nothing; it never submits, so the CSP's `form-action 'none'` stays.
+fn render_search(site: &Config, links: FooterLinks, canonical: &str) -> String {
+    let content = "\n<article>\n<h1>Search</h1>\n<form id=\"search\" class=\"search\" role=\"search\">\n\
+<label for=\"search-box\">Words to find</label>\n<input id=\"search-box\" type=\"search\" name=\"q\" disabled>\n\
+<button disabled>Search</button>\n</form>\n<p id=\"search-status\" role=\"status\">\n<noscript>Search runs in your \
+browser, so it needs JavaScript. Every note is listed on <a href=\"/notes/\">Notes</a>, where your browser's Find can \
+look through the titles.</noscript>\n</p>\n<script src=\"/search.js\" defer></script>\n</article>\n";
+    base(
+        site,
+        links,
+        &format!("Search \u{2014} {}", e(site.title)),
+        &description_meta(&format!("Search every note and page on {}.", site.title)),
+        Some(canonical),
+        content,
+    )
+}
+
 /// What the service worker shows for a page that wasn't kept, when the
 /// reader is offline (ADR 2026-10-29-offline-reading).
 fn render_offline(site: &Config, links: FooterLinks) -> String {
@@ -1391,6 +1413,28 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     write(&out.join("404.html"), &render_404(site, footer_links(&notes)))?;
     write(&out.join("offline.html"), &render_offline(site, footer_links(&notes)))?;
 
+    // Search: the page, and what it searches as plain text, every note in
+    // the order of /notes/ and then the other pages (ADR 2026-11-21-search-page).
+    write(
+        &out.join("search").join("index.html"),
+        &render_search(site, footer_links(&notes), &canonical("/search/")),
+    )?;
+    let pages = (0..notes.len()).filter(|&i| notes[i].kind == Kind::Page);
+    let entries: Vec<Json> = listed
+        .iter()
+        .copied()
+        .chain(pages)
+        .map(|i| {
+            let n = &notes[i];
+            Json::Obj(vec![
+                ("url".into(), Json::Str(canonical(&n.url))),
+                ("title".into(), json::s(n.title())),
+                ("text".into(), json::s(&text::plain(&n.content_html))),
+            ])
+        })
+        .collect();
+    write(&out.join("search.json"), &(json::dumps(&Json::Arr(entries)) + "\n"))?;
+
     // spec/feeds.md: the blogroll's sites as OPML (ADR 2026-10-25-blogroll).
     if let Some(n) = notes.iter().find(|n| n.slug == BLOGROLL && n.kind == Kind::Page) {
         let sites = blogroll::sites(&n.content_html)?;
@@ -1539,6 +1583,7 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         write(&out.join("themes").join(format!("{slug}.css")), css)?;
     }
     write(&out.join("sw.js"), SERVICE_WORKER_JS)?;
+    write(&out.join("search.js"), SEARCH_JS)?;
     for (name, bytes) in ICONS {
         write_bytes(&out.join(name), bytes)?;
     }
