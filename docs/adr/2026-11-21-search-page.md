@@ -1,10 +1,10 @@
 # 2026-11-21 — Search page that searches in the browser
 
 - Date: 2026-11-21
-- Status: Proposed
-- Decided by: not yet. JC asked "Is there a simple search that can be made",
-  and was offered this page (recommended),
-  a no-JS hand-off to DuckDuckGo, or no search for now.
+- Status: Accepted
+- Decided by: JC, asking "Is there a simple search that can be made",
+  then choosing this page (recommended)
+  over a no-JS hand-off to DuckDuckGo or no search for now.
 
 ## Context
 
