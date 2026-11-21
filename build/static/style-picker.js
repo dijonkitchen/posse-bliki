@@ -1,5 +1,5 @@
 // Loads and remembers the style picked in the header, the only script on
-// the site (ADR 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles).
+// every page (ADR 2026-10-18-style-picker, ADR 2026-10-20-zen-garden-styles).
 // Without it the picker still restyles the page you're on, through CSS
 // :has() and the stylesheets in <noscript>; it just forgets.
 // It runs in <head>, before the page is drawn: there it can mark <html>

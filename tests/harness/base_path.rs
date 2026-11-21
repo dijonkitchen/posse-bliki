@@ -74,6 +74,24 @@ fn feeds_use_base_url() {
 }
 
 #[test]
+fn search_works_under_sub_path() {
+    // The page loads its script from under the sub-path, and the script
+    // fetches search.json beside itself, whose addresses are the preview's
+    // (ADR 2026-11-21-search-page).
+    let site = sub_site();
+    assert!(read(&site.join("search/index.html")).contains(&format!("<script src=\"{PREFIX}search.js\" defer>")));
+    let index = read(&site.join("search.json"));
+    assert!(
+        index.contains(&format!("\"url\": \"{PREVIEW}/notes/")),
+        "search.json doesn't use {PREVIEW}"
+    );
+    assert!(
+        !index.contains(config_str("base_url")),
+        "search.json still uses the site's address"
+    );
+}
+
+#[test]
 fn inline_style_and_script_work_under_sub_path() {
     // The style picker's root and the house style's font URLs take the
     // sub-path, and the policy's hashes still match the blocks once the

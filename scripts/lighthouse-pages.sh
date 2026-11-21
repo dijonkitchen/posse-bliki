@@ -14,8 +14,9 @@ set -eu
 MAX_CHANGED="${MAX_CHANGED:-10}"
 
 # Home, a post with code, a post with a large photo, a post with a video
-# embed, the longest list page, and a plain page.
-FIXED="/ /notes/data/ /notes/governance/ /notes/security/ /notes/ /about/"
+# embed, the longest list page, a plain page, and the one page with a form
+# and its own script.
+FIXED="/ /notes/data/ /notes/governance/ /notes/security/ /notes/ /about/ /search/"
 
 printf '%s\n' $FIXED
 [ $# -gt 0 ] || exit 0

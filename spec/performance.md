@@ -66,8 +66,8 @@ budget, which `scripts/lighthouse.sh` checks in CI.
 
 `make lighthouse` (CI-only, like `make validate`) builds and serves the site
 and runs Lighthouse's default mobile audit on the home page, a post with
-code, a post with a large photo, a post with a video embed, `/notes/` and
-`/about/`. Each page is audited three times and each category is scored by
+code, a post with a large photo, a post with a video embed, `/notes/`,
+`/about/` and `/search/`. Each page is audited three times and each category is scored by
 the median run (ADR 2026-10-16-lighthouse-median-of-three). It fails if any
 page's median scores below. CI audits each page in its own job, all at
 once (ADR 2026-10-27-parallel-lighthouse). On a pull request it also audits
@@ -107,15 +107,18 @@ maps onto a static, script-free site:
   HTML from the server, with no client rendering.
 - **Pre-cache** remaining routes: only the shell. `/sw.js`, a service
   worker that `/style-picker.js` starts once a page has loaded, keeps the
-  pages in the header (home, notes index, now, about), the offline page,
+  pages in the header (home, notes index, now, about, search) and the
+  search page's script, the offline page,
   the body font and the tab icon on install, then each page, image and style as it is read,
   for reading offline. Online it always asks the network first, so it
   never serves a stale page or slows a first visit
   (ADR 2026-10-29-offline-reading).
-- **Lazy-load** everything else: images after the first, embeds, and the
+- **Lazy-load** everything else: images after the first, embeds, the
   style picker's styles, which load only once picked, so adding a style
   adds nothing to a page that doesn't use it
-  (ADR 2026-10-20-zen-garden-styles).
+  (ADR 2026-10-20-zen-garden-styles), and search's script and index,
+  which only the search page loads, the index only once someone searches
+  (ADR 2026-11-21-search-page).
 
 ## Outside the build
 

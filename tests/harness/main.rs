@@ -33,6 +33,7 @@ mod published;
 mod robots;
 mod rss;
 mod scheduled;
+mod search;
 mod security_txt;
 mod supply_chain;
 mod url_policy;

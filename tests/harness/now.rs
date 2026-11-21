@@ -61,16 +61,17 @@ fn nav_hrefs(html: &str) -> Vec<String> {
 }
 
 #[test]
-fn every_page_header_reads_notes_now_about() {
+fn every_page_header_reads_notes_now_about_search() {
+    // Search comes last (ADR 2026-11-21-search-page).
     let out = site();
     let wrong: Vec<String> = files_with_ext(out, "html")
         .iter()
-        .filter(|p| nav_hrefs(&read(p)) != ["/notes/", "/now/", "/about/"])
+        .filter(|p| nav_hrefs(&read(p)) != ["/notes/", "/now/", "/about/", "/search/"])
         .map(|p| rel(p, out))
         .collect();
     assert!(
         wrong.is_empty(),
-        "pages whose header nav isn't Notes, Now, About:\n{}",
+        "pages whose header nav isn't Notes, Now, About, Search:\n{}",
         wrong.join("\n")
     );
 }
@@ -96,7 +97,7 @@ fn no_now_page_means_no_now_link() {
     let out = temp_dir("no-now-out");
     build(&vault, &out, &[]).expect("build without a now page");
     let home = read(&out.join("index.html"));
-    assert_eq!(nav_hrefs(&home), ["/notes/", "/about/"]);
+    assert_eq!(nav_hrefs(&home), ["/notes/", "/about/", "/search/"]);
     assert!(!home.contains("/now/"), "links a now page that doesn't exist");
 }
 

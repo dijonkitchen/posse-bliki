@@ -46,14 +46,17 @@ fn universal_invariants() {
 
 #[test]
 fn only_the_style_picker_script() {
-    // The site must work with JS off; the one script only remembers the
-    // picked style (ADR 2026-10-18-style-picker), inline
-    // (ADR 2026-11-11-inline-house-style-and-script).
+    // The site must work with JS off; the one script on every page only
+    // remembers the picked style (ADR 2026-10-18-style-picker), inline
+    // (ADR 2026-11-11-inline-house-style-and-script). The search page adds
+    // its own, which only it loads (ADR 2026-11-21-search-page).
     let allowed = "<script data-root=\"/\" data-styles=\"";
+    let search = "<script src=\"/search.js\" defer></script>";
     for (p, text) in html_files() {
         let lower = text.to_lowercase();
         let scripts = lower.matches("<script").count();
         let picker = usize::from(text.contains(allowed));
-        assert_eq!(scripts, picker, "{}: unexpected <script>", rel(p, site()));
+        let searching = usize::from(rel(p, site()) == "search/index.html" && text.contains(search));
+        assert_eq!(scripts, picker + searching, "{}: unexpected <script>", rel(p, site()));
     }
 }
