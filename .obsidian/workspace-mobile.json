@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/notes/balance.md",
+                "file": "content/notes/communication.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "balance"
+              "title": "communication"
             }
           }
         ]
@@ -36,7 +36,7 @@
         "state": {
           "type": "file-explorer",
           "state": {
-            "sortOrder": "alphabetical",
+            "sortOrder": "byModifiedTime",
             "autoReveal": false,
             "showSearch": false,
             "searchQuery": ""
@@ -170,9 +170,13 @@
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
-      "bases:Create new base": false
+      "bases:Create new base": false,
+      "obsidian-excalidraw-plugin:New drawing": false,
+      "obsidian-git:Open Git source control": false
     }
   },
   "active": "050543290e683201",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "content/notes/balance.md"
+  ]
 }
