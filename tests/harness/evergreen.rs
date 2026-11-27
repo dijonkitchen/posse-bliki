@@ -1,7 +1,8 @@
 //! Evergreen notes and the order of lists (spec/content-schema.md,
 //! ADR 2026-11-07-evergreen-notes): a note with `updated_at` but no `created_at` is
 //! listed on home and /notes/ but stays out of the feeds, and those lists
-//! put the most recently tended note first. The feeds stay in publish order.
+//! put the most recently tended note first. The feeds follow the same order,
+//! dated by each post's last update (ADR 2026-11-27-feeds-match-home).
 //!
 //! `updated_at` is a UTC datetime or a bare day, and a post only counts as
 //! updated once its publish day is over everywhere
@@ -131,19 +132,43 @@ fn lists_put_the_most_recently_tended_note_first() {
 }
 
 #[test]
-fn feeds_stay_in_publish_order() {
+fn feeds_match_home() {
+    // The feeds carry Home's posts in Home's order, less the evergreen notes,
+    // so an old post that was just updated comes first
+    // (ADR 2026-11-27-feeds-match-home).
+    let listed: Vec<String> = entries(&built().join("notes/index.html"))
+        .iter()
+        .map(url)
+        .filter(|u| !u.starts_with("/notes/evergreen-"))
+        .collect();
     let json = posse_bliki_build::json::parse(&read(&built().join("feed.json"))).expect("feed.json");
     let items = json.get("items").expect("items").as_arr();
-    let urls: Vec<&str> = items.iter().map(|i| i.str_at("url").expect("url")).collect();
+    let path = |u: &str| u[u.find("/notes/").expect("a note URL")..].to_string();
+    let urls: Vec<String> = items.iter().map(|i| path(i.str_at("url").expect("url"))).collect();
+    assert_eq!(urls, listed, "feed.json isn't in Home's order");
+    assert_eq!(urls[0], "/notes/tended-post/");
+
+    // JSON Feed keeps when a post was published and adds when it was updated.
+    let item = |slug: &str| {
+        items
+            .iter()
+            .find(|i| i.str_at("url").is_some_and(|u| u.ends_with(&format!("/notes/{slug}/"))))
+            .unwrap_or_else(|| panic!("{slug} not in feed.json"))
+    };
+    let tended = item("tended-post");
+    assert_eq!(tended.str_at("date_published"), Some("2020-01-01T00:00:00+00:00"));
+    assert_eq!(tended.str_at("date_modified"), Some("2099-01-04T09:30:00+00:00"));
+    // A save in the 24 hours after created_at isn't an update.
+    assert_eq!(item("evening-post").str_at("date_modified"), None);
+    assert_eq!(item("new-post").str_at("date_modified"), None);
+
+    // RSS has one date per item: when the post was last tended.
+    let rss = read(&built().join("index.xml"));
+    let at = rss.find("/notes/tended-post/</link>").expect("tended-post in RSS");
+    let after = &rss[at..];
     assert!(
-        urls[0].ends_with("/notes/new-post/"),
-        "newest post isn't first: {}",
-        urls[0]
-    );
-    let dates: Vec<&str> = items.iter().map(|i| i.str_at("date_published").unwrap()).collect();
-    assert!(
-        dates.windows(2).all(|w| w[0] >= w[1]),
-        "feed.json isn't newest first by date_published"
+        after[..after.find("</item>").unwrap()].contains("<pubDate>Sun, 04 Jan 2099 09:30:00 +0000</pubDate>"),
+        "tended-post's RSS date isn't its update"
     );
 }
 

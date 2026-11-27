@@ -364,10 +364,9 @@ impl Note {
         }
     }
 
-    /// When the note was last tended, in seconds since 1970: its update,
-    /// or else its `created_at`.
-    fn tended(&self) -> Option<i64> {
-        self.update().or(self.created_at).map(|s| s.seconds())
+    /// When the note was last tended: its update, or else its `created_at`.
+    fn tended(&self) -> Option<Stamp> {
+        self.update().or(self.created_at)
     }
 
     /// The day the page last changed, for the sitemap: the later of the
@@ -1340,23 +1339,18 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
     let base_url = site.base_url.trim_end_matches('/');
     let canonical = |url: &str| format!("{}{}", base_url, url);
 
-    // The feeds carry dated posts, newest first. Home and /notes/ list every
-    // note, evergreen ones too, most recently tended first, so a note moves
-    // up when it is updated (ADR 2026-11-07-evergreen-notes).
-    let mut posts: Vec<usize> = (0..notes.len())
-        .filter(|&i| notes[i].kind == Kind::Post && !notes[i].evergreen())
-        .collect();
-    posts.sort_by(|&a, &b| {
-        let ka = (notes[a].created_at.map_or(i64::MIN, |c| c.seconds()), &notes[a].slug);
-        let kb = (notes[b].created_at.map_or(i64::MIN, |c| c.seconds()), &notes[b].slug);
-        kb.cmp(&ka)
-    });
+    // Home and /notes/ list every note, evergreen ones too, most recently
+    // tended first, so a note moves up when it is updated
+    // (ADR 2026-11-07-evergreen-notes). The feeds carry the same posts in
+    // the same order, less the evergreen notes, so they match Home
+    // (ADR 2026-11-27-feeds-match-home).
     let mut listed: Vec<usize> = (0..notes.len()).filter(|&i| notes[i].kind == Kind::Post).collect();
     listed.sort_by(|&a, &b| {
-        let ka = (notes[a].tended().unwrap_or(i64::MIN), &notes[a].slug);
-        let kb = (notes[b].tended().unwrap_or(i64::MIN), &notes[b].slug);
+        let ka = (notes[a].tended().map_or(i64::MIN, |t| t.seconds()), &notes[a].slug);
+        let kb = (notes[b].tended().map_or(i64::MIN, |t| t.seconds()), &notes[b].slug);
         kb.cmp(&ka)
     });
+    let posts: Vec<usize> = listed.iter().copied().filter(|&i| !notes[i].evergreen()).collect();
 
     // pages
     for n in &notes {
@@ -1456,11 +1450,13 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
         e(site.language),
         e(site.base_url)
     );
-    let rfc = |i: usize| notes[i].created_at.map_or(date::EPOCH.rfc822(), |c| c.rfc822());
+    // RSS has one date per item, so it is when the post was last tended,
+    // the date Home goes by (ADR 2026-11-27-feeds-match-home).
+    let rfc = |i: usize| notes[i].tended().map_or(date::EPOCH.rfc822(), |t| t.rfc822());
     if let Some(&first) = posts.first() {
         rss.push_str(&format!("\n<lastBuildDate>{}</lastBuildDate>", e(&rfc(first))));
     }
-    // spec/feeds.md: the RSS feed carries at most the 50 newest posts, each
+    // spec/feeds.md: the RSS feed carries at most the 50 most recently tended posts, each
     // with a plain summary and the whole post (ADR 2026-11-07-full-text-rss).
     for &p in posts.iter().take(50) {
         let n = &notes[p];
@@ -1501,6 +1497,10 @@ pub fn build_site(content: &Path, out: &Path, site: &Config) -> Result<(), Strin
                     Json::Str(n.created_at.map_or(date::EPOCH.iso_datetime(), |c| c.rfc3339())),
                 ),
             ];
+            // JSON Feed has its own field for an update.
+            if let Some(u) = n.update() {
+                item.push(("date_modified".to_string(), Json::Str(u.rfc3339())));
+            }
             if let Some(s) = n.summary() {
                 item.push(("summary".to_string(), json::s(s)));
             }

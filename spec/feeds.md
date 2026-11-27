@@ -9,13 +9,22 @@ external bridges (Bridgy Fed, echofeed, IFTTT) at one of them.
 - Channel: `<title>`, `<link>` (canonical site URL), `<description>`,
   `<language>`, `<lastBuildDate>` (RFC 822), `<atom:link rel="self">`.
 - Up to 50 most recent posts (excluding unpublished and evergreen notes),
-  newest first by `created_at`. Why: feed
+  most recently tended first, in Home's order:
+  by a post's update, or else its `created_at`, then by slug
+  (spec/content-schema.md).
+  Why: a reader places each item by its date,
+  so a draft published days after it was started,
+  or a post reworked since, shows up at the top, as on Home
+  (ADR 2026-11-27-feeds-match-home; tested in `tests/harness/evergreen.rs`).
+  Why only 50: feed
   readers fetch the whole file on every poll, so it stays small; the JSON
   Feed and the notes index carry everything.
   With full text, 50 posts come to about 100 KB, or 30 KB gzipped.
 - Each `<item>`: `<title>`, `<link>` (canonical post URL),
   `<guid isPermaLink="true">` = link, `<pubDate>` (RFC 822 from
-  front-matter `created_at`, its time or else midnight UTC), `<description>`, then `<content:encoded>`.
+  the post's update, or else its `created_at`, its time or else midnight UTC:
+  RSS has one date per item, so it is the one Home goes by),
+  `<description>`, then `<content:encoded>`.
 - `<description>` is plain text:
   the `summary`, or else the body's opening words with markup stripped,
   at most 200 characters,
@@ -62,9 +71,10 @@ Spec: <https://www.jsonfeed.org/version/1.1/>
 
 - Top-level: `version`, `title`, `home_page_url`, `feed_url`,
   `language`, `authors`, `items`.
-- Every post (excluding unpublished and evergreen notes), newest first by `created_at`.
+- Every post (excluding unpublished and evergreen notes), in the RSS feed's order.
 - Each item: `id` (canonical URL), `url`, `title`, `content_html`,
   `date_published` (RFC 3339 from `created_at`, its time or else midnight UTC),
+  `date_modified` (RFC 3339 from the post's update) when it has one,
   optional `summary`.
 
 ## Blogroll — `/blogroll/` and `/blogroll.opml`

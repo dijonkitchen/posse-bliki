@@ -90,7 +90,8 @@ by a note's update, or else its `created_at`, then by slug.
 Each entry shows its `created_at`,
 then " · updated <date>" when the note has been updated since;
 an evergreen note shows only "Updated <date>".
-The feeds stay in `created_at` order.
+The feeds list posts in the same order, less the evergreen notes
+(ADR 2026-11-27-feeds-match-home; spec/feeds.md).
 
 ## `created_at`
 
