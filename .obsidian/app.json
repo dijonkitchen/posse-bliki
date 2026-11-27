@@ -10,6 +10,7 @@
     "scripts/",
     "spec/",
     "target/",
+    "templates/",
     "tests/"
   ]
 }

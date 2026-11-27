@@ -1,13 +1,16 @@
 //! The vault's committed Obsidian settings stamp `created_at` and
 //! `updated_at` in the form the build reads, and only in notes
 //! (spec/content-schema.md, ADRs 2026-11-12-obsidian-stamps-updated-at and
-//! 2026-11-13-created-at). The vault is the repo root,
+//! 2026-11-13-created-at), and start a new note from a template the build
+//! accepts (ADR 2026-11-27-new-note-template). The vault is the repo root,
 //! so its settings are the root `.obsidian/`.
+
+use std::fs;
 
 use posse_bliki_build::date::Stamp;
 use posse_bliki_build::json::{self, Json};
 
-use crate::support::{read_as_built, repo};
+use crate::support::{build, read_as_built, repo, temp_dir, vault_copy};
 
 fn settings(file: &str) -> Json {
     let path = repo().join(".obsidian").join(file);
@@ -86,5 +89,66 @@ fn linter_stamps_only_notes() {
     assert!(
         ignored.contains(&"^(?!content/)"),
         "Linter would stamp README.md, the specs and the ADRs, or skip notes: filesToIgnore is {ignored:?}"
+    );
+}
+
+/// The template Templater writes into a new, empty note in `content/`.
+fn new_note_template() -> String {
+    let data = settings("plugins/templater-obsidian/data.json");
+    assert_eq!(
+        data.str_at("trigger_on_file_creation_mode"),
+        Some("folder"),
+        "new notes wouldn't get the template"
+    );
+    // Templater then runs nothing in any other new file, such as a note
+    // pulled from git that happens to contain `<% ... %>`.
+    assert_eq!(
+        data.get("only_trigger_for_matching_files"),
+        Some(&Json::Lit("true".to_string())),
+        "Templater would run commands in every new file"
+    );
+    let rules = data.get("folder_templates").map(Json::as_arr).unwrap_or_default();
+    let template = rules
+        .iter()
+        .find(|r| r.str_at("folder") == Some("content"))
+        .and_then(|r| r.str_at("template"))
+        .expect("no folder template for content/");
+    read_as_built(&repo().join(template))
+}
+
+#[test]
+fn a_new_note_starts_unticked_and_builds_once_ticked() {
+    let on = settings("community-plugins.json");
+    assert!(
+        on.as_arr().iter().any(|p| p.as_str() == Some("templater-obsidian")),
+        "community-plugins.json doesn't list templater-obsidian"
+    );
+    let template = new_note_template();
+    assert!(
+        template.contains("\npublished: false\n"),
+        "the template doesn't start unpublished:\n{template}"
+    );
+    // A new note as Linter leaves it a few seconds later, with its stamps
+    // at the end of the front matter (the first "\n---\n" closes it).
+    let stamped = template.replacen(
+        "\n---\n",
+        "\ncreated_at: 2026-11-27T17:40:00Z\nupdated_at: 2026-11-27T17:40:05Z\n---\n",
+        1,
+    ) + "\nhalf a thought\n";
+    let ticked = stamped
+        .replace("title:\n", "title: From the template\n")
+        .replace("published: false", "published: true");
+    let vault = vault_copy("new-note-template");
+    fs::write(vault.join("notes/unticked.md"), &stamped).unwrap();
+    fs::write(vault.join("notes/ticked.md"), &ticked).unwrap();
+    let out = temp_dir("new-note-template-out");
+    build(&vault, &out, &["--today", "2026-11-28"]).expect("a note from the template builds");
+    assert!(
+        !out.join("notes/unticked/index.html").exists(),
+        "an unticked note was built"
+    );
+    assert!(
+        out.join("notes/ticked/index.html").exists(),
+        "a ticked note wasn't built"
     );
 }

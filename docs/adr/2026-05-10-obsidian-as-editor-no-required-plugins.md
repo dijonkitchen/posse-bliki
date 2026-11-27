@@ -1,7 +1,7 @@
 # 2026-05-10 — Obsidian as editor, no required plugins
 
 - Date: 2026-05-10
-- Status: Accepted; wikilinks replaced by [2026-10-16-relative-markdown-links](2026-10-16-relative-markdown-links.md), its tag syntax dropped by [2026-11-06-drop-tags](2026-11-06-drop-tags.md); the vault now carries the Linter plugin, which stamps `updated_at`, by [2026-11-12-obsidian-stamps-updated-at](2026-11-12-obsidian-stamps-updated-at.md); the vault moved to the repo root, with its settings committed, by [2026-11-14-vault-at-repo-root](2026-11-14-vault-at-repo-root.md); see [2026-11-06-scaffold-adrs-decided](2026-11-06-scaffold-adrs-decided.md)
+- Status: Accepted; wikilinks replaced by [2026-10-16-relative-markdown-links](2026-10-16-relative-markdown-links.md), its tag syntax dropped by [2026-11-06-drop-tags](2026-11-06-drop-tags.md); the vault now carries the Linter plugin, which stamps `updated_at`, by [2026-11-12-obsidian-stamps-updated-at](2026-11-12-obsidian-stamps-updated-at.md); the vault moved to the repo root, with its settings committed, by [2026-11-14-vault-at-repo-root](2026-11-14-vault-at-repo-root.md); the vault carries Templater, which starts a new note with an unticked `published` box, by [2026-11-27-new-note-template](2026-11-27-new-note-template.md); see [2026-11-06-scaffold-adrs-decided](2026-11-06-scaffold-adrs-decided.md)
 
 ## Context
 

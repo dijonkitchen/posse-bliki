@@ -14,6 +14,7 @@ The architecture is **spec + harness + replaceable build** — see
 
 ```
 content/         Your notes: each is published once its `published` box is ticked
+templates/       What Obsidian puts in a new note
 spec/            Outcome contracts (what "correct" means)
 tests/           Automated harness enforcing the specs
 build/           Build implementation — Rust, std only (replaceable)
@@ -30,11 +31,18 @@ AGENTS.md        Operating contract for any agent/human editing this repo
    The vault's `.obsidian/app.json` turns off wikilinks,
    makes new links relative paths,
    puts new notes in `content/notes/`,
-   and hides the code, specs and ADRs from search and the graph
+   and hides the code, specs, ADRs and templates from search and the graph
    (*Settings → Files and links*); keep it that way.
-2. The vault carries the Linter plugin, its code and its settings,
+2. The vault carries the Linter and Templater plugins, their code and their settings,
    so there is nothing to install;
    if Obsidian asks, turn on community plugins (*Settings → Community plugins*).
+   Templater starts each new note in `content/` from
+   [`templates/new-note.md`](templates/new-note.md):
+   an empty `title` and an unticked `published` box
+   (ADR 2026-11-27-new-note-template).
+   It keeps the switch that lets it act on new files on each device, not in git,
+   so turn it on once on each one:
+   *Settings → Templater → Trigger Templater on new file creation*.
    Five seconds after you stop typing in a note, and when you save it,
    Linter stamps `updated_at` with the current UTC time,
    and gives a note with no `created_at` the time its file was made
@@ -42,14 +50,14 @@ AGENTS.md        Operating contract for any agent/human editing this repo
    It stamps only notes, in `content/`,
    and leaves the README, specs and ADRs alone.
    Don't run its "Lint all files" command, which would stamp every note.
-3. Write a new note; it starts in `content/notes/`.
+3. Write a new note; it starts in `content/notes/`, with the box unticked.
    Until its `published` property is ticked, the build skips it,
    so an unfinished note can't break the deploy
    (ADR 2026-11-14-published-checkbox).
    It's still public on GitHub, like the rest of the repo.
-4. To publish, give it the front matter a published note needs
-   (a `title` and its dates; see [`spec/content-schema.md`](spec/content-schema.md)),
-   then add the `published` property and tick it.
+4. To publish, fill in its `title` and tick `published`.
+   A note made outside Obsidian needs that front matter and its dates typed
+   (see [`spec/content-schema.md`](spec/content-schema.md)).
    A published note can't link to an unpublished one: the build fails on that link.
 5. Link notes as `[text](other-note.md)` (Obsidian does this for
    you when you type `[[`).
@@ -61,7 +69,13 @@ and the build skips every note without it,
 and `syndication:` lists a post's copies elsewhere.
 `created_at` is when you made a note,
 as a UTC datetime (`date -u +%Y-%m-%dT%H:%M:%SZ` prints one) or a day.
-It dates a post, and a future one holds the post back until then.
+It dates a post, and a future one holds the post back until then:
+to schedule a post, set it to a future UTC time and tick `published`,
+and it goes out with the first deploy after that time,
+a push or the daily rebuild at 06:17 UTC.
+Type the time ending in `Z`:
+if Obsidian offers a date picker for it, the time it writes has no zone,
+and Linter reads that as UTC.
 Obsidian fills it in the first time you edit a new note, and keeps it after;
 anywhere else, type it.
 `updated_at` says when you last reworked a note, as a UTC datetime (`2026-11-12T04:27:28Z`) or a day,
