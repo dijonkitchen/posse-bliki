@@ -147,5 +147,12 @@ So if Obsidian offers a date picker for `created_at`,
   `created_at` already holds a post back until its time,
   and JC chose it over `published_at` (ADR 2026-11-13-created-at).
   Two fields would be two dates to keep in step.
+- **A "Publish now" command that dates a post when it's ticked.**
+  A Templater command, one tap from the phone's toolbar,
+  could tick `published` and set `created_at` to the current UTC time,
+  so a post is dated when it goes public, in the feeds too, which sort by `created_at`.
+  Obsidian has no hook for a checkbox being ticked, so it would be a second way to publish.
+  `updated_at` can't stand in: Linter re-stamps it on the tick, but again on every later edit.
+  JC chose to keep setting `created_at` by hand when that matters (2026-11-27).
 - **Keep adding the properties by hand.**
   Nothing new, but it's the step on the phone this is meant to remove.
