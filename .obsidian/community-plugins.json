@@ -1,5 +1,6 @@
 [
   "obsidian-excalidraw-plugin",
   "obsidian-git",
-  "obsidian-linter"
+  "obsidian-linter",
+  "templater-obsidian"
 ]
